@@ -1,16 +1,18 @@
 body {
   margin: 0;
-  padding: 16px; /* отступы по краям */
+  padding: 0;
   background: #2b2b2b;
   font-family: Arial, sans-serif;
   box-sizing: border-box;
 }
 
-/* Основная сетка: 2 блока в ряд, сколько рядов угодно */
+/* Сетка для всех устройств */
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 блока */
-  gap: 16px; /* промежуток между блоками */
+  grid-template-columns: repeat(2, 1fr); /* 2 блока в ряд */
+  gap: 16px; /* расстояние между блоками = боковым отступам */
+  padding: 16px; /* расстояние слева и справа */
+  box-sizing: border-box;
 }
 
 /* Блок принтера */
@@ -50,11 +52,13 @@ body {
 .yellow { background: #c9a93a; color: #000; }
 .red    { background: #b94a48; color: #fff; }
 
-/* Адаптив на телефоне — 2 блока уже оптимально */
+/* Адаптив под телефоны */
 @media (max-width: 650px) {
   .grid {
-    grid-template-columns: 1fr 1fr; /* 2 блока в ряд */
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr); /* 2 блока в ряд */
+    gap: 16px; /* промежуток между блоками = отступам от краев */
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }
 
