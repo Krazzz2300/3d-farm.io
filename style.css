@@ -1,57 +1,60 @@
 body {
   margin: 0;
-  padding: 24px;
-  background: #2b2b2b; /* тёмно-серый фон */
+  padding: 16px; /* отступы по краям */
+  background: #2b2b2b;
   font-family: Arial, sans-serif;
+  box-sizing: border-box;
 }
 
+/* Основная сетка: 2 блока в ряд, сколько рядов угодно */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 2 блока в ряд максимум */
-  gap: 24px; /* ровное расстояние между блоками */
-  justify-content: center; /* центрируем сетку */
+  grid-template-columns: 1fr 1fr; /* 2 блока */
+  gap: 16px; /* промежуток между блоками */
 }
 
+/* Блок принтера */
 .printer {
-  background: #3a3a3a; /* светло-серый блок */
+  background: #3a3a3a;
   border-radius: 40px;
-  padding: 20px;
-  box-sizing: border-box;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  width: 100%; /* занять всю ячейку сетки */
-  max-width: 400px; /* чтобы не растягивалось */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Название принтера над фото */
+.number {
+  font-size: 32px;
+  font-weight: bold;
+  color: #ffffff;
+  text-align: center;
+  padding: 12px;
+}
+
+/* Фото */
 .printer img {
   width: 100%;
   height: auto;
-  border-radius: 40px;
-  margin-bottom: 16px;
 }
 
-.number {
-  font-size: 32px; /* увеличенный текст номера */
-  font-weight: bold;
-  margin-bottom: 16px;
-  color: #ffffff;
-}
-
+/* Статус */
 .status {
-  font-size: 28px; /* текст в 2 раза больше */
+  font-size: 28px;
   padding: 14px;
-  border-radius: 40px;
   text-align: center;
-  color: #fff;
+  border-radius: 0 0 40px 40px;
 }
 
 /* Цвета статусов */
-.green  { background: #3fa96b; }
+.green  { background: #3fa96b; color: #fff; }
 .yellow { background: #c9a93a; color: #000; }
-.red    { background: #b94a48; }
+.red    { background: #b94a48; color: #fff; }
 
-/* Адаптив для телефона */
+/* Адаптив на телефоне — 2 блока уже оптимально */
 @media (max-width: 650px) {
   .grid {
-    grid-template-columns: 1fr; /* 1 блок в ряд на телефоне */
+    grid-template-columns: 1fr 1fr; /* 2 блока в ряд */
+    gap: 16px;
   }
 }
+
