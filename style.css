@@ -1,0 +1,42 @@
+body {
+  margin: 0;
+  padding: 16px;
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.printer {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.printer img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.number {
+  margin-top: 8px;
+  font-weight: bold;
+}
+
+.status {
+  margin-top: 8px;
+  padding: 6px;
+  border-radius: 6px;
+  text-align: center;
+  color: #fff;
+  font-size: 14px;
+}
+
+.green { background: #2ecc71; }
+.yellow { background: #f1c40f; color: #000; }
+.red { background: #e74c3c; }
