@@ -7,16 +7,19 @@ body {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* два принтера в ряд */
-  gap: 24px; /* ровное расстояние */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 2 блока в ряд максимум */
+  gap: 24px; /* ровное расстояние между блоками */
+  justify-content: center; /* центрируем сетку */
 }
 
 .printer {
   background: #3a3a3a; /* светло-серый блок */
-  border-radius: 40px; /* закругление всех углов */
+  border-radius: 40px;
   padding: 20px;
   box-sizing: border-box;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  width: 100%; /* занять всю ячейку сетки */
+  max-width: 400px; /* чтобы не растягивалось */
 }
 
 .printer img {
@@ -45,3 +48,10 @@ body {
 .green  { background: #3fa96b; }
 .yellow { background: #c9a93a; color: #000; }
 .red    { background: #b94a48; }
+
+/* Адаптив для телефона */
+@media (max-width: 650px) {
+  .grid {
+    grid-template-columns: 1fr; /* 1 блок в ряд на телефоне */
+  }
+}
