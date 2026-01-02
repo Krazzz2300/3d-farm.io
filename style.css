@@ -6,12 +6,12 @@ body {
   box-sizing: border-box;
 }
 
-/* Сетка для всех устройств */
+/* Сетка */
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 2 блока в ряд */
-  gap: 16px; /* расстояние между блоками = боковым отступам */
-  padding: 16px; /* расстояние слева и справа */
+  gap: 32px; /* расстояние между блоками = боковым отступам */
+  padding: 32px; /* расстояние слева и справа */
   box-sizing: border-box;
 }
 
@@ -56,9 +56,9 @@ body {
 @media (max-width: 650px) {
   .grid {
     grid-template-columns: repeat(2, 1fr); /* 2 блока в ряд */
-    gap: 16px; /* промежуток между блоками = отступам от краев */
-    padding-left: 16px;
-    padding-right: 16px;
+    gap: 32px; /* увеличиваем зазоры */
+    padding-left: 32px;
+    padding-right: 32px;
   }
 }
 
