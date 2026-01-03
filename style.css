@@ -11,7 +11,7 @@ body {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 2 блока в ряд */
   gap: 32px; /* расстояние между блоками = боковым отступам */
-  padding: 32px; /* расстояние слева и справа */
+  padding: 32px; /* отступ слева и справа */
   box-sizing: border-box;
 }
 
@@ -36,19 +36,22 @@ body {
 
 /* Фото */
 .printer img {
-  width: 100%;
-  height: auto;
+  width: 100%;       /* фото подстраивается по ширине блока */
+  height: auto;      /* сохраняет пропорции */
   border-radius: 7px; /* скругление фото */
+  display: block;     /* убираем лишние отступы */
+  object-fit: contain; /* полностью помещается в блок */
+  margin-bottom: 8px; /* небольшой отступ снизу */
 }
 
 /* Статус */
 .status {
-  font-size: 32px; /* текст чуть крупнее */
+  font-size: 32px; /* текст крупнее */
   font-weight: bold; /* жирный */
   padding: 28px; /* толще в 2 раза */
   text-align: center;
-  border-radius: 7px; /* скругление снизу */
-  margin-top: 8px;
+  border-radius: 7px; /* скругление */
+  margin-top: 0; /* отступ сверху минимальный */
 }
 
 /* Цвета статусов */
