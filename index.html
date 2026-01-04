@@ -1,95 +1,77 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Ферма 3D-принтеров</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ферма принтеров</title>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#0f1115;
-  color:#fff;
-}
-
-.container{
-  display:flex;
-  flex-wrap:wrap;
-  gap:32px;
-  padding:24px;
-}
+body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; }
+.container { display:flex; flex-wrap:wrap; gap:64px; padding:32px; justify-content:center; }
 
 .card{
-  width:calc(50% - 48px);
-  max-width:520px;
-  background:#1b1f27;
-  border-radius:16px;
-  padding:20px;
+  position:relative;
+  background:#2a2a2a;
+  border-radius:7px;
+  width:45%;
+  min-width:140px;
+  padding:12px;
+  cursor:pointer;
 }
 
-.title{
-  font-size:18px;
+.card img{width:100%; border-radius:7px; object-fit:contain;}
+
+.card-title{
+  font-size:20px;
   font-weight:bold;
-}
-
-.status{
-  margin-top:6px;
-  font-size:14px;
-}
-
-.status.idle{ color:#999; }
-.status.printing{ color:#4da3ff; }
-.status.stopped{ color:#ffa500; }
-.status.ready{ color:#4cff4c; }
-.status.repair{ color:#ff4c4c; }
-
-.progress-wrapper{
+  margin-top:8px;
   display:flex;
   align-items:center;
-  gap:10px;
-  margin-top:12px;
+  gap:8px;
+}
+
+.color-indicator{width:16px;height:16px;border-radius:50%;}
+
+.status-row{
+  display:flex;
+  justify-content:space-between;
+  margin-top:8px;
+  font-size:16px;
 }
 
 .progress{
-  flex:1;
-  height:14px;
-  background:#333;
-  border-radius:10px;
+  margin-top:8px;
+  height:18px;
+  background:#444;
+  border-radius:9px;
   overflow:hidden;
 }
 
 .progress-bar{
   height:100%;
   width:0%;
-  background:#666;
-  transition:width .4s linear;
 }
 
-/* состояния */
-.bar-printing{ background:#4da3ff; }
-.bar-stopped{ background:#ffa500; }
-.bar-repair{ background:#ff4c4c; }
-
-.bar-ready{
-  background:linear-gradient(
-    90deg,
-    #2aff2a,
-    #6dff6d,
-    #2aff2a
-  );
-  background-size:200% 100%;
-  animation:shine 1.4s linear infinite;
+.red-badge{
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:red;
+  color:#fff;
+  font-size:12px;
+  font-weight:bold;
+  display:none;
+  align-items:center;
+  justify-content:center;
 }
 
-@keyframes shine{
-  from{ background-position:0% }
-  to{ background-position:200% }
-}
-
-.percent{
-  min-width:52px;
-  text-align:right;
-  font-size:14px;
+@keyframes pulse{
+  0%{background:#4caf50;}
+  50%{background:#00ff00;}
+  100%{background:#4caf50;}
 }
 </style>
 </head>
@@ -97,92 +79,128 @@ body{
 <body>
 
 <div class="container">
-  <div class="card">
-    <div class="title" id="name">Prusa MK3S+</div>
-    <div class="status idle" id="status">Простой</div>
-
-    <div class="progress-wrapper">
-      <div class="progress">
-        <div class="progress-bar" id="bar"></div>
-      </div>
-      <div class="percent" id="percent">0%</div>
+  <div class="card" onclick="openPrinter()">
+    <img src="foto/1.png">
+    <div class="card-title">
+      Принтер 1
+      <div class="color-indicator" id="main-color-1"></div>
     </div>
+
+    <div class="status-row">
+      <div>Статус:</div>
+      <div id="main-status-1">Простаивает</div>
+    </div>
+
+    <div class="status-row">
+      <div>Модель:</div>
+      <div id="main-model-1">—</div>
+    </div>
+
+    <div class="progress">
+      <div id="main-bar-1" class="progress-bar"></div>
+    </div>
+
+    <div class="red-badge" id="main-notify-1">1</div>
   </div>
 </div>
 
 <script>
-const DEFAULT_STATE = {
-  status:"idle",
-  progress:0,
-  problem:"нет"
-};
-
-function load(){
-  return JSON.parse(localStorage.getItem("printer")) || DEFAULT_STATE;
+function getPrinterData(){
+  return {
+    status: localStorage.getItem("printerStatus") || "idle",
+    printName: localStorage.getItem("printerPrintName") || "",
+    totalSeconds: +localStorage.getItem("printerTotalSeconds") || 0,
+    startTime: +localStorage.getItem("printerStartTime") || 0,
+    savedPercent: +localStorage.getItem("printerSavedPercent") || 0,
+    color: localStorage.getItem("printerColor") || "red"
+  };
 }
 
-function save(data){
-  localStorage.setItem("printer", JSON.stringify(data));
+function savePrinterData(p){
+  localStorage.setItem("printerStatus", p.status);
+  localStorage.setItem("printerSavedPercent", p.savedPercent);
 }
 
-function update(){
-  const data = load();
+function updateCard(){
+  const p = getPrinterData();
+  const now = Date.now();
 
-  const statusEl = document.getElementById("status");
-  const bar = document.getElementById("bar");
-  const percent = document.getElementById("percent");
+  const statusEl = document.getElementById("main-status-1");
+  const modelEl = document.getElementById("main-model-1");
+  const bar = document.getElementById("main-bar-1");
+  const notify = document.getElementById("main-notify-1");
 
-  bar.className = "progress-bar";
+  let percent = p.savedPercent;
 
-  // ----- ПРОСТОЙ -----
-  if(data.status === "idle"){
-    statusEl.textContent = "Простой";
-    statusEl.className = "status idle";
-    bar.style.width = "0%";
-    bar.style.background = "#666";
-    percent.textContent = "0%";
+  if(p.status==="printing" && p.totalSeconds){
+    const elapsed = Math.floor((now - p.startTime)/1000);
+    percent = Math.min(100, Math.floor(elapsed/p.totalSeconds*100));
+    p.savedPercent = percent;
+
+    if(percent>=100){
+      p.status="finished";
+      p.savedPercent=100;
+      savePrinterData(p);
+    }
   }
 
-  // ----- ПЕЧАТЬ -----
-  if(data.status === "printing"){
-    statusEl.textContent = "Печать";
-    statusEl.className = "status printing";
-    bar.style.width = data.progress + "%";
-    bar.classList.add("bar-printing");
-    percent.textContent = data.progress + "%";
+  bar.style.animation="none";
+  notify.style.display="none";
+
+  switch(p.status){
+    case "idle":
+      statusEl.textContent="Простаивает";
+      statusEl.style.color="#fff";
+      bar.style.width="0%";
+      bar.style.background="#444";
+      modelEl.textContent="—";
+      break;
+
+    case "printing":
+      statusEl.textContent="Печать";
+      statusEl.style.color="#fff";
+      bar.style.width=percent+"%";
+      bar.style.background="#4caf50";
+      modelEl.textContent=p.printName||"—";
+      break;
+
+    case "stopped":
+      statusEl.textContent="Печать остановлена";
+      statusEl.style.color="orange";
+      bar.style.width=percent+"%";
+      bar.style.background="orange";
+      modelEl.textContent=p.printName||"—";
+      break;
+
+    case "finished":
+      statusEl.textContent="Готово";
+      statusEl.style.color="#4caf50";
+      bar.style.width="100%";
+      bar.style.background="#4caf50";
+      bar.style.animation="pulse 1s infinite";
+      notify.style.display="flex";
+      modelEl.textContent=p.printName||"—";
+      break;
+
+    case "repair":
+      statusEl.textContent="На ремонте";
+      statusEl.style.color="red";
+      bar.style.width="100%";
+      bar.style.background="red";
+      modelEl.textContent="—";
+      break;
   }
 
-  // ----- ОСТАНОВЛЕНА -----
-  if(data.status === "stopped"){
-    statusEl.textContent = "Остановлена";
-    statusEl.className = "status stopped";
-    bar.style.width = data.progress + "%";
-    bar.classList.add("bar-stopped");
-    percent.textContent = data.progress + "%";
-  }
-
-  // ----- ГОТОВА -----
-  if(data.status === "ready"){
-    statusEl.textContent = "Готово";
-    statusEl.className = "status ready";
-    bar.style.width = "100%";
-    bar.classList.add("bar-ready");
-    percent.textContent = "100%";
-  }
-
-  // ----- РЕМОНТ -----
-  if(data.status === "repair"){
-    statusEl.textContent = "На ремонте";
-    statusEl.className = "status repair";
-    bar.style.width = "100%";
-    bar.classList.add("bar-repair");
-    percent.textContent = "РЕМОНТ";
-  }
+  document.getElementById("main-color-1").style.background=p.color;
+  savePrinterData(p);
 }
 
-// синхронизация
-window.addEventListener("storage", update);
-update();
+setInterval(updateCard,500);
+updateCard();
+
+function openPrinter(){
+  window.location.href="printer.html";
+}
 </script>
 
 </body>
