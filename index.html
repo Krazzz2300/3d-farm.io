@@ -435,6 +435,70 @@ body {
   outline: none;
 }
 
+/* ГАЛЕРЕЯ ВЫБОРА ФОТО */
+.photo-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.photo-option {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: border-color 0.2s, transform 0.2s;
+  background: #1e1e1e;
+  position: relative;
+}
+
+.photo-option.selected {
+  border-color: #4caf50;
+  transform: scale(0.95);
+}
+
+.photo-option:active {
+  transform: scale(0.9);
+}
+
+.photo-option img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  font-size: 10px;
+  padding: 4px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.default-photo-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #333;
+  color: #aaa;
+  font-size: 24px;
+}
+
+.default-photo-option .photo-label {
+  background: rgba(51,51,51,0.9);
+}
+
 .modal-buttons {
   display: flex;
   gap: 10px;
@@ -536,6 +600,14 @@ body {
     border: 1px solid #444;
     border-top: none;
   }
+  
+  .modal {
+    max-width: 400px;
+  }
+  
+  .photo-gallery {
+    grid-template-columns: repeat(5, 1fr);
+  }
 }
 
 @media (min-width: 1024px) {
@@ -607,10 +679,14 @@ body {
     <label>Модель принтера:</label>
     <input type="text" id="new-printer-model" placeholder="Например: Creality Ender 3 V2" required>
     
-    <label>Ссылка на изображение:</label>
-    <input type="text" id="new-printer-image" placeholder="https://example.com/printer.jpg">
+    <label>Выберите фото принтера:</label>
+    
+    <div class="photo-gallery" id="photo-gallery">
+      <!-- Фото будут добавлены через JavaScript -->
+    </div>
+    
     <small style="color: #888; font-size: 12px; display: block; margin-top: 4px;">
-      Можно оставить пустым для изображения по умолчанию
+      Выберите изображение для принтера
     </small>
     
     <div class="modal-buttons">
@@ -626,6 +702,16 @@ const STORAGE_KEY = '3d_printer_farm_data';
 const LOGS_STORAGE_KEY = 'printer_farm_logs';
 const MAX_LOGS = 50;
 
+// Доступные фото принтеров
+const PRINTER_PHOTOS = [
+  { id: 'creality', name: 'Creality', url: 'foto/creality.jpg' },
+  { id: 'anycubic', name: 'Anycubic', url: 'foto/anycubic.jpg' },
+  { id: 'bambu', name: 'Bambu Lab', url: 'foto/bambu.jpg' },
+  { id: 'prusa', name: 'Prusa', url: 'foto/prusa.jpg' },
+  { id: 'elegoo', name: 'Elegoo', url: 'foto/elegoo.jpg' },
+  { id: 'default', name: 'Стандартное', url: 'foto/default.png' }
+];
+
 const DEFAULT_PRINTERS = [
   {
     id: "printer1",
@@ -635,7 +721,7 @@ const DEFAULT_PRINTERS = [
     color: "red",
     progress: 0,
     printName: "",
-    image: "foto/1.png",
+    image: "foto/bambu.jpg",
     startTime: null,
     printDuration: null,
     finishedNotified: false,
@@ -649,7 +735,7 @@ const DEFAULT_PRINTERS = [
     color: "blue",
     progress: 0,
     printName: "",
-    image: "foto/2.png",
+    image: "foto/creality.jpg",
     startTime: null,
     printDuration: null,
     finishedNotified: false,
@@ -825,6 +911,7 @@ function getProgressColor(status) {
 
 let currentPage = 'printers';
 let lastUpdateTime = Date.now();
+let selectedPhoto = 'foto/default.png';
 
 function showPage(page) {
   document.getElementById('printers-page').classList.add('hidden');
@@ -1034,31 +1121,73 @@ function updateNotificationBadge() {
   badge.style.display = count > 0 ? 'flex' : 'none';
 }
 
-// ===== УПРАВЛЕНИЕ МОДАЛЬНЫМ ОКНОМ =====
+// ===== УПРАВЛЕНИЕ МОДАЛЬНЫМ ОКНОМ С ФОТО =====
 
 function showAddModal() {
   document.getElementById('add-modal').style.display = 'flex';
   document.getElementById('new-printer-name').focus();
+  
+  // Сбрасываем выбранное фото
+  selectedPhoto = 'foto/default.png';
+  
+  // Создаем галерею фото
+  createPhotoGallery();
+}
+
+function createPhotoGallery() {
+  const gallery = document.getElementById('photo-gallery');
+  gallery.innerHTML = '';
+  
+  PRINTER_PHOTOS.forEach(photo => {
+    const photoOption = document.createElement('div');
+    photoOption.className = `photo-option ${selectedPhoto === photo.url ? 'selected' : ''}`;
+    photoOption.dataset.photo = photo.url;
+    
+    if (photo.id === 'default') {
+      photoOption.classList.add('default-photo-option');
+      photoOption.innerHTML = `
+        <i class="fas fa-print" style="font-size: 24px; margin-bottom: 8px;"></i>
+        <div class="photo-label">${photo.name}</div>
+      `;
+    } else {
+      photoOption.innerHTML = `
+        <img src="${photo.url}" alt="${photo.name}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-print\\' style=\\'font-size:24px;\\'></i><div class=\\'photo-label\\'>${photo.name}</div>'">
+        <div class="photo-label">${photo.name}</div>
+      `;
+    }
+    
+    photoOption.onclick = function() {
+      // Снимаем выделение со всех фото
+      document.querySelectorAll('.photo-option').forEach(el => {
+        el.classList.remove('selected');
+      });
+      
+      // Выделяем выбранное фото
+      this.classList.add('selected');
+      selectedPhoto = this.dataset.photo;
+    };
+    
+    gallery.appendChild(photoOption);
+  });
 }
 
 function closeAddModal() {
   document.getElementById('add-modal').style.display = 'none';
   document.getElementById('new-printer-name').value = '';
   document.getElementById('new-printer-model').value = '';
-  document.getElementById('new-printer-image').value = '';
+  selectedPhoto = 'foto/default.png';
 }
 
 function addNewPrinter() {
   const name = document.getElementById('new-printer-name').value.trim();
   const model = document.getElementById('new-printer-model').value.trim();
-  const image = document.getElementById('new-printer-image').value.trim();
   
   if (!name || !model) {
     alert('Заполните название и модель принтера');
     return;
   }
   
-  const newPrinter = addPrinter(name, model, image);
+  const newPrinter = addPrinter(name, model, selectedPhoto);
   
   if (newPrinter) {
     closeAddModal();
