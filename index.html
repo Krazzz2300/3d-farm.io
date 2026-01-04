@@ -738,40 +738,50 @@ function addPrinter(name, model, image = "") {
   return null;
 }
 
-// ===== ВАЖНО: ФУНКЦИЯ ОБНОВЛЕНИЯ ПРОГРЕССА =====
-// Обновить прогресс всех печатающих принтеров
+// ===== ВАЖНО: ФУНКЦИЯ ОБНОВЛЕНИЯ ПРОГРЕССА - ИСПРАВЛЕННАЯ ВЕРСИЯ =====
 function updateAllPrintersProgress() {
   const printers = getPrinters();
   let updated = false;
   const now = Date.now();
   
-  printers.forEach(printer => {
+  printers.forEach((printer, index) => {
     if (printer.status === 'printing' && printer.startTime && printer.printDuration) {
       const elapsed = now - printer.startTime;
       const progress = Math.min(100, Math.floor((elapsed / printer.printDuration) * 100));
       
+      // Всегда обновляем прогресс, даже если значение не изменилось
+      // Это нужно для корректного расчета времени
       if (progress !== printer.progress) {
         printer.progress = progress;
+        updated = true;
+      }
+      
+      // Проверяем завершение печати
+      if (progress >= 100 && printer.status !== 'finished') {
+        printer.status = 'finished';
+        printer.progress = 100; // Гарантируем 100%
+        printer.finishedNotified = false; // Сбрасываем уведомление
         
-        if (progress >= 100 && printer.status !== 'finished') {
-          printer.status = 'finished';
-          // Добавляем уведомление
-          if (!printer.finishedNotified) {
-            printer.finishedNotified = true;
-            showNotification(`✅ ${printer.name} завершил печать!`);
-            // ВАЖНО: Добавляем запись в логи
-            addLog(`Принтер "${printer.name}" завершил печать: ${printer.printName}`, 'info');
-          }
-        }
+        // Добавляем уведомление
+        showNotification(`✅ ${printer.name} завершил печать!`);
+        // Добавляем запись в логи
+        addLog(`Принтер "${printer.name}" завершил печать: ${printer.printName}`, 'info');
         
         updated = true;
       }
+      
+      // Сохраняем изменения в массиве
+      printers[index] = printer;
     }
   });
   
   if (updated) {
+    // Сохраняем обновленные данные
     savePrinters(printers);
-    loadPrinters();
+    // Обновляем отображение если мы на странице принтеров
+    if (currentPage === 'printers') {
+      loadPrinters();
+    }
   }
   
   return updated;
@@ -847,6 +857,8 @@ function showPage(page) {
   if (page === 'printers') {
     document.querySelectorAll('.nav-item')[0].classList.add('active');
     document.getElementById('page-title').textContent = 'Ферма принтеров';
+    // При переключении на страницу принтеров обновляем данные
+    loadPrinters();
   } else if (page === 'logs') {
     document.querySelectorAll('.nav-item')[2].classList.add('active');
     document.getElementById('page-title').textContent = 'История действий';
@@ -873,16 +885,32 @@ function loadPrinters() {
   
   let html = '';
   printers.forEach(printer => {
-    const statusText = getStatusText(printer.status);
-    const statusColor = getStatusColor(printer.status);
-    const progressColor = getProgressColor(printer.status);
+    // ВАЖНО: Рассчитываем актуальный прогресс для печатающих принтеров
+    let displayProgress = printer.progress;
+    let displayStatus = printer.status;
+    
+    if (printer.status === 'printing' && printer.startTime && printer.printDuration) {
+      const now = Date.now();
+      const elapsed = now - printer.startTime;
+      displayProgress = Math.min(100, Math.floor((elapsed / printer.printDuration) * 100));
+      
+      // Проверяем завершение
+      if (displayProgress >= 100) {
+        displayStatus = 'finished';
+        displayProgress = 100;
+      }
+    }
+    
+    const statusText = getStatusText(displayStatus);
+    const statusColor = getStatusColor(displayStatus);
+    const progressColor = getProgressColor(displayStatus);
     
     // Проверяем, нужно ли мигать (завершенная печать без уведомления)
-    const pulseClass = (printer.status === 'finished' && printer.finishedNotified === false) ? 'pulse-animation' : '';
+    const pulseClass = (displayStatus === 'finished' && printer.finishedNotified === false) ? 'pulse-animation' : '';
     
     // Определяем какие бейджи показывать
-    const showProblemBadge = printer.status === 'repair';
-    const showFinishedBadge = printer.status === 'finished' && printer.finishedNotified === false;
+    const showProblemBadge = displayStatus === 'repair';
+    const showFinishedBadge = displayStatus === 'finished' && printer.finishedNotified === false;
     
     html += `
       <div class="card" onclick="openPrinter('${printer.id}')">
@@ -909,8 +937,8 @@ function loadPrinters() {
           </div>
         </div>
         <div class="progress">
-          <div class="progress-bar ${pulseClass}" style="width:${printer.progress}%; background:${progressColor}"></div>
-          <div class="progress-text">${printer.progress}%</div>
+          <div class="progress-bar ${pulseClass}" style="width:${displayProgress}%; background:${progressColor}"></div>
+          <div class="progress-text">${displayProgress}%</div>
         </div>
       </div>
     `;
@@ -1086,12 +1114,15 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // ВАЖНО: Запускаем автообновление прогресса каждую секунду
-  setInterval(updateAllPrintersProgress, 1000);
+  const updateInterval = setInterval(updateAllPrintersProgress, 1000);
   
   // Также обновляем при возвращении на страницу
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
-      updateAllPrintersProgress();
+      // Обновляем прогресс и перерисовываем
+      if (updateAllPrintersProgress() && currentPage === 'printers') {
+        loadPrinters();
+      }
     }
   });
   
