@@ -436,7 +436,6 @@ body {
   outline: none;
 }
 
-/* СПИСОК ПРИНТЕРОВ */
 .printer-list {
   display: flex;
   flex-direction: column;
@@ -781,6 +780,27 @@ body {
   color: white;
 }
 
+.loading {
+  text-align: center;
+  padding: 30px;
+  color: #888;
+}
+
+.loading-spinner {
+  border: 3px solid #333;
+  border-top: 3px solid #4caf50;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 @media (min-width: 768px) {
   .printers-container {
     gap: 15px;
@@ -886,7 +906,6 @@ body {
 <div id="logs-page" class="page hidden">
   <div class="logs-container" id="logs-container"></div>
   
-  <!-- Фиксированная кнопка очистки логов -->
   <div class="logs-footer">
     <div class="logs-footer-content">
       <div class="logs-stats" id="logs-stats">Всего записей: 0</div>
@@ -899,33 +918,29 @@ body {
 
 <!-- Нижняя навигация -->
 <div class="bottom-nav">
-  <!-- Принтеры -->
   <div class="nav-item active" onclick="showPage('printers')">
     <i class="fas fa-home nav-icon"></i>
     <span>Принтеры</span>
   </div>
   
-  <!-- План печати -->
-  <div class="nav-item" onclick="showPage('plan')">
-    <i class="fas fa-calendar-alt nav-icon"></i>
-    <span>План</span>
-  </div>
-  
-  <!-- Кнопка добавления принтера -->
   <div class="nav-item nav-add">
     <button class="add-nav-btn" onclick="showAddModal()">
       <i class="fas fa-plus"></i>
     </button>
   </div>
   
-  <!-- Логи -->
+  <div class="nav-item" onclick="showPage('plan')">
+    <i class="fas fa-calendar-alt nav-icon"></i>
+    <span>План</span>
+  </div>
+  
   <div class="nav-item" onclick="showPage('logs')">
     <i class="fas fa-history nav-icon"></i>
     <span>Логи</span>
   </div>
 </div>
 
-<!-- Модальные окна (остаются как были) -->
+<!-- Модальные окна -->
 <div class="modal-bg" id="choose-model-modal">
   <div class="modal">
     <h3>Выберите модель принтера</h3>
@@ -962,67 +977,17 @@ body {
 </div>
 
 <script>
-// ===== КОНСТАНТЫ И ПЕРЕМЕННЫЕ =====
+// ===== КОНСТАНТЫ =====
 const STORAGE_KEY = '3d_printer_farm_data';
 const LOGS_STORAGE_KEY = 'printer_farm_logs';
 const MAX_LOGS = 50;
 const SHEET_ID = '12cvna-mOg3z9PofZ2tEPSwQjz7WOhkGnjQpYBnwTKoc';
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
 
-// Список популярных принтеров
-const POPULAR_PRINTERS = [
-  { brand: "Anycubic", model: "Cobra 2", image: "foto/anycubic_cobra2.jpg" },
-  { brand: "Creality", model: "Ender 3", image: "foto/creality_ender3.jpg" },
-  { brand: "Creality", model: "Ender 5", image: "foto/creality_ender5.jpg" },
-  { brand: "Creality", model: "K1", image: "foto/creality_k1.jpg" },
-  { brand: "Bambu Lab", model: "A1 Mini", image: "foto/bambulab_a1mini.jpg" },
-  { brand: "Bambu Lab", model: "A1", image: "foto/bambulab_a1.jpg" },
-  { brand: "Bambu Lab", model: "X1 Carbon", image: "foto/bambulab_x1carbon.jpg" },
-  { brand: "Elegoo", model: "Neptune 3", image: "foto/elegoo_neptune3.jpg" },
-  { brand: "Elegoo", model: "Neptune 4", image: "foto/elegoo_neptune4.jpg" },
-  { brand: "Flashforge", model: "AD5X", image: "foto/flashforge_ad5x.jpg" },
-  { brand: "Flashforge", model: "Adventurer 5M", image: "foto/flashforge_adventurer5m.jpg" },
-  { brand: "Flashforge", model: "Adventurer 3", image: "foto/flashforge_adventurer3.jpg" },
-  { brand: "Artillery", model: "Sidewinder X2", image: "foto/artillery_sidewinderx2.jpg" },
-  { brand: "Sovol", model: "SV06", image: "foto/sovol_sv06.jpg" }
-];
-
-const DEFAULT_PRINTERS = [
-  {
-    id: "printer1",
-    name: "Принтер 1",
-    model: "Bambu Lab A1",
-    status: "idle",
-    color: "red",
-    progress: 0,
-    printName: "",
-    image: "foto/bambulab_a1.jpg",
-    startTime: null,
-    printDuration: null,
-    finishedNotified: false,
-    problem: ""
-  },
-  {
-    id: "printer2", 
-    name: "Принтер 2",
-    model: "Creality Ender 3",
-    status: "idle",
-    color: "blue",
-    progress: 0,
-    printName: "",
-    image: "foto/creality_ender3.jpg",
-    startTime: null,
-    printDuration: null,
-    finishedNotified: false,
-    problem: ""
-  }
-];
-
-// Переменные
+// ===== ПЕРЕМЕННЫЕ =====
+let currentPage = 'printers';
 let selectedPrinter = null;
 let currentStep = 'model';
-let currentPage = 'printers';
-let lastUpdateTime = Date.now();
 
 // ===== ФУНКЦИИ ДЛЯ ВКЛАДКИ "ПЛАН ПЕЧАТИ" =====
 
@@ -1098,13 +1063,9 @@ async function loadPlanData() {
   `;
   
   try {
-    // Загружаем заказы из таблицы
     const ordersFromSheet = await fetchOrdersFromSheet();
-    
-    // Считаем что уже в печати
     const inPrintCounts = calculateOrdersInPrint();
     
-    // Объединяем данные
     const allOrders = ordersFromSheet.map(order => {
       const inPrint = inPrintCounts[order.name] || 0;
       const need = Math.max(0, order.reserve - inPrint);
@@ -1117,12 +1078,10 @@ async function loadPlanData() {
       };
     });
     
-    // Фильтруем и сортируем
     const urgentOrders = allOrders.filter(o => o.need >= 10).sort((a, b) => b.need - a.need);
     const regularOrders = allOrders.filter(o => o.need > 0 && o.need < 10).sort((a, b) => b.need - a.need);
     const inProgressOrders = allOrders.filter(o => o.inPrint > 0).sort((a, b) => b.inPrint - a.inPrint);
     
-    // Рендерим план
     renderPlan(urgentOrders, regularOrders, inProgressOrders);
     
   } catch (error) {
@@ -1142,12 +1101,12 @@ async function loadPlanData() {
 
 function renderPlan(urgentOrders, regularOrders, inProgressOrders) {
   const container = document.getElementById('plan-container');
+  const printers = getPrinters();
   
-  // Статистика
   const totalOrders = urgentOrders.length + regularOrders.length;
   const totalNeed = [...urgentOrders, ...regularOrders].reduce((sum, o) => sum + o.need, 0);
   const totalInProgress = inProgressOrders.reduce((sum, o) => sum + o.inPrint, 0);
-  const freePrinters = getPrinters().filter(p => p.status === 'idle').length;
+  const freePrinters = printers.filter(p => p.status === 'idle').length;
   
   let html = `
     <div class="plan-stats">
@@ -1170,7 +1129,6 @@ function renderPlan(urgentOrders, regularOrders, inProgressOrders) {
     </div>
   `;
   
-  // Срочные заказы
   if (urgentOrders.length > 0) {
     html += `
       <div class="plan-section">
@@ -1206,7 +1164,6 @@ function renderPlan(urgentOrders, regularOrders, inProgressOrders) {
     html += `</div></div>`;
   }
   
-  // Обычные заказы
   if (regularOrders.length > 0) {
     html += `
       <div class="plan-section">
@@ -1242,7 +1199,6 @@ function renderPlan(urgentOrders, regularOrders, inProgressOrders) {
     html += `</div></div>`;
   }
   
-  // В работе
   if (inProgressOrders.length > 0) {
     html += `
       <div class="plan-section">
@@ -1278,7 +1234,6 @@ function renderPlan(urgentOrders, regularOrders, inProgressOrders) {
     html += `</div></div>`;
   }
   
-  // Если нет заказов
   if (urgentOrders.length === 0 && regularOrders.length === 0 && inProgressOrders.length === 0) {
     html += `
       <div class="empty-plan">
@@ -1296,9 +1251,56 @@ function openOrdersPage() {
   window.open('orders.html', '_blank');
 }
 
-// ===== СТАРЫЕ ФУНКЦИИ (оставляем как есть) =====
+// ===== СТАРЫЕ ФУНКЦИИ =====
 
-// Функции для логов
+const POPULAR_PRINTERS = [
+  { brand: "Anycubic", model: "Cobra 2", image: "foto/anycubic_cobra2.jpg" },
+  { brand: "Creality", model: "Ender 3", image: "foto/creality_ender3.jpg" },
+  { brand: "Creality", model: "Ender 5", image: "foto/creality_ender5.jpg" },
+  { brand: "Creality", model: "K1", image: "foto/creality_k1.jpg" },
+  { brand: "Bambu Lab", model: "A1 Mini", image: "foto/bambulab_a1mini.jpg" },
+  { brand: "Bambu Lab", model: "A1", image: "foto/bambulab_a1.jpg" },
+  { brand: "Bambu Lab", model: "X1 Carbon", image: "foto/bambulab_x1carbon.jpg" },
+  { brand: "Elegoo", model: "Neptune 3", image: "foto/elegoo_neptune3.jpg" },
+  { brand: "Elegoo", model: "Neptune 4", image: "foto/elegoo_neptune4.jpg" },
+  { brand: "Flashforge", model: "AD5X", image: "foto/flashforge_ad5x.jpg" },
+  { brand: "Flashforge", model: "Adventurer 5M", image: "foto/flashforge_adventurer5m.jpg" },
+  { brand: "Flashforge", model: "Adventurer 3", image: "foto/flashforge_adventurer3.jpg" },
+  { brand: "Artillery", model: "Sidewinder X2", image: "foto/artillery_sidewinderx2.jpg" },
+  { brand: "Sovol", model: "SV06", image: "foto/sovol_sv06.jpg" }
+];
+
+const DEFAULT_PRINTERS = [
+  {
+    id: "printer1",
+    name: "Принтер 1",
+    model: "Bambu Lab A1",
+    status: "idle",
+    color: "red",
+    progress: 0,
+    printName: "",
+    image: "foto/bambulab_a1.jpg",
+    startTime: null,
+    printDuration: null,
+    finishedNotified: false,
+    problem: ""
+  },
+  {
+    id: "printer2", 
+    name: "Принтер 2",
+    model: "Creality Ender 3",
+    status: "idle",
+    color: "blue",
+    progress: 0,
+    printName: "",
+    image: "foto/creality_ender3.jpg",
+    startTime: null,
+    printDuration: null,
+    finishedNotified: false,
+    problem: ""
+  }
+];
+
 function addLog(message, type = 'info') {
   const logs = getLogs();
   const logEntry = {
@@ -1334,7 +1336,6 @@ function clearLogs() {
   }
 }
 
-// Функции для работы с данными
 function getPrinters() {
   try {
     const savedData = localStorage.getItem(STORAGE_KEY);
@@ -1407,7 +1408,6 @@ function getNotificationCount() {
   return count;
 }
 
-// Вспомогательные функции
 function getStatusText(status) {
   const statusMap = {
     'idle': 'Простаивает',
@@ -1441,28 +1441,23 @@ function getProgressColor(status) {
   return colorMap[status] || '#444';
 }
 
-// Отображение принтеров
 function showPage(page) {
-  // Скрываем все страницы
   document.getElementById('printers-page').classList.add('hidden');
   document.getElementById('plan-page').classList.add('hidden');
   document.getElementById('logs-page').classList.add('hidden');
   
-  // Снимаем активный класс со всех кнопок
   document.querySelectorAll('.nav-item').forEach(item => {
     item.classList.remove('active');
   });
   
-  // Показываем выбранную страницу
   document.getElementById(page + '-page').classList.remove('hidden');
   
-  // Устанавливаем активный класс на кнопку
   if (page === 'printers') {
     document.querySelectorAll('.nav-item')[0].classList.add('active');
     document.getElementById('page-title').textContent = 'Ферма принтеров';
     renderPrinters();
   } else if (page === 'plan') {
-    document.querySelectorAll('.nav-item')[1].classList.add('active');
+    document.querySelectorAll('.nav-item')[2].classList.add('active');
     document.getElementById('page-title').textContent = 'План печати';
     loadPlanData();
   } else if (page === 'logs') {
@@ -1562,10 +1557,8 @@ function renderPrinters() {
   
   container.innerHTML = html;
   updateNotificationBadge();
-  lastUpdateTime = Date.now();
 }
 
-// Отображение логов
 function loadLogs() {
   const logs = getLogs();
   const container = document.getElementById('logs-container');
@@ -1646,7 +1639,6 @@ function updateNotificationBadge() {
   badge.style.display = count > 0 ? 'flex' : 'none';
 }
 
-// Добавление принтера
 function showAddModal() {
   selectedPrinter = null;
   currentStep = 'model';
@@ -1750,7 +1742,6 @@ function addNewPrinter() {
   }
 }
 
-// Уведомления
 function showNotification(message) {
   const notification = document.createElement('div');
   notification.className = 'notification';
@@ -1769,7 +1760,6 @@ function showNotification(message) {
   }, 3000);
 }
 
-// Обработчики событий
 function openPrinter(printerId) {
   const printers = getPrinters();
   const printer = printers.find(p => p.id === printerId);
@@ -1784,22 +1774,17 @@ function openPrinter(printerId) {
   window.location.href = `printer.html?id=${printerId}`;
 }
 
-// Инициализация
 document.addEventListener('DOMContentLoaded', function() {
   renderPrinters();
   
-  // Назначаем обработчики навигации
   document.querySelectorAll('.nav-item').forEach((item, index) => {
-    if (index !== 2) { // Пропускаем среднюю кнопку (+)
-      item.addEventListener('click', function() {
-        const pages = ['printers', 'plan', 'logs'];
-        const pageIndex = index > 2 ? 2 : (index > 1 ? 1 : 0);
-        showPage(pages[pageIndex]);
-      });
-    }
+    item.addEventListener('click', function() {
+      if (index === 0) showPage('printers');
+      else if (index === 2) showPage('plan');
+      else if (index === 3) showPage('logs');
+    });
   });
   
-  // Закрытие модальных окон
   document.getElementById('choose-model-modal').addEventListener('click', function(e) {
     if (e.target === this) closeChooseModelModal();
   });
@@ -1811,12 +1796,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Автообновление
   setInterval(() => {
     if (currentPage === 'printers') {
       renderPrinters();
-    } else if (currentPage === 'plan') {
-      loadPlanData();
     }
   }, 1000);
   
@@ -1825,15 +1807,8 @@ document.addEventListener('DOMContentLoaded', function() {
       renderPrinters();
     }
   });
-  
-  window.addEventListener('focus', function() {
-    if (currentPage === 'printers') {
-      renderPrinters();
-    }
-  });
 });
 
-// Глобальные функции
 window.showAddModal = showAddModal;
 window.closeAddModal = closeChooseModelModal;
 window.addNewPrinter = addNewPrinter;
