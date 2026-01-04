@@ -68,6 +68,7 @@ input { padding:8px; border-radius:5px; border:none; }
 </div>
 
 <script>
+// ===== ЭЛЕМЕНТЫ =====
 const statusText = document.getElementById("status-text");
 const printNameText = document.getElementById("print-name");
 const progressText = document.getElementById("progress-text");
@@ -77,6 +78,7 @@ const startBtn = document.getElementById("start");
 const stopBtn = document.getElementById("stop");
 const modal = document.getElementById("modal");
 
+// ===== ДАННЫЕ ПРИНТЕРА =====
 function getPrinterData() {
   return {
     status: localStorage.getItem("printerStatus") || "idle",
@@ -110,7 +112,6 @@ function updateUI(){
       savePrinterData(printer);
     }
   } else if(printer.status==="stopped"){
-    // сохраняем процент на котором остановились
     elapsed = Math.floor(printer.totalSeconds * printer.savedPercent / 100);
   } else { // idle
     elapsed = 0;
@@ -121,6 +122,7 @@ function updateUI(){
   if(printer.status==="stopped") percent = printer.savedPercent;
   else printer.savedPercent = percent;
 
+  // ===== ОБНОВЛЕНИЕ UI ЭЛЕМЕНТОВ =====
   statusText.textContent = printer.status==="idle"?"Простаивает":printer.status==="printing"?"Печать":"Печать остановлена";
   printNameText.textContent = printer.printName || "—";
   progressText.textContent = percent+"%";
