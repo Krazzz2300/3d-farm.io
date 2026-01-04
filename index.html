@@ -744,6 +744,7 @@ function getProgressColor(status) {
 // ===== ОТОБРАЖЕНИЕ ПРИНТЕРОВ =====
 
 let currentPage = 'printers';
+let lastUpdateTime = Date.now();
 
 function showPage(page) {
   document.getElementById('printers-page').classList.add('hidden');
@@ -758,7 +759,7 @@ function showPage(page) {
   if (page === 'printers') {
     document.querySelectorAll('.nav-item')[0].classList.add('active');
     document.getElementById('page-title').textContent = 'Ферма принтеров';
-    renderPrinters();
+    renderPrinters(true); // Принудительное обновление
   } else if (page === 'logs') {
     document.querySelectorAll('.nav-item')[2].classList.add('active');
     document.getElementById('page-title').textContent = 'История действий';
@@ -768,10 +769,52 @@ function showPage(page) {
   currentPage = page;
 }
 
-function renderPrinters() {
+// ВАЖНО: функция обновления статусов
+function updatePrintersStatus() {
+  const printers = getPrinters();
+  const now = Date.now();
+  let updated = false;
+  
+  printers.forEach((printer, index) => {
+    if (printer.status === 'printing' && printer.startTime && printer.printDuration) {
+      const elapsed = now - printer.startTime;
+      const progress = Math.min(100, Math.floor((elapsed / printer.printDuration) * 100));
+      
+      if (progress !== printer.progress) {
+        printer.progress = progress;
+        updated = true;
+      }
+      
+      if (progress >= 100 && printer.status !== 'finished') {
+        printer.status = 'finished';
+        printer.finishedNotified = false;
+        updated = true;
+        
+        addLog(`Принтер "${printer.name}" завершил печать: ${printer.printName}`, 'info');
+      }
+      
+      printers[index] = printer;
+    }
+  });
+  
+  if (updated) {
+    savePrinters(printers);
+    if (currentPage === 'printers') {
+      renderPrinters(false); // Обновляем отображение
+    }
+  }
+  
+  return updated;
+}
+
+function renderPrinters(forceUpdate = false) {
+  const now = Date.now();
+  
+  // Обновляем статусы перед отрисовкой
+  updatePrintersStatus();
+  
   const printers = getPrinters();
   const container = document.getElementById('printers-container');
-  const now = Date.now();
   
   if (printers.length === 0) {
     container.innerHTML = `
@@ -785,10 +828,8 @@ function renderPrinters() {
   }
   
   let html = '';
-  let needsSave = false;
-  const updatedPrinters = [...printers];
-  
-  printers.forEach((printer, index) => {
+  printers.forEach(printer => {
+    // Рассчитываем актуальный прогресс
     let displayProgress = printer.progress;
     let displayStatus = printer.status;
     
@@ -796,19 +837,9 @@ function renderPrinters() {
       const elapsed = now - printer.startTime;
       displayProgress = Math.min(100, Math.floor((elapsed / printer.printDuration) * 100));
       
-      if (displayProgress !== printer.progress) {
-        updatedPrinters[index].progress = displayProgress;
-        needsSave = true;
-      }
-      
-      if (displayProgress >= 100 && printer.status !== 'finished') {
+      if (displayProgress >= 100) {
         displayStatus = 'finished';
         displayProgress = 100;
-        updatedPrinters[index].status = 'finished';
-        updatedPrinters[index].finishedNotified = false;
-        needsSave = true;
-        
-        addLog(`Принтер "${printer.name}" завершил печать: ${printer.printName}`, 'info');
       }
     }
     
@@ -853,12 +884,8 @@ function renderPrinters() {
   });
   
   container.innerHTML = html;
-  
-  if (needsSave) {
-    savePrinters(updatedPrinters);
-  }
-  
   updateNotificationBadge();
+  lastUpdateTime = now;
 }
 
 // ===== ОТОБРАЖЕНИЕ ЛОГОВ =====
@@ -932,7 +959,7 @@ function addNewPrinter() {
   
   if (newPrinter) {
     closeAddModal();
-    renderPrinters();
+    renderPrinters(true);
     showNotification(`Принтер "${name}" добавлен!`);
   } else {
     alert('Ошибка при добавлении принтера');
@@ -978,7 +1005,7 @@ function openPrinter(printerId) {
 // ===== ИНИЦИАЛИЗАЦИЯ =====
 
 document.addEventListener('DOMContentLoaded', function() {
-  renderPrinters();
+  renderPrinters(true);
   
   document.getElementById('add-printer-btn').onclick = showAddModal;
   
@@ -1000,13 +1027,32 @@ document.addEventListener('DOMContentLoaded', function() {
   // ВАЖНО: Автообновление каждую секунду
   setInterval(() => {
     if (currentPage === 'printers') {
-      renderPrinters();
+      const now = Date.now();
+      // Обновляем каждую секунду или если прошло больше 2 секунд
+      if (now - lastUpdateTime >= 1000) {
+        renderPrinters();
+      }
     }
   }, 1000);
   
+  // Обновляем при возвращении на страницу
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden && currentPage === 'printers') {
-      renderPrinters();
+      renderPrinters(true);
+    }
+  });
+  
+  // Обновляем при фокусе на страницу
+  window.addEventListener('focus', function() {
+    if (currentPage === 'printers') {
+      renderPrinters(true);
+    }
+  });
+  
+  // Обновляем при загрузке страницы (возврат из принтера)
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+      renderPrinters(true);
     }
   });
 });
