@@ -5,17 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Управление принтером</title>
 <style>
-/* Простой CSS для страницы принтера */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   background: #1e1e1e;
   color: #fff;
   font-family: Arial, sans-serif;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .header {
@@ -23,46 +29,219 @@ body {
   padding: 15px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .back-btn {
   background: #333;
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 10px 15px;
-  font-size: 18px;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 20px;
   cursor: pointer;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-btn:active {
+  background: #444;
+  transform: scale(0.95);
 }
 
 .title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
+  flex: 1;
 }
 
 .content {
   padding: 15px;
 }
 
+.printer-image {
+  width: 100%;
+  height: 200px;
+  border-radius: 12px;
+  object-fit: contain;
+  background: #2a2a2a;
+  margin-bottom: 15px;
+  padding: 10px;
+}
+
 .info-box {
   background: #2a2a2a;
   border-radius: 12px;
-  padding: 15px;
+  padding: 20px;
   margin-bottom: 15px;
 }
 
 .info-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 16px;
+  margin-bottom: 12px;
+  font-size: 17px;
+}
+
+.info-label {
+  color: #aaa;
+}
+
+.info-value {
+  font-weight: bold;
+  text-align: right;
+  max-width: 60%;
+}
+
+.progress-container {
+  margin-top: 20px;
+}
+
+.progress-bar-bg {
+  height: 24px;
+  background: #444;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 8px;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #4caf50;
+  transition: width 0.5s ease;
+  border-radius: 12px;
+}
+
+.progress-text {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  line-height: 24px;
+  font-weight: bold;
+  font-size: 14px;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .control-btn {
+  padding: 18px;
+  border-radius: 12px;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.control-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.start-btn { 
+  background: #4caf50; 
+  color: white; 
+}
+
+.stop-btn { 
+  background: #f44336; 
+  color: white; 
+}
+
+.repair-btn { 
+  background: orange; 
+  color: white; 
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.disabled:active {
+  transform: none;
+  opacity: 0.5;
+}
+
+.color-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.color-option {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+
+.color-option.selected {
+  border-color: white;
+}
+
+.color-option:active {
+  transform: scale(0.9);
+}
+
+.modal-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
   padding: 15px;
+}
+
+.modal {
+  background: #2a2a2a;
+  padding: 20px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.modal input {
+  width: 100%;
+  padding: 12px;
   margin: 10px 0;
+  border-radius: 10px;
+  border: 2px solid #444;
+  background: #1e1e1e;
+  color: white;
+  font-size: 16px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 12px;
   border-radius: 10px;
   border: none;
   font-size: 16px;
@@ -70,52 +249,110 @@ body {
   cursor: pointer;
 }
 
-.start-btn { background: #4caf50; color: white; }
-.stop-btn { background: #f44336; color: white; }
-.repair-btn { background: orange; color: white; }
+.cancel-btn { background: #666; color: white; }
+.ok-btn { background: #4caf50; color: white; }
+
+@keyframes pulse {
+  0% { background-color: #4caf50; }
+  50% { background-color: #00ff00; }
+  100% { background-color: #4caf50; }
+}
+
+.pulse-animation {
+  animation: pulse 1s infinite;
+}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <button class="back-btn" onclick="goBack()">← Назад</button>
+  <button class="back-btn" onclick="goBack()">←</button>
   <div class="title" id="printer-title">Загрузка...</div>
 </div>
 
 <div class="content">
+  <img id="printer-image" class="printer-image" src="" alt="Принтер">
+  
   <div class="info-box">
     <div class="info-row">
-      <span>Статус:</span>
-      <span id="status-text">Загрузка...</span>
+      <div class="info-label">Статус:</div>
+      <div class="info-value" id="status-text">—</div>
     </div>
     <div class="info-row">
-      <span>Модель:</span>
-      <span id="model-text">Загрузка...</span>
+      <div class="info-label">Модель:</div>
+      <div class="info-value" id="model-text">—</div>
     </div>
     <div class="info-row">
-      <span>Печатает:</span>
-      <span id="print-text">—</span>
+      <div class="info-label">Печатает:</div>
+      <div class="info-value" id="print-text">—</div>
     </div>
     <div class="info-row">
-      <span>Готово:</span>
-      <span id="progress-text">0%</span>
+      <div class="info-label">Цвет печати:</div>
+      <div class="info-value">
+        <div id="current-color" style="display:inline-block; width:20px; height:20px; border-radius:50%; vertical-align:middle; margin-left:8px;"></div>
+      </div>
+    </div>
+    
+    <div class="progress-container">
+      <div class="info-row">
+        <div class="info-label">Прогресс:</div>
+        <div class="info-value" id="progress-text">0%</div>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar" id="progress-bar"></div>
+        <div class="progress-text" id="progress-bar-text">0%</div>
+      </div>
     </div>
   </div>
   
-  <button class="control-btn start-btn" onclick="startPrint()">Начать печать</button>
-  <button class="control-btn stop-btn" onclick="stopPrint()">Остановить</button>
-  <button class="control-btn repair-btn" onclick="toggleRepair()">В ремонт / С ремонта</button>
+  <div class="controls">
+    <button id="start-btn" class="control-btn start-btn">Начать печать</button>
+    <button id="stop-btn" class="control-btn stop-btn disabled">Остановить печать</button>
+    <button id="repair-btn" class="control-btn repair-btn">Отправить в ремонт</button>
+  </div>
+  
+  <div style="margin-top: 20px; text-align: center;">
+    <button class="control-btn" style="background:#666; color:white;" onclick="deleteThisPrinter()">Удалить этот принтер</button>
+  </div>
+</div>
+
+<!-- Модальное окно для начала печати -->
+<div class="modal-bg" id="print-modal">
+  <div class="modal">
+    <h3 style="text-align:center; margin-bottom:15px;">Настройка печати</h3>
+    
+    <input type="text" id="print-name" placeholder="Название детали" value="Деталь">
+    <input type="number" id="print-time" placeholder="Время печати (сек)" value="60">
+    
+    <div style="margin:15px 0;">
+      <div style="margin-bottom:8px; color:#aaa;">Цвет печати:</div>
+      <div class="color-selector" id="color-selector">
+        <!-- Цвета будут добавлены через JS -->
+      </div>
+    </div>
+    
+    <div class="modal-buttons">
+      <button class="cancel-btn" onclick="closePrintModal()">Отмена</button>
+      <button class="ok-btn" onclick="confirmPrint()">Начать печать</button>
+    </div>
+  </div>
 </div>
 
 <script>
-// Получаем ID принтера из URL
+// ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+const STORAGE_KEY = '3d_printer_farm_data';
 const urlParams = new URLSearchParams(window.location.search);
 const printerId = urlParams.get('id') || 'printer1';
+let updateInterval;
 
-// Ключ для хранения данных (такой же как в index.html)
-const STORAGE_KEY = '3d_printer_farm_data';
+// Цвета для печати
+const PRINT_COLORS = [
+  'red', 'blue', 'green', 'yellow', 'orange', 
+  'purple', 'pink', 'black', 'white', 'gray'
+];
 
-// Получить данные принтеров
+// ===== РАБОТА С ДАННЫМИ =====
+
 function getPrinters() {
   try {
     const savedData = localStorage.getItem(STORAGE_KEY);
@@ -126,7 +363,6 @@ function getPrinters() {
   }
 }
 
-// Сохранить данные принтеров
 function savePrinters(printers) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(printers));
@@ -137,53 +373,271 @@ function savePrinters(printers) {
   }
 }
 
-// Получить текущий принтер
 function getCurrentPrinter() {
   const printers = getPrinters();
   return printers.find(p => p.id === printerId) || null;
 }
 
-// Обновить принтер
-function updatePrinter(updatedPrinter) {
+function updatePrinter(updatedData) {
   const printers = getPrinters();
   const index = printers.findIndex(p => p.id === printerId);
   
   if (index !== -1) {
-    printers[index] = updatedPrinter;
-    savePrinters(printers);
-    return true;
+    printers[index] = { ...printers[index], ...updatedData };
+    return savePrinters(printers);
   }
   
   return false;
 }
 
-// Загрузить данные принтера на страницу
-function loadPrinterData() {
+// ===== ОБНОВЛЕНИЕ ПРОГРЕССА ПЕЧАТИ =====
+
+function updatePrintProgress() {
   const printer = getCurrentPrinter();
   
-  if (!printer) {
-    document.getElementById('printer-title').textContent = 'Принтер не найден';
-    return;
+  if (!printer) return false;
+  
+  let updated = false;
+  
+  if (printer.status === 'printing' && printer.startTime && printer.printDuration) {
+    const now = Date.now();
+    const elapsed = now - printer.startTime;
+    const progress = Math.min(100, Math.floor((elapsed / printer.printDuration) * 100));
+    
+    if (progress !== printer.progress) {
+      printer.progress = progress;
+      
+      if (progress >= 100) {
+        printer.status = 'finished';
+        printer.finishedNotified = false;
+        showNotificationOnPage('✅ Печать завершена!');
+      }
+      
+      updatePrinter(printer);
+      updated = true;
+    }
   }
   
-  // Обновляем интерфейс
+  if (updated || document.hidden) {
+    // Обновляем интерфейс даже если страница неактивна
+    updatePrinterUI(printer);
+  }
+  
+  return updated;
+}
+
+// ===== ОБНОВЛЕНИЕ ИНТЕРФЕЙСА =====
+
+function updatePrinterUI(printer) {
+  if (!printer) return;
+  
+  // Обновляем основные поля
   document.getElementById('printer-title').textContent = printer.name;
   document.getElementById('model-text').textContent = printer.model;
-  document.getElementById('status-text').textContent = getStatusText(printer.status);
   document.getElementById('print-text').textContent = printer.printName || '—';
   document.getElementById('progress-text').textContent = printer.progress + '%';
   
-  // Цвет статуса
+  // Статус с цветом
+  const statusText = getStatusText(printer.status);
   const statusColor = getStatusColor(printer.status);
+  document.getElementById('status-text').textContent = statusText;
   document.getElementById('status-text').style.color = statusColor;
+  
+  // Прогресс-бар
+  const progressBar = document.getElementById('progress-bar');
+  const progressBarText = document.getElementById('progress-bar-text');
+  progressBar.style.width = printer.progress + '%';
+  progressBarText.textContent = printer.progress + '%';
+  
+  // Цвет прогресс-бара и анимация
+  const progressColor = getProgressColor(printer.status);
+  progressBar.style.background = progressColor;
+  
+  if (printer.status === 'finished' && (!printer.finishedNotified || printer.finishedNotified === undefined)) {
+    progressBar.classList.add('pulse-animation');
+  } else {
+    progressBar.classList.remove('pulse-animation');
+  }
+  
+  // Цвет печати
+  const currentColorEl = document.getElementById('current-color');
+  currentColorEl.style.background = printer.color || 'gray';
+  
+  // Изображение принтера
+  const imageEl = document.getElementById('printer-image');
+  imageEl.src = printer.image || 'foto/default.png';
+  imageEl.onerror = function() {
+    this.src = 'foto/default.png';
+  };
+  
+  // Кнопки управления
+  const startBtn = document.getElementById('start-btn');
+  const stopBtn = document.getElementById('stop-btn');
+  const repairBtn = document.getElementById('repair-btn');
+  
+  // Обновляем состояние кнопок
+  startBtn.disabled = printer.status === 'printing' || printer.status === 'repair';
+  stopBtn.disabled = printer.status !== 'printing';
+  
+  if (printer.status === 'repair') {
+    repairBtn.textContent = 'Снять с ремонта';
+    startBtn.classList.add('disabled');
+    stopBtn.classList.add('disabled');
+  } else {
+    repairBtn.textContent = 'Отправить в ремонт';
+    startBtn.classList.remove('disabled');
+    stopBtn.classList.remove('disabled');
+  }
+  
+  // Стили для disabled кнопок
+  if (startBtn.disabled) {
+    startBtn.classList.add('disabled');
+  } else {
+    startBtn.classList.remove('disabled');
+  }
+  
+  if (stopBtn.disabled) {
+    stopBtn.classList.add('disabled');
+  } else {
+    stopBtn.classList.remove('disabled');
+  }
 }
+
+// ===== УПРАВЛЕНИЕ ПЕЧАТЬЮ =====
+
+function openPrintModal() {
+  const printer = getCurrentPrinter();
+  if (!printer || printer.status === 'repair') return;
+  
+  // Заполняем значения по умолчанию
+  document.getElementById('print-name').value = printer.printName || 'Деталь';
+  document.getElementById('print-time').value = '60';
+  
+  // Создаем выбор цвета
+  const colorSelector = document.getElementById('color-selector');
+  colorSelector.innerHTML = '';
+  
+  PRINT_COLORS.forEach(color => {
+    const colorOption = document.createElement('div');
+    colorOption.className = `color-option ${printer.color === color ? 'selected' : ''}`;
+    colorOption.style.background = color;
+    colorOption.dataset.color = color;
+    colorOption.onclick = function() {
+      // Снимаем выделение со всех
+      document.querySelectorAll('.color-option').forEach(el => {
+        el.classList.remove('selected');
+      });
+      // Выделяем текущий
+      this.classList.add('selected');
+    };
+    colorSelector.appendChild(colorOption);
+  });
+  
+  document.getElementById('print-modal').style.display = 'flex';
+  document.getElementById('print-name').focus();
+}
+
+function closePrintModal() {
+  document.getElementById('print-modal').style.display = 'none';
+}
+
+function confirmPrint() {
+  const printName = document.getElementById('print-name').value.trim();
+  const printTime = parseInt(document.getElementById('print-time').value);
+  const selectedColor = document.querySelector('.color-option.selected')?.dataset.color || 'red';
+  
+  if (!printName || isNaN(printTime) || printTime <= 0) {
+    alert('Заполните все поля корректно');
+    return;
+  }
+  
+  const printer = getCurrentPrinter();
+  if (!printer) return;
+  
+  // Обновляем данные принтера
+  const updatedPrinter = {
+    ...printer,
+    status: 'printing',
+    printName: printName,
+    progress: 0,
+    startTime: Date.now(),
+    printDuration: printTime * 1000,
+    color: selectedColor,
+    finishedNotified: false
+  };
+  
+  if (updatePrinter(updatedPrinter)) {
+    closePrintModal();
+    updatePrinterUI(updatedPrinter);
+    showNotificationOnPage('🖨️ Печать начата!');
+  }
+}
+
+function stopPrint() {
+  const printer = getCurrentPrinter();
+  if (!printer || printer.status !== 'printing') return;
+  
+  if (confirm('Остановить печать?')) {
+    printer.status = 'stopped';
+    if (updatePrinter(printer)) {
+      updatePrinterUI(printer);
+      showNotificationOnPage('⏸️ Печать остановлена');
+    }
+  }
+}
+
+function toggleRepair() {
+  const printer = getCurrentPrinter();
+  if (!printer) return;
+  
+  if (printer.status !== 'repair') {
+    const reason = prompt('Причина ремонта:', 'Неисправность экструдера');
+    if (reason === null) return;
+    
+    printer.status = 'repair';
+    printer.problem = reason;
+    printer.progress = 100;
+    printer.printName = '';
+    
+    if (updatePrinter(printer)) {
+      updatePrinterUI(printer);
+      showNotificationOnPage('🔧 Принтер отправлен в ремонт');
+    }
+  } else {
+    printer.status = 'idle';
+    printer.problem = '';
+    printer.progress = 0;
+    printer.printName = '';
+    
+    if (updatePrinter(printer)) {
+      updatePrinterUI(printer);
+      showNotificationOnPage('✅ Принтер снят с ремонта');
+    }
+  }
+}
+
+function deleteThisPrinter() {
+  if (confirm('Удалить этот принтер? Это действие нельзя отменить.')) {
+    const printers = getPrinters();
+    const updatedPrinters = printers.filter(p => p.id !== printerId);
+    
+    if (savePrinters(updatedPrinters)) {
+      showNotificationOnPage('🗑️ Принтер удален');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1000);
+    }
+  }
+}
+
+// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
 
 function getStatusText(status) {
   const statusMap = {
     'idle': 'Простаивает',
-    'printing': 'Печать',
+    'printing': 'Печать...',
     'stopped': 'Остановлено',
-    'finished': 'Готово',
+    'finished': 'Готово!',
     'repair': 'На ремонте'
   };
   return statusMap[status] || status;
@@ -192,7 +646,7 @@ function getStatusText(status) {
 function getStatusColor(status) {
   const colorMap = {
     'idle': '#fff',
-    'printing': '#fff',
+    'printing': '#4caf50',
     'stopped': 'orange',
     'finished': '#4caf50',
     'repair': 'red'
@@ -200,98 +654,120 @@ function getStatusColor(status) {
   return colorMap[status] || '#fff';
 }
 
-// Управление принтером
-function startPrint() {
-  const printer = getCurrentPrinter();
-  
-  if (printer && printer.status !== 'repair') {
-    const printName = prompt('Что печатаем?', 'Деталь');
-    const printTime = prompt('Время печати (сек):', '60');
-    
-    if (printName && printTime) {
-      printer.status = 'printing';
-      printer.printName = printName;
-      printer.progress = 0;
-      
-      // Сохраняем время начала печати
-      printer.startTime = Date.now();
-      printer.printDuration = parseInt(printTime) * 1000; // в миллисекундах
-      
-      updatePrinter(printer);
-      loadPrinterData();
-      alert('Печать начата!');
-    }
-  } else if (printer.status === 'repair') {
-    alert('Принтер в ремонте!');
-  }
+function getProgressColor(status) {
+  const colorMap = {
+    'idle': '#444',
+    'printing': '#4caf50',
+    'stopped': 'orange',
+    'finished': '#4caf50',
+    'repair': 'red'
+  };
+  return colorMap[status] || '#444';
 }
 
-function stopPrint() {
-  const printer = getCurrentPrinter();
+function showNotificationOnPage(message) {
+  // Создаем уведомление
+  const notification = document.createElement('div');
+  notification.textContent = message;
+  notification.style.cssText = `
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease-out;
+    font-weight: bold;
+    backdrop-filter: blur(10px);
+  `;
   
-  if (printer && printer.status === 'printing') {
-    if (confirm('Остановить печать?')) {
-      printer.status = 'stopped';
-      updatePrinter(printer);
-      loadPrinterData();
-    }
-  }
-}
-
-function toggleRepair() {
-  const printer = getCurrentPrinter();
+  document.body.appendChild(notification);
   
-  if (printer) {
-    if (printer.status !== 'repair') {
-      const reason = prompt('Причина ремонта:');
-      if (reason) {
-        printer.status = 'repair';
-        printer.progress = 100;
-        updatePrinter(printer);
-        loadPrinterData();
+  // Удаляем через 3 секунды
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease-out';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        document.body.removeChild(notification);
       }
-    } else {
-      printer.status = 'idle';
-      printer.progress = 0;
-      printer.printName = '';
-      updatePrinter(printer);
-      loadPrinterData();
-    }
-  }
+    }, 300);
+  }, 3000);
 }
+
+// Добавляем анимации
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+  }
+  @keyframes slideOut {
+    from { transform: translateX(-50%) translateY(0); opacity: 1; }
+    to { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+  }
+`;
+document.head.appendChild(style);
 
 function goBack() {
-  window.history.back();
+  window.location.href = 'index.html';
 }
 
-// Обновление прогресса печати
-function updatePrintProgress() {
-  const printer = getCurrentPrinter();
-  
-  if (printer && printer.status === 'printing' && printer.startTime && printer.printDuration) {
-    const elapsed = Date.now() - printer.startTime;
-    const progress = Math.min(100, Math.floor((elapsed / printer.printDuration) * 100));
-    
-    if (progress !== printer.progress) {
-      printer.progress = progress;
-      
-      if (progress >= 100) {
-        printer.status = 'finished';
-      }
-      
-      updatePrinter(printer);
-      loadPrinterData();
-    }
-  }
-}
+// ===== ИНИЦИАЛИЗАЦИЯ =====
 
-// Инициализация
 document.addEventListener('DOMContentLoaded', function() {
-  loadPrinterData();
+  // Загружаем данные принтера
+  const printer = getCurrentPrinter();
+  if (!printer) {
+    alert('Принтер не найден!');
+    window.location.href = 'index.html';
+    return;
+  }
   
-  // Обновляем прогресс каждую секунду
-  setInterval(updatePrintProgress, 1000);
+  // Инициализируем интерфейс
+  updatePrinterUI(printer);
+  
+  // Назначаем обработчики кнопок
+  document.getElementById('start-btn').onclick = openPrintModal;
+  document.getElementById('stop-btn').onclick = stopPrint;
+  document.getElementById('repair-btn').onclick = toggleRepair;
+  
+  // Закрытие модального окна
+  document.getElementById('print-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closePrintModal();
+    }
+  });
+  
+  // Запускаем обновление прогресса
+  updateInterval = setInterval(updatePrintProgress, 1000);
+  
+  // Обновляем прогресс даже когда страница неактивна
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      updatePrintProgress();
+    }
+  });
 });
+
+// Очищаем интервал при закрытии страницы
+window.addEventListener('beforeunload', function() {
+  if (updateInterval) {
+    clearInterval(updateInterval);
+  }
+});
+
+// Глобальные функции
+window.goBack = goBack;
+window.openPrintModal = openPrintModal;
+window.closePrintModal = closePrintModal;
+window.confirmPrint = confirmPrint;
+window.stopPrint = stopPrint;
+window.toggleRepair = toggleRepair;
+window.deleteThisPrinter = deleteThisPrinter;
 </script>
 
 </body>
