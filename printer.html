@@ -13,11 +13,16 @@ body {
   font-family: Arial, sans-serif;
 }
 
-/* ===== КНОПКА НАЗАД ===== */
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+}
+
+/* Кнопка назад */
 .back-btn {
-  position: fixed;
-  top: 16px;
-  left: 16px;
   background: #2e2e2e;
   color: #fff;
   border: none;
@@ -25,19 +30,16 @@ body {
   padding: 14px 18px;
   font-size: 18px;
   font-weight: bold;
-  z-index: 100;
 }
 
 .back-btn:active {
   transform: scale(0.95);
 }
 
-/* ===== ЗАГОЛОВОК ===== */
+/* Название */
 .title {
-  text-align: center;
   font-size: 32px;
   font-weight: bold;
-  margin: 80px 16px 24px;
 }
 
 /* ===== ВЕРХНИЙ БЛОК ===== */
@@ -57,6 +59,7 @@ body {
   height: auto;
   border-radius: 7px;
   object-fit: contain;
+  display: block;
 }
 
 /* Инфо */
@@ -65,11 +68,11 @@ body {
   background: #2a2a2a;
   border-radius: 7px;
   padding: 16px;
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.4;
 }
 
-/* ===== СТАТУС ПЕЧАТИ ===== */
+/* ===== СТАТУС ===== */
 .status-block {
   margin: 24px 16px;
   background: #2a2a2a;
@@ -115,22 +118,23 @@ body {
 
 <body>
 
-<button class="back-btn" onclick="history.back()">← Назад</button>
-
-<div class="title">Принтер 1</div>
+<div class="header">
+  <button class="back-btn" onclick="history.back()">←</button>
+  <div class="title">Принтер 1</div>
+</div>
 
 <div class="top-block">
   <div class="photo-block">
-    <img src="foto/printer1.jpg" alt="Принтер">
+    <img src="foto/1.png" alt="Bambu Lab A1">
   </div>
 
   <div class="info-block">
-    <div><b>Модель:</b><br>Ender 3 V2</div>
+    <div><b>Модель:</b><br>Bambu Lab A1</div>
   </div>
 </div>
 
 <div class="status-block">
-  <div><b>Печать:</b> Корпус редуктора</div>
+  <div><b>Печать:</b> Корпус</div>
   <div>Готово: 65%</div>
   <div>Осталось: 2ч 15м</div>
 
