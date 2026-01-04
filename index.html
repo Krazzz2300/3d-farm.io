@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ферма принтеров</title>
 <style>
 body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; }
 .container { display: flex; flex-wrap: wrap; gap:64px; padding:32px; justify-content: center; }
+
 .card {
   position: relative;
   background:#2a2a2a;
@@ -18,9 +19,10 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
   transition: transform 0.15s;
 }
 .card:active { transform: scale(0.97); }
+
 .card img { width:100%; border-radius:7px; object-fit:contain; }
 .card-title { font-size:20px; font-weight:bold; margin-top:8px; display:flex; align-items:center; gap:8px; }
-.color-indicator { width:16px; height:16px; border-radius:50%; background:red; }
+.color-indicator { width:16px; height:16px; border-radius:50%; }
 
 .status-row { display:flex; justify-content: space-between; margin-top:8px; font-size:16px; }
 .progress { margin-top:8px; height:18px; background:#444; border-radius:9px; overflow:hidden; }
@@ -76,8 +78,8 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 </div>
 
 <script>
-// ===== ПОЛУЧЕНИЕ ДАННЫХ ПРИНТЕРА =====
-function getPrinterData(id) {
+// ===== Получение данных принтера =====
+function getPrinterData(id){
   return {
     status: localStorage.getItem(`printerStatus_${id}`) || "idle",
     printName: localStorage.getItem(`printerPrintName_${id}`) || "",
@@ -99,7 +101,7 @@ function savePrinterData(id, data){
   localStorage.setItem(`printerCompletedNotified_${id}`, data.completedNotified);
 }
 
-// ===== ОБНОВЛЕНИЕ UI =====
+// ===== Обновление UI =====
 function updateCard(id){
   let printer = getPrinterData(id);
   const now = Date.now();
@@ -108,7 +110,7 @@ function updateCard(id){
   if(printer.status==="printing"){
     elapsed = Math.floor((now - printer.startTime)/1000);
     if(elapsed >= printer.totalSeconds){
-      printer.status="completed"; // отметка, что завершено
+      printer.status="completed";
       elapsed = printer.totalSeconds;
       printer.savedPercent = 100;
       printer.completedNotified = false;
@@ -124,9 +126,9 @@ function updateCard(id){
   else printer.savedPercent = percent;
 
   document.getElementById(`main-status-${id}`).textContent = 
-    printer.status==="idle" ? "Простаивает" : 
-    printer.status==="printing" ? "Печать" : 
-    printer.status==="stopped" ? "Печать остановлена" : 
+    printer.status==="idle" ? "Простаивает" :
+    printer.status==="printing" ? "Печать" :
+    printer.status==="stopped" ? "Печать остановлена" :
     "Готово";
 
   document.getElementById(`main-print-${id}`).textContent = printer.printName || "—";
@@ -164,13 +166,12 @@ function updateAllCards(){
   });
 }
 
-setInterval(updateAllCards, 1000);
+setInterval(updateAllCards,1000);
 updateAllCards();
 
 function openPrinter(id){
   window.location.href = `printer.html?id=${id}`;
 }
 </script>
-
 </body>
 </html>
