@@ -5,44 +5,70 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Принтер</title>
 <style>
-body{margin:0;background:#1e1e1e;color:#fff;font-family:Arial,sans-serif;}
+body {margin:0; background:#1e1e1e; color:#fff; font-family: Arial,sans-serif; opacity:0; transform:translateX(40px); animation:pageEnter 0.25s forwards ease-out;}
+@keyframes pageEnter {from{opacity:0; transform:translateX(40px);} to{opacity:1; transform:translateX(0);}}
+@keyframes pageExit {from{opacity:1; transform:translateX(0);} to{opacity:0; transform:translateX(40px);}}
+
 .header{display:flex;align-items:center;gap:16px;padding:16px;}
 .back-btn{background:#2e2e2e;color:#fff;border:none;border-radius:12px;padding:20px;font-size:18px;font-weight:bold;cursor:pointer;}
 .back-btn:active{transform:scale(0.95);}
 .title{font-size:32px;font-weight:bold;}
+
 .top-block{display:flex;gap:16px;padding:0 16px;}
 .photo-block{width:50%;}
 .photo-block img{width:100%;height:auto;border-radius:7px;object-fit:contain;}
 .info-block{width:50%;background:#2a2a2a;border-radius:7px;padding:16px;}
 .model-label{font-size:18px;opacity:0.7;}
-.model-value{font-size:20px;font-weight:bold;}
+.model-value{font-size:20px;font-weight:bold;white-space:nowrap;}
+
 .status-block{margin:24px 16px;background:#2a2a2a;border-radius:7px;padding:20px;}
 .status-row{display:grid;grid-template-columns:140px 1fr;align-items:center;margin-bottom:12px;}
 .status-label{background:#242424;border-radius:6px;padding:6px 10px;font-size:18px;opacity:0.85;}
 .status-value{font-size:22px;padding-left:12px;}
 .progress{margin-top:16px;height:18px;background:#444;border-radius:9px;overflow:hidden;}
 .progress-bar{height:100%;width:0%;background:#4caf50;transition:width 0.3s;}
-.progress-bar.completed{animation:greenPulse 1s infinite;}
+.progress-bar.completed{animation: greenPulse 1s infinite;}
 @keyframes greenPulse{0%{background-color:#4caf50;}50%{background-color:#7CFC00;}100%{background-color:#4caf50;}}
+
+.color-block{margin:0 16px 24px;background:#2a2a2a;border-radius:7px;padding:20px;display:flex;align-items:center;gap:16px;font-size:22px;}
+.color-circle{width:32px;height:32px;border-radius:50%;background:red;}
+
+.control-block{display:flex;justify-content:space-between;margin:0 16px 24px;}
+button.control-btn{flex:1;margin:0 8px;padding:20px;font-size:20px;font-weight:bold;border:none;border-radius:12px;cursor:pointer;}
+button#start{background:#4caf50;color:#fff;}
+button#stop{background:#f44336;color:#fff;}
+button.disabled{opacity:0.5;cursor:default;}
+
 .modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:none;justify-content:center;align-items:center;}
-.modal{background:#2a2a2a;padding:24px;border-radius:10px;width:90%;max-width:400px;text-align:center;}
-.modal button{padding:20px; font-size:20px; font-weight:bold; border:none; border-radius:12px; cursor:pointer; background:#4caf50; color:#fff;}
+.modal{background:#2a2a2a;padding:24px;border-radius:10px;width:90%;max-width:400px;}
+.modal label{display:block;margin:12px 0 4px;}
+.modal input{width:100%;padding:8px;font-size:18px;border-radius:6px;border:none;}
+.color-options{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:12px;}
+.color-option{width:36px;height:36px;border-radius:50%;cursor:pointer;border:2px solid #2a2a2a;}
+.color-option.selected{border:3px solid #fff;}
+.modal-buttons{display:flex;justify-content:space-between;margin-top:16px;}
+.modal-buttons button{flex:1;margin:0 4px;padding:20px;font-size:20px;border-radius:12px;border:none;font-weight:bold;}
+.modal-buttons button.cancel{background:#f44336;color:#fff;}
+.modal-buttons button.ok{background:#4caf50;color:#fff;}
+
+/* Всплывающее окно завершения печати */
+#complete-modal .modal-buttons button {flex:1;margin:0;padding:20px;font-size:20px;border-radius:12px;}
 </style>
 </head>
 <body>
 
 <div class="header">
   <button class="back-btn" onclick="goBack()">←</button>
-  <div class="title" id="printer-title">Принтер</div>
+  <div class="title">Принтер 1</div>
 </div>
 
 <div class="top-block">
   <div class="photo-block">
-    <img id="printer-img" src="foto/1.png" alt="Принтер">
+    <img src="foto/1.png" alt="Bambu Lab A1">
   </div>
   <div class="info-block">
     <div class="model-label">Модель</div>
-    <div class="model-value" id="model-value"></div>
+    <div class="model-value" id="model-value">Bambu Lab A1</div>
   </div>
 </div>
 
@@ -64,36 +90,90 @@ body{margin:0;background:#1e1e1e;color:#fff;font-family:Arial,sans-serif;}
   </div>
 </div>
 
+<div class="color-block">
+  <div>Цвет печати</div>
+  <div class="color-circle" id="color-circle"></div>
+</div>
+
+<div class="control-block">
+  <button id="start" class="control-btn">Поставить в печать</button>
+  <button id="stop" class="control-btn disabled">Остановить печать</button>
+</div>
+
+<!-- Модальное окно для выбора печати -->
 <div class="modal-bg" id="modal">
   <div class="modal">
-    <p>Печать завершена!</p>
-    <button onclick="confirmCompleted()">ОКЕЙ</button>
+    <label>Модель/Название печати:</label>
+    <input type="text" id="modal-model" placeholder="Корпус">
+    <label>Время печати (секунды):</label>
+    <input type="number" id="modal-time" placeholder="60">
+    <label>Выберите цвет печати:</label>
+    <div class="color-options" id="color-options">
+      <div class="color-option" data-color="red" style="background:red;"></div>
+      <div class="color-option" data-color="white" style="background:white;"></div>
+      <div class="color-option" data-color="blue" style="background:blue;"></div>
+      <div class="color-option" data-color="yellow" style="background:yellow;"></div>
+      <div class="color-option" data-color="green" style="background:green;"></div>
+      <div class="color-option" data-color="orange" style="background:orange;"></div>
+      <div class="color-option" data-color="purple" style="background:purple;"></div>
+      <div class="color-option" data-color="black" style="background:black;"></div>
+      <div class="color-option" data-color="pink" style="background:pink;"></div>
+    </div>
+    <div class="modal-buttons">
+      <button class="cancel" onclick="closeModal()">Отмена</button>
+      <button class="ok" onclick="startPrint()">Готово</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно завершения печати -->
+<div class="modal-bg" id="complete-modal">
+  <div class="modal">
+    <div style="font-size:20px; font-weight:bold; text-align:center;">Печать завершена!</div>
+    <div class="modal-buttons">
+      <button onclick="ackComplete()">ОКЕЙ</button>
+    </div>
   </div>
 </div>
 
 <script>
-const printerId = new URLSearchParams(window.location.search).get("id") || 1;
+const statusText = document.getElementById("status-text");
+const printNameText = document.getElementById("print-name");
+const progressText = document.getElementById("progress-text");
+const progressBar = document.getElementById("progress-bar");
+const startBtn = document.getElementById("start");
+const stopBtn = document.getElementById("stop");
+const modal = document.getElementById("modal");
+const completeModal = document.getElementById("complete-modal");
+const colorCircle = document.getElementById("color-circle");
+const colorOptions = document.getElementById("color-options").children;
 
+let selectedColor = "red";
+
+// ===== localStorage =====
 function getPrinterData(){
   return {
-    status: localStorage.getItem(`printerStatus_${printerId}`) || "idle",
-    printName: localStorage.getItem(`printerPrintName_${printerId}`) || "",
-    totalSeconds: parseInt(localStorage.getItem(`printerTotalSeconds_${printerId}`)) || 0,
-    startTime: parseInt(localStorage.getItem(`printerStartTime_${printerId}`)) || 0,
-    savedPercent: parseInt(localStorage.getItem(`printerSavedPercent_${printerId}`)) || 0,
-    completedNotified: localStorage.getItem(`printerCompletedNotified_${printerId}`) === "true"
+    status: localStorage.getItem("printerStatus") || "idle",
+    printName: localStorage.getItem("printerPrintName") || "",
+    totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
+    startTime: parseInt(localStorage.getItem("printerStartTime")) || 0,
+    savedPercent: parseInt(localStorage.getItem("printerSavedPercent")) || 0,
+    color: localStorage.getItem("printerColor") || "red",
+    completedNotified: localStorage.getItem("printerCompletedNotified") === "true"
   };
 }
 
-function savePrinterData(data){
-  localStorage.setItem(`printerStatus_${printerId}`, data.status);
-  localStorage.setItem(`printerPrintName_${printerId}`, data.printName);
-  localStorage.setItem(`printerTotalSeconds_${printerId}`, data.totalSeconds);
-  localStorage.setItem(`printerStartTime_${printerId}`, data.startTime);
-  localStorage.setItem(`printerSavedPercent_${printerId}`, data.savedPercent);
-  localStorage.setItem(`printerCompletedNotified_${printerId}`, data.completedNotified);
+function savePrinterData(printer){
+  localStorage.setItem("printerStatus", printer.status);
+  localStorage.setItem("printerPrintName", printer.printName);
+  localStorage.setItem("printerTotalSeconds", printer.totalSeconds);
+  localStorage.setItem("printerStartTime", printer.startTime);
+  localStorage.setItem("printerSavedPercent", printer.savedPercent);
+  localStorage.setItem("printerColor", printer.color);
+  localStorage.setItem("printerCompletedNotified", printer.completedNotified);
 }
 
+// ===== UI =====
 function updateUI(){
   let printer = getPrinterData();
   const now = Date.now();
@@ -102,65 +182,107 @@ function updateUI(){
   if(printer.status==="printing"){
     elapsed = Math.floor((now - printer.startTime)/1000);
     if(elapsed >= printer.totalSeconds){
-      printer.status="completed";
+      printer.status = "completed";
+      elapsed = printer.totalSeconds;
       printer.savedPercent = 100;
       printer.completedNotified = false;
+      savePrinterData(printer);
+      completeModal.style.display="flex";
     }
   } else if(printer.status==="stopped"){
     elapsed = Math.floor(printer.totalSeconds * printer.savedPercent / 100);
   } else if(printer.status==="completed"){
     elapsed = printer.totalSeconds;
+    if(!printer.completedNotified) completeModal.style.display="flex";
   }
 
   let percent = printer.totalSeconds ? Math.floor((elapsed/printer.totalSeconds)*100) : 0;
   if(printer.status==="stopped") percent = printer.savedPercent;
   else printer.savedPercent = percent;
 
-  document.getElementById("status-text").textContent =
-    printer.status==="idle"?"Простаивает":
-    printer.status==="printing"?"Печать":
-    printer.status==="stopped"?"Печать остановлена":
-    "Готово";
+  statusText.textContent = printer.status==="idle" ? "Простаивает" :
+                          printer.status==="printing" ? "Печать" :
+                          printer.status==="stopped" ? "Печать остановлена" : "Готово";
 
-  document.getElementById("print-name").textContent = printer.printName || "—";
-  document.getElementById("progress-text").textContent = percent+"%";
+  printNameText.textContent = printer.printName || "—";
+  progressText.textContent = percent+"%";
 
-  const bar = document.getElementById("progress-bar");
+  progressBar.style.width = percent+"%";
   if(printer.status==="completed"){
-    bar.classList.add("completed");
-    if(!printer.completedNotified) document.getElementById("modal").style.display="flex";
+    progressBar.classList.add("completed");
+    statusText.style.color="#7CFC00";
   } else if(printer.status==="stopped"){
-    bar.classList.remove("completed");
-    bar.style.background="orange";
+    progressBar.classList.remove("completed");
+    progressBar.style.background="orange";
+    statusText.style.color="orange";
   } else {
-    bar.classList.remove("completed");
-    bar.style.background="#4caf50";
+    progressBar.classList.remove("completed");
+    progressBar.style.background="#4caf50";
+    statusText.style.color="#fff";
   }
-  bar.style.width = percent+"%";
+
+  colorCircle.style.background = printer.color;
+
+  startBtn.classList.toggle("disabled", printer.status==="printing");
+  stopBtn.classList.toggle("disabled", printer.status!=="printing");
+
   savePrinterData(printer);
 }
+updateUI();
+setInterval(updateUI,1000);
 
-function confirmCompleted(){
+// ===== Кнопки =====
+startBtn.onclick=()=>{ if(getPrinterData().status!=="printing") modal.style.display="flex"; }
+stopBtn.onclick=()=>{
   let printer = getPrinterData();
-  printer.status="idle";
-  printer.printName="";
-  printer.totalSeconds=0;
-  printer.startTime=0;
-  printer.savedPercent=0;
-  printer.completedNotified=true;
+  if(printer.status==="printing"){
+    if(confirm("Точно остановить печать?")){
+      const now = Date.now();
+      const elapsed = Math.floor((now - printer.startTime)/1000);
+      printer.savedPercent = Math.floor((elapsed/printer.totalSeconds)*100);
+      printer.status="stopped";
+      savePrinterData(printer);
+      updateUI();
+    }
+  }
+}
+
+function closeModal(){ modal.style.display="none"; }
+
+for(let c of colorOptions){
+  c.onclick=()=>{
+    selectedColor = c.dataset.color;
+    for(let cc of colorOptions) cc.classList.remove("selected");
+    c.classList.add("selected");
+  }
+}
+
+function startPrint(){
+  let printer = getPrinterData();
+  printer.printName = document.getElementById("modal-model").value || "Корпус";
+  printer.totalSeconds = parseInt(document.getElementById("modal-time").value) || 60;
+  printer.startTime = Date.now();
+  printer.status = "printing";
+  printer.savedPercent = 0;
+  printer.color = selectedColor;
+  printer.completedNotified = false;
   savePrinterData(printer);
-  document.getElementById("modal").style.display="none";
+  updateUI();
+  modal.style.display="none";
+}
+
+function ackComplete(){
+  let printer = getPrinterData();
+  printer.status = "idle";
+  printer.savedPercent = 0;
+  printer.printName = "";
+  printer.completedNotified = true;
+  savePrinterData(printer);
+  completeModal.style.display="none";
   updateUI();
 }
 
-function goBack(){history.back();}
-
-setInterval(updateUI,500);
-updateUI();
+function goBack(){document.body.style.animation="pageExit 0.2s forwards ease-in"; setTimeout(()=>history.back(),200);}
 </script>
-
 </body>
 </html>
-
-
-
