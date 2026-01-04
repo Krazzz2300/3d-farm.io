@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Ферма принтеров</title>
 
 <style>
@@ -14,20 +14,21 @@ body{
 }
 
 .container{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:32px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:64px;
   padding:32px;
-  max-width:1000px;
-  margin:auto;
+  justify-content:center;
 }
 
 .card{
+  position:relative;
   background:#2a2a2a;
   border-radius:7px;
+  width:45%;
+  min-width:140px;
   padding:12px;
   cursor:pointer;
-  position:relative;
 }
 
 .card img{
@@ -37,7 +38,7 @@ body{
 }
 
 .card-title{
-  font-size:18px;
+  font-size:20px;
   font-weight:bold;
   margin-top:8px;
   display:flex;
@@ -46,22 +47,23 @@ body{
 }
 
 .color-indicator{
-  width:14px;
-  height:14px;
+  width:16px;
+  height:16px;
   border-radius:50%;
 }
 
 .status-row{
   display:flex;
   justify-content:space-between;
-  margin-top:6px;
+  margin-top:8px;
+  font-size:16px;
 }
 
 .progress{
   margin-top:8px;
-  height:16px;
+  height:18px;
   background:#444;
-  border-radius:8px;
+  border-radius:9px;
   overflow:hidden;
 }
 
@@ -70,13 +72,22 @@ body{
   width:0%;
 }
 
-@keyframes pulse{
-  0%{background:#4caf50;}
-  50%{background:#00ff00;}
-  100%{background:#4caf50;}
+.red-badge{
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:red;
+  color:#fff;
+  font-size:12px;
+  font-weight:bold;
+  display:none;
+  align-items:center;
+  justify-content:center;
 }
 
-/* ➕ ADD CARD */
 .add-card{
   display:flex;
   align-items:center;
@@ -84,12 +95,18 @@ body{
   flex-direction:column;
   border:2px dashed #555;
   color:#aaa;
-  font-size:18px;
+  font-size:20px;
 }
 
 .add-card:hover{
   border-color:#0fb6ec;
   color:#0fb6ec;
+}
+
+@keyframes pulse{
+  0%{background:#4caf50;}
+  50%{background:#00ff00;}
+  100%{background:#4caf50;}
 }
 
 /* MODAL */
@@ -125,26 +142,26 @@ body{
   border:none;
   color:#fff;
   font-size:16px;
-  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container" id="printers"></div>
+<div class="container" id="container"></div>
 
-<!-- MODAL -->
+<!-- МОДАЛКА -->
 <div class="modal" id="modal">
   <div class="modal-content">
     <input id="pName" placeholder="Название принтера">
     <input id="pModel" placeholder="Модель принта">
     <input id="pPhoto" type="file" accept="image/*">
-    <button onclick="addPrinter()">Добавить</button>
+    <button onclick="addPrinter()">Добавить принтер</button>
   </div>
 </div>
 
 <script>
+/* ===== ХРАНЕНИЕ ===== */
 function getPrinters(){
   return JSON.parse(localStorage.getItem("printers")||"[]");
 }
@@ -153,8 +170,9 @@ function savePrinters(p){
   localStorage.setItem("printers",JSON.stringify(p));
 }
 
+/* ===== РЕНДЕР ===== */
 function render(){
-  const wrap=document.getElementById("printers");
+  const wrap=document.getElementById("container");
   wrap.innerHTML="";
   const printers=getPrinters();
 
@@ -163,86 +181,98 @@ function render(){
     card.className="card";
     card.onclick=()=>location.href=`printer.html?id=${i}`;
 
+    let percent=p.savedPercent||0;
+
+    if(p.status==="printing" && p.totalSeconds){
+      const elapsed=Math.floor((Date.now()-p.startTime)/1000);
+      percent=Math.min(100,Math.floor(elapsed/p.totalSeconds*100));
+      p.savedPercent=percent;
+      if(percent>=100) p.status="finished";
+    }
+
+    let barColor="#444";
+    let anim="none";
+    let statusColor="#fff";
+
+    if(p.status==="printing") barColor="#4caf50";
+    if(p.status==="stopped"){barColor="orange";statusColor="orange";}
+    if(p.status==="finished"){barColor="#4caf50";anim="pulse 1s infinite";statusColor="#4caf50";}
+    if(p.status==="repair"){barColor="red";statusColor="red";percent=100;}
+
     card.innerHTML=`
       <img src="${p.photo}">
       <div class="card-title">
         ${p.name}
         <div class="color-indicator" style="background:${p.color}"></div>
       </div>
+
       <div class="status-row">
         <div>Статус:</div>
-        <div style="color:${p.status==='repair'?'red':p.status==='finished'?'#4caf50':'#fff'}">
+        <div style="color:${statusColor}">
           ${statusText(p.status)}
         </div>
       </div>
+
       <div class="status-row">
         <div>Модель:</div>
         <div>${p.model||"—"}</div>
       </div>
+
       <div class="progress">
         <div class="progress-bar"
-          style="
-            width:${progressWidth(p)}%;
-            background:${progressColor(p)};
-            animation:${p.status==='finished'?'pulse 1s infinite':'none'};
-          ">
+          style="width:${percent}%;background:${barColor};animation:${anim}">
         </div>
       </div>
     `;
+
     wrap.appendChild(card);
   });
 
   const add=document.createElement("div");
   add.className="card add-card";
-  add.onclick=()=>document.getElementById("modal").style.display="flex";
   add.innerHTML="➕<br>Добавить принтер";
+  add.onclick=()=>modal.style.display="flex";
   wrap.appendChild(add);
+
+  savePrinters(printers);
 }
 
-function statusText(s){
-  return s==="idle"?"Простаивает":
-         s==="printing"?"Печать":
-         s==="stopped"?"Остановлен":
-         s==="finished"?"Готово":
-         "На ремонте";
-}
-
-function progressWidth(p){
-  if(p.status==="finished"||p.status==="repair") return 100;
-  return p.percent||0;
-}
-
-function progressColor(p){
-  if(p.status==="repair") return "red";
-  if(p.status==="stopped") return "orange";
-  return "#4caf50";
-}
-
+/* ===== ДОБАВЛЕНИЕ ===== */
 function addPrinter(){
-  const name=pName.value.trim();
-  if(!name) return;
+  if(!pName.value.trim()) return;
 
-  const file=pPhoto.files[0];
   const reader=new FileReader();
-
   reader.onload=()=>{
     const printers=getPrinters();
     printers.push({
-      name,
+      name:pName.value,
       model:pModel.value,
       photo:reader.result,
       status:"idle",
-      percent:0,
+      savedPercent:0,
       color:"red"
     });
     savePrinters(printers);
     modal.style.display="none";
+    pName.value="";
+    pModel.value="";
+    pPhoto.value="";
     render();
   };
-  reader.readAsDataURL(file);
+  reader.readAsDataURL(pPhoto.files[0]);
+}
+
+/* ===== УТИЛ ===== */
+function statusText(s){
+  return s==="idle"?"Простаивает":
+         s==="printing"?"Печать":
+         s==="stopped"?"Остановлена":
+         s==="finished"?"Готово":
+         "На ремонте";
 }
 
 render();
+setInterval(render,500);
 </script>
 
 </body>
