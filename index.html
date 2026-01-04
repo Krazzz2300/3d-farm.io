@@ -6,21 +6,21 @@
 <title>Ферма принтеров</title>
 <style>
 body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; }
-.container { display: flex; flex-wrap: wrap; gap:32px; padding:32px; justify-content: center; }
+.container { display: flex; flex-wrap: wrap; gap:64px; padding:32px; justify-content: center; }
 
 .card {
   position: relative;
   background:#2a2a2a;
   border-radius: 7px;
-  width:300px;
+  width:45%;
   min-width:140px;
   padding:12px;
   cursor:pointer;
   transition: transform 0.15s;
 }
 .card:active { transform: scale(0.97); }
-.card img { width:100%; border-radius:7px; object-fit:contain; }
 
+.card img { width:100%; border-radius:7px; object-fit:contain; }
 .card-title { font-size:20px; font-weight:bold; margin-top:8px; display:flex; align-items:center; gap:8px; }
 .color-indicator { width:16px; height:16px; border-radius:50%; background:red; }
 
@@ -39,8 +39,8 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
   position: absolute;
   top:8px;
   right:8px;
-  width:24px;
-  height:24px;
+  width:20px;
+  height:20px;
   border-radius:50%;
   background:red;
   display:flex;
@@ -56,7 +56,6 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 <body>
 
 <div class="container" id="printer-container">
-  <!-- Пример одного принтера -->
   <div class="card" data-id="1" onclick="openPrinter(1)">
     <img src="foto/1.png" alt="Bambu Lab A1">
     <div class="card-title">
@@ -71,10 +70,6 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
       <div>Модель:</div>
       <div id="main-print-1">—</div>
     </div>
-    <div class="status-row">
-      <div>Прогресс:</div>
-      <div id="main-progress-1">0%</div>
-    </div>
     <div class="progress">
       <div id="main-bar-1" class="progress-bar"></div>
     </div>
@@ -83,7 +78,7 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 </div>
 
 <script>
-// ===== ПОЛУЧЕНИЕ ДАННЫХ ПРИНТЕРА =====
+// ===== ПОЛУЧЕНИЕ И СОХРАНЕНИЕ ДАННЫХ =====
 function getPrinterData(id) {
   return {
     status: localStorage.getItem(`printerStatus_${id}`) || "idle",
@@ -115,7 +110,7 @@ function updateCard(id){
   if(printer.status==="printing"){
     elapsed = Math.floor((now - printer.startTime)/1000);
     if(elapsed >= printer.totalSeconds){
-      printer.status="completed"; // завершено
+      printer.status="completed";
       elapsed = printer.totalSeconds;
       printer.savedPercent = 100;
       printer.completedNotified = false;
@@ -137,26 +132,25 @@ function updateCard(id){
     "Готово";
 
   document.getElementById(`main-print-${id}`).textContent = printer.printName || "—";
-  document.getElementById(`main-progress-${id}`).textContent = percent+"%";
 
   const bar = document.getElementById(`main-bar-${id}`);
-  if(printer.status==="completed"){
+  bar.style.width = percent + "%";
+
+  if(printer.status==="stopped"){
+    bar.style.background="orange";
+    bar.classList.remove("completed");
+    document.getElementById(`main-status-${id}`).style.color="orange";
+  } else if(printer.status==="completed"){
     bar.classList.add("completed");
     document.getElementById(`main-status-${id}`).style.color="#7CFC00";
-  } else if(printer.status==="stopped"){
-    bar.classList.remove("completed");
-    bar.style.background="orange";
-    document.getElementById(`main-status-${id}`).style.color="orange";
   } else {
-    bar.classList.remove("completed");
     bar.style.background="#4caf50";
+    bar.classList.remove("completed");
     document.getElementById(`main-status-${id}`).style.color="#fff";
   }
-  bar.style.width = percent+"%";
 
   document.getElementById(`main-color-${id}`).style.background = printer.color;
 
-  // уведомление
   const notif = document.getElementById(`notif-${id}`);
   notif.style.display = (printer.status==="completed" && !printer.completedNotified) ? "flex" : "none";
 
@@ -164,8 +158,7 @@ function updateCard(id){
 }
 
 function updateAllCards(){
-  const cards = document.querySelectorAll(".card");
-  cards.forEach(c=>{
+  document.querySelectorAll(".card").forEach(c=>{
     const id = c.dataset.id;
     updateCard(id);
   });
@@ -178,8 +171,5 @@ function openPrinter(id){
   window.location.href = `printer.html?id=${id}`;
 }
 </script>
-
 </body>
 </html>
-
-
