@@ -6,7 +6,7 @@
 <title>Ферма принтеров</title>
 <style>
 body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; }
-.container { display: flex; flex-wrap: wrap; gap:32px; padding:16px; justify-content: center; }
+.container { display: flex; flex-wrap: wrap; gap:64px; padding:32px; justify-content: center; }
 .card {
   background:#2a2a2a;
   border-radius: 7px;
@@ -56,7 +56,8 @@ function getPrinterData() {
     printName: localStorage.getItem("printerPrintName") || "",
     totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
     startTime: parseInt(localStorage.getItem("printerStartTime")) || 0,
-    endTime: parseInt(localStorage.getItem("printerEndTime")) || 0
+    endTime: parseInt(localStorage.getItem("printerEndTime")) || 0,
+    savedPercent: parseInt(localStorage.getItem("printerSavedPercent")) || 0
   };
 }
 
@@ -67,6 +68,7 @@ function savePrinterData(printer){
   localStorage.setItem("printerTotalSeconds", printer.totalSeconds);
   localStorage.setItem("printerStartTime", printer.startTime);
   localStorage.setItem("printerEndTime", printer.endTime);
+  localStorage.setItem("printerSavedPercent", printer.savedPercent);
 }
 
 // ===== ОБНОВЛЕНИЕ UI =====
@@ -80,24 +82,40 @@ function updateCard() {
     if(elapsed >= printer.totalSeconds){
       printer.status="idle";
       elapsed = printer.totalSeconds;
+      printer.savedPercent = 100;
       savePrinterData(printer);
     }
   } else if(printer.status==="stopped"){
-    elapsed = parseInt(localStorage.getItem("printerElapsed")) || 0;
+    elapsed = Math.floor(printer.totalSeconds * printer.savedPercent / 100);
   } else {
     elapsed = 0;
+    printer.savedPercent = 0;
   }
+
+  let percent = printer.totalSeconds ? Math.floor((elapsed/printer.totalSeconds)*100) : 0;
+  if(printer.status==="stopped") percent = printer.savedPercent;
+  else printer.savedPercent = percent;
 
   // обновляем UI
   document.getElementById("main-status-1").textContent = printer.status==="idle" ? "Простаивает" : printer.status==="printing" ? "Печать" : "Печать остановлена";
-  let percent = printer.totalSeconds ? Math.floor((elapsed/printer.totalSeconds)*100) : 0;
   document.getElementById("main-progress-1").textContent = percent + "%";
   let remaining = printer.totalSeconds - elapsed;
   document.getElementById("main-time-1").textContent = printer.status==="printing" ? remaining + "с" : "0с";
-  document.getElementById("main-bar-1").style.width = percent + "%";
 
-  // сохраняем текущее состояние для остановки
-  localStorage.setItem("printerElapsed", elapsed);
+  // цвет полоски и текста
+  const bar = document.getElementById("main-bar-1");
+  const statusText = document.getElementById("main-status-1");
+  if(printer.status==="stopped"){
+    bar.style.background="orange";
+    statusText.style.color="orange";
+  } else {
+    bar.style.background="#4caf50";
+    statusText.style.color="#fff";
+  }
+
+  bar.style.width = percent+"%";
+
+  savePrinterData(printer);
 }
 
 // ===== ОБНОВЛЕНИЕ КАЖДУЮ СЕКУНДУ =====
