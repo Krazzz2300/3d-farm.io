@@ -1,207 +1,578 @@
+[file name]: index.html
+[file content begin]
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Ферма принтеров</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; }
-.container { display:flex; flex-wrap:wrap; gap:64px; padding:32px; justify-content:center; }
-
-.card{
-  position:relative;
-  background:#2a2a2a;
-  border-radius:7px;
-  width:45%;
-  min-width:140px;
-  padding:12px;
-  cursor:pointer;
+* {
+  box-sizing: border-box;
 }
 
-.card img{width:100%; border-radius:7px; object-fit:contain;}
-
-.card-title{
-  font-size:20px;
-  font-weight:bold;
-  margin-top:8px;
-  display:flex;
-  align-items:center;
-  gap:8px;
+body { 
+  margin: 0; 
+  background: #1e1e1e; 
+  font-family: Arial, sans-serif; 
+  color: #fff; 
+  padding-bottom: 80px;
 }
 
-.color-indicator{width:16px;height:16px;border-radius:50%;}
-
-.status-row{
-  display:flex;
-  justify-content:space-between;
-  margin-top:8px;
-  font-size:16px;
+.header {
+  background: #2a2a2a;
+  padding: 16px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  border-bottom: 1px solid #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.progress{
-  margin-top:8px;
-  height:18px;
-  background:#444;
-  border-radius:9px;
-  overflow:hidden;
+.notification-badge {
+  background: red;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  position: relative;
+  top: -8px;
+  right: -8px;
 }
 
-.progress-bar{
-  height:100%;
-  width:0%;
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+  justify-content: center;
 }
 
-.red-badge{
-  position:absolute;
-  top:8px;
-  right:8px;
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  background:red;
-  color:#fff;
-  font-size:12px;
-  font-weight:bold;
-  display:none;
-  align-items:center;
-  justify-content:center;
+.card {
+  position: relative;
+  background: #2a2a2a;
+  border-radius: 12px;
+  width: calc(50% - 10px);
+  min-width: 280px;
+  max-width: 400px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 2px solid transparent;
 }
 
-@keyframes pulse{
-  0%{background:#4caf50;}
-  50%{background:#00ff00;}
-  100%{background:#4caf50;}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+  border-color: #444;
+}
+
+.card img {
+  width: 100%;
+  height: 180px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #1e1e1e;
+  padding: 8px;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.color-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #444;
+}
+
+.model-text {
+  font-size: 14px;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 16px;
+  align-items: center;
+}
+
+.status-text {
+  font-weight: bold;
+}
+
+.progress {
+  margin-top: 12px;
+  height: 20px;
+  background: #444;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 20px;
+  color: white;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+}
+
+.red-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: red;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.problem-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #f44336;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  display: none;
+  z-index: 2;
+}
+
+@keyframes pulse {
+  0% { background-color: #4caf50; }
+  50% { background-color: #00ff00; }
+  100% { background-color: #4caf50; }
+}
+
+.add-printer-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #4caf50;
+  color: white;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.2s, background 0.2s;
+  z-index: 100;
+}
+
+.add-printer-btn:hover {
+  background: #45a049;
+  transform: scale(1.1);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+}
+
+.empty-state i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* Модальное окно */
+.modal-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #2a2a2a;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal h2 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.modal label {
+  display: block;
+  margin: 16px 0 6px;
+  font-weight: bold;
+}
+
+.modal input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background: #1e1e1e;
+  color: white;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+  gap: 12px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #666;
+  color: white;
+}
+
+.save-btn {
+  background: #4caf50;
+  color: white;
+}
+
+.delete-btn {
+  background: #f44336;
+  color: white;
+  margin-top: 16px;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .card {
+    width: 100%;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-  <div class="card" onclick="openPrinter()">
-    <img src="foto/1.png">
-    <div class="card-title">
-      Принтер 1
-      <div class="color-indicator" id="main-color-1"></div>
-    </div>
-
-    <div class="status-row">
-      <div>Статус:</div>
-      <div id="main-status-1">Простаивает</div>
-    </div>
-
-    <div class="status-row">
-      <div>Модель:</div>
-      <div id="main-model-1">—</div>
-    </div>
-
-    <div class="progress">
-      <div id="main-bar-1" class="progress-bar"></div>
-    </div>
-
-    <div class="red-badge" id="main-notify-1">1</div>
+<div class="header">
+  <span>Ферма принтеров</span>
+  <div style="position: relative;">
+    <i class="fas fa-bell" style="font-size: 20px;"></i>
+    <div class="notification-badge" id="global-notification">0</div>
   </div>
 </div>
 
+<div class="container" id="printers-container">
+  <!-- Принтеры будут добавляться сюда через JavaScript -->
+</div>
+
+<!-- Кнопка добавления принтера -->
+<button class="add-printer-btn" id="add-printer-btn">
+  <i class="fas fa-plus"></i>
+</button>
+
+<!-- Модальное окно добавления принтера -->
+<div class="modal-bg" id="add-modal">
+  <div class="modal">
+    <h2>Добавить принтер</h2>
+    <label>Название принтера:</label>
+    <input type="text" id="new-printer-name" placeholder="Принтер 3">
+    
+    <label>Модель принтера:</label>
+    <input type="text" id="new-printer-model" placeholder="Creality Ender 3 V2">
+    
+    <label>Ссылка на изображение:</label>
+    <input type="text" id="new-printer-image" placeholder="foto/3.png">
+    <small style="color: #888; font-size: 12px;">Можно оставить пустым для изображения по умолчанию</small>
+    
+    <div class="modal-buttons">
+      <button class="cancel-btn" onclick="closeAddModal()">Отмена</button>
+      <button class="save-btn" onclick="addNewPrinter()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно удаления принтера -->
+<div class="modal-bg" id="delete-modal">
+  <div class="modal">
+    <h2>Удалить принтер</h2>
+    <p id="delete-message">Вы уверены, что хотите удалить этот принтер?</p>
+    <div class="modal-buttons">
+      <button class="cancel-btn" onclick="closeDeleteModal()">Отмена</button>
+      <button class="delete-btn" onclick="confirmDeletePrinter()">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
 <script>
-function getPrinterData(){
-  return {
-    status: localStorage.getItem("printerStatus") || "idle",
-    printName: localStorage.getItem("printerPrintName") || "",
-    totalSeconds: +localStorage.getItem("printerTotalSeconds") || 0,
-    startTime: +localStorage.getItem("printerStartTime") || 0,
-    savedPercent: +localStorage.getItem("printerSavedPercent") || 0,
-    color: localStorage.getItem("printerColor") || "red"
-  };
-}
+let printersData = {};
+let printerToDelete = null;
 
-function savePrinterData(p){
-  localStorage.setItem("printerStatus", p.status);
-  localStorage.setItem("printerSavedPercent", p.savedPercent);
-}
-
-function updateCard(){
-  const p = getPrinterData();
-  const now = Date.now();
-
-  const statusEl = document.getElementById("main-status-1");
-  const modelEl = document.getElementById("main-model-1");
-  const bar = document.getElementById("main-bar-1");
-  const notify = document.getElementById("main-notify-1");
-
-  let percent = p.savedPercent;
-
-  if(p.status==="printing" && p.totalSeconds){
-    const elapsed = Math.floor((now - p.startTime)/1000);
-    percent = Math.min(100, Math.floor(elapsed/p.totalSeconds*100));
-    p.savedPercent = percent;
-
-    if(percent>=100){
-      p.status="finished";
-      p.savedPercent=100;
-      savePrinterData(p);
+// Загрузка и отображение принтеров
+function loadPrinters() {
+  printersData = getAllPrinters();
+  updatePrintingProgress(); // Обновляем прогресс печати
+  
+  const container = document.getElementById('printers-container');
+  const notificationBadge = document.getElementById('global-notification');
+  
+  if (Object.keys(printersData).length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-print"></i>
+        <h3>Нет принтеров</h3>
+        <p>Добавьте первый принтер, нажав на кнопку "+"</p>
+      </div>
+    `;
+    notificationBadge.textContent = '0';
+    notificationBadge.style.display = 'none';
+    return;
+  }
+  
+  container.innerHTML = '';
+  let notificationCount = 0;
+  
+  Object.values(printersData).forEach(printer => {
+    // Проверяем завершенные печати для уведомлений
+    if (printer.status === 'finished' && !printer.finishedNotified) {
+      notificationCount++;
     }
-  }
-
-  bar.style.animation="none";
-  notify.style.display="none";
-
-  switch(p.status){
-    case "idle":
-      statusEl.textContent="Простаивает";
-      statusEl.style.color="#fff";
-      bar.style.width="0%";
-      bar.style.background="#444";
-      modelEl.textContent="—";
-      break;
-
-    case "printing":
-      statusEl.textContent="Печать";
-      statusEl.style.color="#fff";
-      bar.style.width=percent+"%";
-      bar.style.background="#4caf50";
-      modelEl.textContent=p.printName||"—";
-      break;
-
-    case "stopped":
-      statusEl.textContent="Печать остановлена";
-      statusEl.style.color="orange";
-      bar.style.width=percent+"%";
-      bar.style.background="orange";
-      modelEl.textContent=p.printName||"—";
-      break;
-
-    case "finished":
-      statusEl.textContent="Готово";
-      statusEl.style.color="#4caf50";
-      bar.style.width="100%";
-      bar.style.background="#4caf50";
-      bar.style.animation="pulse 1s infinite";
-      notify.style.display="flex";
-      modelEl.textContent=p.printName||"—";
-      break;
-
-    case "repair":
-      statusEl.textContent="На ремонте";
-      statusEl.style.color="red";
-      bar.style.width="100%";
-      bar.style.background="red";
-      modelEl.textContent="—";
-      break;
-  }
-
-  document.getElementById("main-color-1").style.background=p.color;
-  savePrinterData(p);
+    
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.onclick = () => openPrinter(printer.id);
+    
+    // Долгое нажатие для удаления
+    let pressTimer;
+    card.addEventListener('mousedown', (e) => {
+      if (e.button === 0) { // Левая кнопка мыши
+        pressTimer = setTimeout(() => {
+          showDeleteModal(printer);
+        }, 1000);
+      }
+    });
+    
+    card.addEventListener('mouseup', () => clearTimeout(pressTimer));
+    card.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+    card.addEventListener('touchstart', (e) => {
+      pressTimer = setTimeout(() => {
+        showDeleteModal(printer);
+        e.preventDefault();
+      }, 1000);
+    });
+    
+    card.addEventListener('touchend', () => clearTimeout(pressTimer));
+    card.addEventListener('touchcancel', () => clearTimeout(pressTimer));
+    
+    const statusText = getStatusText(printer.status);
+    const statusColor = getStatusColor(printer.status);
+    const progressColor = getProgressColor(printer.status);
+    
+    // Определяем, нужно ли мигать (для завершенной печати)
+    const pulseClass = (printer.status === 'finished' && !printer.finishedNotified) ? 'pulse' : '';
+    
+    card.innerHTML = `
+      <div class="red-badge" id="badge-${printer.id}" 
+           style="${printer.status === 'finished' && !printer.finishedNotified ? 'display: flex;' : 'display: none;'}">
+        1
+      </div>
+      <div class="problem-badge" id="problem-${printer.id}" 
+           style="${printer.status === 'repair' ? 'display: block;' : 'display: none;'}">
+        <i class="fas fa-wrench"></i>
+      </div>
+      <img src="${printer.image}" alt="${printer.model}" onerror="this.src='foto/default.png'">
+      <div class="card-title">
+        <span>${printer.name}</span>
+        <div class="color-indicator" style="background:${printer.color};"></div>
+      </div>
+      <div class="model-text">${printer.model}</div>
+      <div class="status-row">
+        <div>Статус:</div>
+        <div class="status-text" style="color:${statusColor};">${statusText}</div>
+      </div>
+      <div class="status-row">
+        <div>Печатает:</div>
+        <div>${printer.printName || '—'}</div>
+      </div>
+      <div class="progress">
+        <div class="progress-bar" id="bar-${printer.id}" 
+             style="width:${printer.progress}%; background:${progressColor}; 
+                    animation: ${pulseClass} 1s infinite;"></div>
+        <div class="progress-text">${printer.progress}%</div>
+      </div>
+    `;
+    
+    container.appendChild(card);
+  });
+  
+  // Обновляем глобальное уведомление
+  notificationBadge.textContent = notificationCount;
+  notificationBadge.style.display = notificationCount > 0 ? 'flex' : 'none';
 }
 
-setInterval(updateCard,500);
-updateCard();
-
-function openPrinter(){
-  window.location.href="printer.html";
+// Открыть страницу принтера
+function openPrinter(printerId) {
+  // Если принтер завершил печать, отмечаем уведомление как просмотренное
+  const printer = getPrinter(printerId);
+  if (printer.status === 'finished' && !printer.finishedNotified) {
+    printer.finishedNotified = true;
+    updatePrinter(printerId, printer);
+    loadPrinters(); // Перерисовываем карточки
+  }
+  
+  window.location.href = `printer.html?id=${printerId}`;
 }
+
+// Показать модальное окно добавления принтера
+function showAddModal() {
+  document.getElementById('add-modal').style.display = 'flex';
+  document.getElementById('new-printer-name').focus();
+}
+
+function closeAddModal() {
+  document.getElementById('add-modal').style.display = 'none';
+  // Очищаем поля
+  document.getElementById('new-printer-name').value = '';
+  document.getElementById('new-printer-model').value = '';
+  document.getElementById('new-printer-image').value = '';
+}
+
+// Добавить новый принтер
+function addNewPrinter() {
+  const name = document.getElementById('new-printer-name').value.trim();
+  const model = document.getElementById('new-printer-model').value.trim();
+  const image = document.getElementById('new-printer-image').value.trim();
+  
+  if (!name) {
+    alert('Введите название принтера');
+    return;
+  }
+  
+  if (!model) {
+    alert('Введите модель принтера');
+    return;
+  }
+  
+  const imageUrl = image || 'foto/default.png';
+  const newId = addPrinter(name, model, imageUrl);
+  
+  closeAddModal();
+  loadPrinters();
+  
+  // Можно сразу открыть новый принтер
+  // openPrinter(newId);
+}
+
+// Показать модальное окно удаления
+function showDeleteModal(printer) {
+  printerToDelete = printer.id;
+  document.getElementById('delete-message').textContent = 
+    `Вы уверены, что хотите удалить принтер "${printer.name}" (${printer.model})?`;
+  document.getElementById('delete-modal').style.display = 'flex';
+}
+
+function closeDeleteModal() {
+  printerToDelete = null;
+  document.getElementById('delete-modal').style.display = 'none';
+}
+
+// Подтвердить удаление принтера
+function confirmDeletePrinter() {
+  if (printerToDelete && removePrinter(printerToDelete)) {
+    loadPrinters();
+  }
+  closeDeleteModal();
+}
+
+// Инициализация
+document.addEventListener('DOMContentLoaded', function() {
+  initPrintersData();
+  loadPrinters();
+  
+  // Кнопка добавления принтера
+  document.getElementById('add-printer-btn').onclick = showAddModal;
+  
+  // Обновляем каждую секунду
+  setInterval(() => {
+    const updated = updatePrintingProgress();
+    if (updated) {
+      loadPrinters();
+    }
+  }, 1000);
+  
+  // Обновляем каждые 5 секунд на всякий случай
+  setInterval(loadPrinters, 5000);
+});
+
+// Глобальные функции для доступа из HTML
+window.showAddModal = showAddModal;
+window.closeAddModal = closeAddModal;
+window.addNewPrinter = addNewPrinter;
+window.showDeleteModal = showDeleteModal;
+window.closeDeleteModal = closeDeleteModal;
+window.confirmDeletePrinter = confirmDeletePrinter;
 </script>
 
 </body>
 </html>
+[file content end]
