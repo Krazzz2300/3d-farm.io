@@ -80,7 +80,7 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 </div>
 
 <script>
-// ===== ПОЛУЧЕНИЕ ДАННЫХ ПРИНТЕРА =====
+// ===== ПОЛУЧЕНИЕ И СОХРАНЕНИЕ ДАННЫХ =====
 function getPrinterData() {
   return {
     status: localStorage.getItem("printerStatus") || "idle",
@@ -105,71 +105,82 @@ function savePrinterData(printer){
 
 // ===== ОБНОВЛЕНИЕ UI =====
 function updateCard() {
-  let printer = getPrinterData();
+  const printer = getPrinterData();
   const now = Date.now();
   let elapsed = 0;
 
-  if(printer.status==="printing"){
+  // Вычисляем процент печати
+  if(printer.status === "printing") {
     elapsed = Math.floor((now - printer.startTime)/1000);
     if(elapsed >= printer.totalSeconds){
-      printer.status="finished";
+      printer.status = "finished";
       printer.savedPercent = 100;
       printer.finishedNotified = false;
       savePrinterData(printer);
     }
-  } else if(printer.status==="stopped"){
+  } else if(printer.status === "stopped") {
     elapsed = Math.floor(printer.totalSeconds * printer.savedPercent / 100);
   }
 
-  let percent = printer.totalSeconds ? Math.floor((elapsed/printer.totalSeconds)*100) : 0;
-  if(printer.status==="stopped") percent = printer.savedPercent;
-  else printer.savedPercent = percent;
+  let percent = printer.totalSeconds ? Math.floor((elapsed / printer.totalSeconds) * 100) : 0;
+  if(printer.status === "stopped") percent = printer.savedPercent;
+  else if(printer.status !== "finished") printer.savedPercent = percent;
 
-  // Статус и модель
   const statusText = document.getElementById("main-status-1");
   const modelText = document.getElementById("main-model-1");
   const bar = document.getElementById("main-bar-1");
   const notify = document.getElementById("main-notify-1");
 
+  // Статус и модель
   statusText.textContent =
-    printer.status==="idle" ? "Простаивает" :
-    printer.status==="printing" ? "Печать" :
-    printer.status==="stopped" ? "Печать остановлена" :
+    printer.status === "idle" ? "Простаивает" :
+    printer.status === "printing" ? "Печать" :
+    printer.status === "stopped" ? "Печать остановлена" :
     "Готово";
 
   modelText.textContent =
-    printer.status==="idle" ? "—" : printer.printName || "—";
+    printer.status === "idle" ? "—" : printer.printName || "—";
 
-  // Полоска прогресса
-  if(printer.status==="idle"){
-    bar.style.animation="none";
-    bar.style.background="#444"; // серый при простое
-    statusText.style.color="#fff";
-    notify.style.display="none";
-  } else if(printer.status==="stopped"){
-    bar.style.animation="none";
-    bar.style.background="orange";
-    statusText.style.color="orange";
-    notify.style.display="none";
-  } else if(printer.status==="finished"){
-    bar.style.animation="pulse 1s infinite";
-    bar.style.background="#4caf50"; // зелёная
-    statusText.style.color="#4caf50";
-    notify.style.display="flex";
-  } else if(printer.status==="printing"){
-    bar.style.animation="none";
-    bar.style.background="#4caf50";
-    statusText.style.color="#fff";
-    notify.style.display="none";
+  // Полоска прогресса с полной логикой по статусу
+  switch(printer.status) {
+    case "idle":
+      bar.style.width = "0%";
+      bar.style.background = "#444";
+      bar.style.animation = "none";
+      statusText.style.color = "#fff";
+      notify.style.display = "none";
+      break;
+
+    case "printing":
+      bar.style.width = percent + "%";
+      bar.style.background = "#4caf50";
+      bar.style.animation = "none";
+      statusText.style.color = "#fff";
+      notify.style.display = "none";
+      break;
+
+    case "stopped":
+      bar.style.width = percent + "%";
+      bar.style.background = "orange";
+      bar.style.animation = "none";
+      statusText.style.color = "orange";
+      notify.style.display = "none";
+      break;
+
+    case "finished":
+      bar.style.width = "100%";
+      bar.style.background = "#4caf50";
+      bar.style.animation = "pulse 1s infinite";
+      statusText.style.color = "#4caf50";
+      notify.style.display = "flex";
+      break;
   }
 
-  bar.style.width = percent + "%";
   document.getElementById("main-color-1").style.background = printer.color;
-
   savePrinterData(printer);
 }
 
-setInterval(updateCard, 1000);
+setInterval(updateCard, 500);
 updateCard();
 
 function openPrinter(id){
