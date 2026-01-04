@@ -1,61 +1,112 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Главная</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ферма принтеров</title>
 <style>
-body {margin:0;background:#1e1e1e;color:#fff;font-family:Arial,sans-serif;}
-.container {display:flex;flex-wrap:wrap;gap:24px;padding:16px;}
-.printer-block {background:#2a2a2a;border-radius:40px;width:48%;padding:16px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;position:relative;}
-.printer-photo {width:100%;border-radius:7px;object-fit:contain;}
-.printer-name {margin-top:12px;font-size:20px;font-weight:bold;display:flex;align-items:center;justify-content:center;gap:8px;}
-.color-indicator {width:16px;height:16px;border-radius:50%;background:red;}
-.progress-bar-bg {width:100%;height:12px;background:#444;border-radius:6px;margin-top:12px;overflow:hidden;}
-.progress-bar {height:100%;width:0%;background:#4caf50;transition:width 0.3s;}
-.printing-name {margin-top:8px;font-size:16px;opacity:0.85;}
+body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; }
+.container { display: flex; flex-wrap: wrap; gap:64px; padding:32px; justify-content: center; }
+.card {
+  background:#2a2a2a;
+  border-radius: 7px;
+  width:45%;
+  min-width:140px;
+  padding:12px;
+  cursor:pointer;
+  transition: transform 0.15s;
+}
+.card:active { transform: scale(0.97); }
+.card img { width:100%; border-radius:7px; object-fit:contain; }
+.card-title { font-size:20px; font-weight:bold; margin-top:8px; display:flex; align-items:center; gap:8px; }
+.color-indicator { width:16px; height:16px; border-radius:50%; background:red; }
+.status-row { display:flex; justify-content: space-between; margin-top:8px; font-size:16px; }
+.progress { margin-top:8px; height:18px; background:#444; border-radius:9px; overflow:hidden; }
+.progress-bar { height:100%; width:0%; background:#4caf50; transition: width 0.3s; }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="printer-block" onclick="openPrinterPage(1)">
-    <img src="foto/1.png" alt="Bambu Lab A1" class="printer-photo">
-    <div class="printer-name">Принтер 1 <div class="color-indicator" id="color-1"></div></div>
-    <div class="progress-bar-bg"><div class="progress-bar" id="progress-1"></div></div>
-    <div class="printing-name" id="printing-1">—</div>
+  <div class="card" onclick="openPrinter(1)">
+    <img src="foto/1.png" alt="Bambu Lab A1">
+    <div class="card-title">
+      Принтер 1
+      <div class="color-indicator" id="main-color-1"></div>
+    </div>
+    <div class="status-row">
+      <div>Статус:</div>
+      <div id="main-status-1">Простаивает</div>
+    </div>
+    <div class="status-row">
+      <div>Готово:</div>
+      <div id="main-progress-1">0%</div>
+    </div>
+    <div class="status-row">
+      <div>Осталось:</div>
+      <div id="main-time-1">0с</div>
+    </div>
+    <div class="progress">
+      <div id="main-bar-1" class="progress-bar"></div>
+    </div>
   </div>
 </div>
 
 <script>
-function openPrinterPage(id){ location.href = "printer.html?id="+id; }
-
-// === Данные принтера ===
-function getPrinterData(){
-  return JSON.parse(localStorage.getItem("printerData")) || {
-    status:"idle",
-    printName:"",
-    totalSeconds:0,
-    startTime:0,
-    endTime:0,
-    color:"red"
+// ===== ПОЛУЧЕНИЕ ДАННЫХ ПРИНТЕРА =====
+function getPrinterData() {
+  return {
+    status: localStorage.getItem("printerStatus") || "idle",
+    printName: localStorage.getItem("printerPrintName") || "",
+    totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
+    startTime: parseInt(localStorage.getItem("printerStartTime")) || 0,
+    endTime: parseInt(localStorage.getItem("printerEndTime")) || 0,
+    savedPercent: parseInt(localStorage.getItem("printerSavedPercent")) || 0,
+    color: localStorage.getItem("printerColor") || "red"
   };
 }
 
-function savePrinterData(data){ localStorage.setItem("printerData",JSON.stringify(data)); }
+// ===== ОБНОВЛЕНИЕ UI =====
+function updateCard() {
+  let printer = getPrinterData();
+  const now = Date.now();
+  let elapsed = 0;
 
-function updateUI(){
-  let p = getPrinterData();
-  let elapsed=0, percent=0;
-  if(p.status==="printing") elapsed=Math.floor((Date.now()-p.startTime)/1000);
-  percent = p.totalSeconds?Math.floor((elapsed/p.totalSeconds)*100):0;
-  document.getElementById("progress-1").style.width = percent+"%";
-  document.getElementById("printing-1").textContent = p.printName || "—";
-  document.getElementById("color-1").style.background = p.color || "red";
+  if(printer.status==="printing"){
+    elapsed = Math.floor((now - printer.startTime)/1000);
+    if(elapsed >= printer.totalSeconds){
+      printer.status="idle";
+      elapsed = printer.totalSeconds;
+      printer.savedPercent = 100;
+    }
+  } else if(printer.status==="stopped"){
+    elapsed = Math.floor(printer.totalSeconds * printer.savedPercent / 100);
+  }
+
+  let percent = printer.totalSeconds ? Math.floor((elapsed/printer.totalSeconds)*100) : 0;
+  if(printer.status==="stopped") percent = printer.savedPercent;
+  else printer.savedPercent = percent;
+
+  document.getElementById("main-status-1").textContent = printer.status==="idle" ? "Простаивает" : printer.status==="printing" ? "Печать" : "Печать остановлена";
+  document.getElementById("main-progress-1").textContent = percent + "%";
+  let remaining = printer.totalSeconds - elapsed;
+  document.getElementById("main-time-1").textContent = printer.status==="printing" ? remaining + "с" : "0с";
+
+  const bar = document.getElementById("main-bar-1");
+  const statusText = document.getElementById("main-status-1");
+  if(printer.status==="stopped"){ bar.style.background="orange"; statusText.style.color="orange"; }
+  else { bar.style.background="#4caf50"; statusText.style.color="#fff"; }
+
+  bar.style.width = percent+"%";
+
+  // обновляем кружок цвета
+  document.getElementById("main-color-1").style.background = printer.color;
 }
-setInterval(updateUI,500);
-updateUI();
-</script>
 
+setInterval(updateCard, 1000);
+updateCard();
+
+function openPrinter(id){ window.location.href="printer.html"; }
+</script>
 </body>
 </html>
