@@ -49,38 +49,67 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 </div>
 
 <script>
-// ===== ОБЪЕКТ ПРИНТЕРА ИЗ localStorage =====
+// ===== ПОЛУЧЕНИЕ ДАННЫХ ПРИНТЕРА =====
 function getPrinterData() {
   return {
     status: localStorage.getItem("printerStatus") || "idle",
     printName: localStorage.getItem("printerPrintName") || "",
     totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
-    elapsed: parseInt(localStorage.getItem("printerElapsed")) || 0
+    startTime: parseInt(localStorage.getItem("printerStartTime")) || 0,
+    endTime: parseInt(localStorage.getItem("printerEndTime")) || 0
   };
 }
 
-// ===== ОБНОВЛЕНИЕ КАРТОЧКИ =====
+// ===== СОХРАНЕНИЕ ДАННЫХ =====
+function savePrinterData(printer){
+  localStorage.setItem("printerStatus", printer.status);
+  localStorage.setItem("printerPrintName", printer.printName);
+  localStorage.setItem("printerTotalSeconds", printer.totalSeconds);
+  localStorage.setItem("printerStartTime", printer.startTime);
+  localStorage.setItem("printerEndTime", printer.endTime);
+}
+
+// ===== ОБНОВЛЕНИЕ UI =====
 function updateCard() {
   let printer = getPrinterData();
-  document.getElementById("main-status-1").textContent = printer.status === "idle" ? "Простаивает" : printer.status === "printing" ? "Печать" : "Печать остановлена";
-  let progressPercent = printer.totalSeconds ? Math.floor((printer.elapsed / printer.totalSeconds) * 100) : 0;
-  document.getElementById("main-progress-1").textContent = progressPercent + "%";
-  let remaining = printer.totalSeconds - printer.elapsed;
+  const now = Date.now();
+  let elapsed = 0;
+
+  if(printer.status==="printing"){
+    elapsed = Math.floor((now - printer.startTime)/1000);
+    if(elapsed >= printer.totalSeconds){
+      printer.status="idle";
+      elapsed = printer.totalSeconds;
+      savePrinterData(printer);
+    }
+  } else if(printer.status==="stopped"){
+    elapsed = parseInt(localStorage.getItem("printerElapsed")) || 0;
+  } else {
+    elapsed = 0;
+  }
+
+  // обновляем UI
+  document.getElementById("main-status-1").textContent = printer.status==="idle" ? "Простаивает" : printer.status==="printing" ? "Печать" : "Печать остановлена";
+  let percent = printer.totalSeconds ? Math.floor((elapsed/printer.totalSeconds)*100) : 0;
+  document.getElementById("main-progress-1").textContent = percent + "%";
+  let remaining = printer.totalSeconds - elapsed;
   document.getElementById("main-time-1").textContent = printer.status==="printing" ? remaining + "с" : "0с";
-  document.getElementById("main-bar-1").style.width = progressPercent + "%";
+  document.getElementById("main-bar-1").style.width = percent + "%";
+
+  // сохраняем текущее состояние для остановки
+  localStorage.setItem("printerElapsed", elapsed);
 }
 
-// ===== ТАЙМЕР ОБНОВЛЕНИЯ UI =====
+// ===== ОБНОВЛЕНИЕ КАЖДУЮ СЕКУНДУ =====
 setInterval(updateCard, 1000);
 
-// ===== Переход к странице принтера =====
 function openPrinter(id){
-  window.location.href = "printer.html";
+  window.location.href="printer.html";
 }
 
-// Инициализация
+// инициализация
 updateCard();
 </script>
-
 </body>
 </html>
+
