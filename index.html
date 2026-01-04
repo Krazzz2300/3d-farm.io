@@ -7,7 +7,6 @@
 <style>
 body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; }
 .container { display: flex; flex-wrap: wrap; gap:64px; padding:32px; justify-content: center; }
-
 .card {
   position: relative;
   background:#2a2a2a;
@@ -19,46 +18,43 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
   transition: transform 0.15s;
 }
 .card:active { transform: scale(0.97); }
-
 .card img { width:100%; border-radius:7px; object-fit:contain; }
-
 .card-title { font-size:20px; font-weight:bold; margin-top:8px; display:flex; align-items:center; gap:8px; }
-
 .color-indicator { width:16px; height:16px; border-radius:50%; background:red; }
 
 .status-row { display:flex; justify-content: space-between; margin-top:8px; font-size:16px; }
-
 .progress { margin-top:8px; height:18px; background:#444; border-radius:9px; overflow:hidden; }
-
 .progress-bar { height:100%; width:0%; background:#4caf50; transition: width 0.3s; }
 
-.red-badge {
+@keyframes greenPulse {
+  0% { background-color: #4caf50; }
+  50% { background-color: #7CFC00; }
+  100% { background-color: #4caf50; }
+}
+.progress-bar.completed { animation: greenPulse 1s infinite; }
+
+.notification {
   position: absolute;
   top:8px;
   right:8px;
-  width:18px;
-  height:18px;
+  width:20px;
+  height:20px;
   border-radius:50%;
   background:red;
-  color:#fff;
-  font-size:12px;
-  font-weight:bold;
-  display:none;
-  align-items:center;
+  display:flex;
   justify-content:center;
-}
-
-@keyframes pulse {
-  0% { background-color: #4caf50; }
-  50% { background-color: #00ff00; }
-  100% { background-color: #4caf50; }
+  align-items:center;
+  font-size:14px;
+  font-weight:bold;
+  color:#fff;
+  display:none;
 }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="card" onclick="openPrinter(1)">
+<div class="container" id="printer-container">
+  <div class="card" data-id="1" onclick="openPrinter(1)">
     <img src="foto/1.png" alt="Bambu Lab A1">
     <div class="card-title">
       Принтер 1
@@ -70,104 +66,111 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
     </div>
     <div class="status-row">
       <div>Модель:</div>
-      <div id="main-model-1">—</div>
+      <div id="main-print-1">—</div>
     </div>
     <div class="progress">
       <div id="main-bar-1" class="progress-bar"></div>
     </div>
-    <div class="red-badge" id="main-notify-1">1</div>
+    <div class="notification" id="notif-1">1</div>
   </div>
 </div>
 
 <script>
 // ===== ПОЛУЧЕНИЕ ДАННЫХ ПРИНТЕРА =====
-function getPrinterData() {
+function getPrinterData(id) {
   return {
-    status: localStorage.getItem("printerStatus") || "idle",
-    printName: localStorage.getItem("printerPrintName") || "",
-    totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
-    startTime: parseInt(localStorage.getItem("printerStartTime")) || 0,
-    savedPercent: parseInt(localStorage.getItem("printerSavedPercent")) || 0,
-    color: localStorage.getItem("printerColor") || "red",
-    finishedNotified: localStorage.getItem("printerFinishedNotified") === "true"
+    status: localStorage.getItem(`printerStatus_${id}`) || "idle",
+    printName: localStorage.getItem(`printerPrintName_${id}`) || "",
+    totalSeconds: parseInt(localStorage.getItem(`printerTotalSeconds_${id}`)) || 0,
+    startTime: parseInt(localStorage.getItem(`printerStartTime_${id}`)) || 0,
+    savedPercent: parseInt(localStorage.getItem(`printerSavedPercent_${id}`)) || 0,
+    color: localStorage.getItem(`printerColor_${id}`) || "red",
+    completedNotified: localStorage.getItem(`printerCompletedNotified_${id}`) === "true"
   };
 }
 
-function savePrinterData(printer){
-  localStorage.setItem("printerStatus", printer.status);
-  localStorage.setItem("printerPrintName", printer.printName);
-  localStorage.setItem("printerTotalSeconds", printer.totalSeconds);
-  localStorage.setItem("printerStartTime", printer.startTime);
-  localStorage.setItem("printerSavedPercent", printer.savedPercent);
-  localStorage.setItem("printerColor", printer.color);
-  localStorage.setItem("printerFinishedNotified", printer.finishedNotified);
+function savePrinterData(id, data){
+  localStorage.setItem(`printerStatus_${id}`, data.status);
+  localStorage.setItem(`printerPrintName_${id}`, data.printName);
+  localStorage.setItem(`printerTotalSeconds_${id}`, data.totalSeconds);
+  localStorage.setItem(`printerStartTime_${id}`, data.startTime);
+  localStorage.setItem(`printerSavedPercent_${id}`, data.savedPercent);
+  localStorage.setItem(`printerColor_${id}`, data.color);
+  localStorage.setItem(`printerCompletedNotified_${id}`, data.completedNotified);
 }
 
 // ===== ОБНОВЛЕНИЕ UI =====
-function updateCard() {
-  let printer = getPrinterData();
+function updateCard(id){
+  let printer = getPrinterData(id);
   const now = Date.now();
   let elapsed = 0;
 
   if(printer.status==="printing"){
     elapsed = Math.floor((now - printer.startTime)/1000);
     if(elapsed >= printer.totalSeconds){
-      printer.status="finished";
+      printer.status="completed"; // отметка, что завершено
+      elapsed = printer.totalSeconds;
       printer.savedPercent = 100;
-      printer.finishedNotified = false;
-      savePrinterData(printer);
+      printer.completedNotified = false;
     }
   } else if(printer.status==="stopped"){
     elapsed = Math.floor(printer.totalSeconds * printer.savedPercent / 100);
+  } else if(printer.status==="completed"){
+    elapsed = printer.totalSeconds;
   }
 
   let percent = printer.totalSeconds ? Math.floor((elapsed/printer.totalSeconds)*100) : 0;
   if(printer.status==="stopped") percent = printer.savedPercent;
   else printer.savedPercent = percent;
 
-  // Статус и модель
-  document.getElementById("main-status-1").textContent =
-    printer.status==="idle" ? "Простаивает" :
-    printer.status==="printing" ? "Печать" :
-    printer.status==="stopped" ? "Печать остановлена" :
+  document.getElementById(`main-status-${id}`).textContent = 
+    printer.status==="idle" ? "Простаивает" : 
+    printer.status==="printing" ? "Печать" : 
+    printer.status==="stopped" ? "Печать остановлена" : 
     "Готово";
 
-  document.getElementById("main-model-1").textContent =
-    printer.status==="idle" ? "—" : printer.printName || "—";
+  document.getElementById(`main-print-${id}`).textContent = printer.printName || "—";
 
-  // Полоска прогресса
-  const bar = document.getElementById("main-bar-1");
-  const statusText = document.getElementById("main-status-1");
-  const notify = document.getElementById("main-notify-1");
+  const bar = document.getElementById(`main-bar-${id}`);
+  bar.style.width = percent + "%";
 
   if(printer.status==="stopped"){
-    bar.style.animation="none";
     bar.style.background="orange";
-    statusText.style.color="orange";
-    notify.style.display="none";
-  } else if(printer.status==="finished"){
-    bar.style.animation="pulse 1s infinite";
-    statusText.style.color="#4caf50";
-    notify.style.display="flex";
-  } else { // printing / idle
-    bar.style.animation="none";
+    bar.classList.remove("completed");
+    document.getElementById(`main-status-${id}`).style.color="orange";
+  } else if(printer.status==="completed"){
+    bar.classList.add("completed");
+    document.getElementById(`main-status-${id}`).style.color="#7CFC00";
+  } else {
     bar.style.background="#4caf50";
-    statusText.style.color="#fff";
-    notify.style.display="none";
+    bar.classList.remove("completed");
+    document.getElementById(`main-status-${id}`).style.color="#fff";
   }
 
-  bar.style.width = percent+"%";
-  document.getElementById("main-color-1").style.background = printer.color;
+  document.getElementById(`main-color-${id}`).style.background = printer.color;
 
-  savePrinterData(printer);
+  // уведомление
+  const notif = document.getElementById(`notif-${id}`);
+  notif.style.display = (printer.status==="completed" && !printer.completedNotified) ? "flex" : "none";
+
+  savePrinterData(id, printer);
 }
 
-setInterval(updateCard, 1000);
-updateCard();
+function updateAllCards(){
+  const cards = document.querySelectorAll(".card");
+  cards.forEach(c=>{
+    const id = c.dataset.id;
+    updateCard(id);
+  });
+}
+
+setInterval(updateAllCards, 1000);
+updateAllCards();
 
 function openPrinter(id){
-  window.location.href="printer.html";
+  window.location.href = `printer.html?id=${id}`;
 }
 </script>
+
 </body>
 </html>
