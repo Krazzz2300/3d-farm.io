@@ -66,38 +66,12 @@ body {
   box-sizing: border-box;
   border: 1px solid #444;
   position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.printer-name {
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.delete-btn {
-  background: #f44336;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-}
-
-.delete-btn:active {
-  background: #d32f2f;
-  transform: scale(0.95);
+.card:active {
+  transform: scale(0.98);
+  background: #333;
 }
 
 .card img {
@@ -110,7 +84,8 @@ body {
 }
 
 .card-title {
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: bold;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -167,6 +142,42 @@ body {
   text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
 }
 
+/* Бейдж проблемы (красный гаечный ключ) */
+.problem-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #f44336;
+  color: white;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border: 2px solid #2a2a2a;
+  z-index: 2;
+}
+
+/* Бейдж завершения печати (зеленый кружок) */
+.finished-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #4caf50;
+  color: white;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border: 2px solid #2a2a2a;
+  z-index: 2;
+}
+
 @keyframes pulse {
   0% { opacity: 1; }
   50% { opacity: 0.5; }
@@ -217,6 +228,11 @@ body {
 .empty-state h3 {
   font-size: 20px;
   margin-bottom: 10px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  opacity: 0.7;
 }
 
 /* Модальное окно */
@@ -310,6 +326,35 @@ body {
   from { transform: translateX(-50%) translateY(0); opacity: 1; }
   to { transform: translateX(-50%) translateY(-20px); opacity: 0; }
 }
+
+/* Для планшетов */
+@media (min-width: 768px) {
+  .printers-container {
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .card {
+    width: calc(33.333% - 10px); /* 3 в ряд */
+    min-height: 240px;
+  }
+  
+  .card img {
+    height: 130px;
+  }
+}
+
+/* Для ПК */
+@media (min-width: 1024px) {
+  .card {
+    width: calc(25% - 12px); /* 4 в ряд */
+  }
+  
+  .printers-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
 </style>
 </head>
 
@@ -363,7 +408,8 @@ const DEFAULT_PRINTERS = [
     image: "foto/1.png",
     startTime: null,
     printDuration: null,
-    finishedNotified: false
+    finishedNotified: false,
+    problem: ""
   },
   {
     id: "printer2", 
@@ -376,7 +422,8 @@ const DEFAULT_PRINTERS = [
     image: "foto/2.png",
     startTime: null,
     printDuration: null,
-    finishedNotified: false
+    finishedNotified: false,
+    problem: ""
   }
 ];
 
@@ -439,7 +486,8 @@ function addPrinter(name, model) {
     image: "foto/default.png",
     startTime: null,
     printDuration: null,
-    finishedNotified: false
+    finishedNotified: false,
+    problem: ""
   };
   
   // Добавляем в массив
@@ -452,19 +500,6 @@ function addPrinter(name, model) {
   }
   
   return null;
-}
-
-// Удалить принтер
-function deletePrinter(printerId) {
-  const printers = getPrinters();
-  const updatedPrinters = printers.filter(p => p.id !== printerId);
-  
-  if (savePrinters(updatedPrinters)) {
-    showNotification('Принтер удален');
-    return true;
-  }
-  
-  return false;
 }
 
 // Обновить прогресс всех печатающих принтеров
@@ -580,25 +615,31 @@ function loadPrinters() {
     // Проверяем, нужно ли мигать (завершенная печать без уведомления)
     const pulseClass = (printer.status === 'finished' && printer.finishedNotified === false) ? 'pulse-animation' : '';
     
+    // Определяем какие бейджи показывать
+    const showProblemBadge = printer.status === 'repair';
+    const showFinishedBadge = printer.status === 'finished' && printer.finishedNotified === false;
+    
     html += `
       <div class="card" onclick="openPrinter('${printer.id}')">
-        <div class="card-header">
-          <span class="printer-name">${printer.name}</span>
-          <button class="delete-btn" onclick="deletePrinterHandler('${printer.id}', event)">×</button>
-        </div>
+        ${showProblemBadge ? '<div class="problem-badge"><i class="fas fa-wrench"></i></div>' : ''}
+        ${showFinishedBadge ? '<div class="finished-badge"><i class="fas fa-check"></i></div>' : ''}
+        
         <img src="${printer.image}" alt="${printer.model}" 
              onerror="this.src='foto/default.png'">
         <div class="card-title">
-          <span>${printer.model}</span>
+          <span>${printer.name}</span>
           <div class="color-indicator" style="background:${printer.color}"></div>
         </div>
+        <div class="model-text">${printer.model}</div>
         <div class="status-row">
           <div>Статус:</div>
           <div class="status-text" style="color:${statusColor};">${statusText}</div>
         </div>
         <div class="status-row">
           <div>Печатает:</div>
-          <div>${printer.printName || '—'}</div>
+          <div style="max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            ${printer.printName || '—'}
+          </div>
         </div>
         <div class="progress">
           <div class="progress-bar ${pulseClass}" style="width:${printer.progress}%; background:${progressColor}"></div>
@@ -703,16 +744,6 @@ function openPrinter(printerId) {
   window.location.href = `printer.html?id=${printerId}`;
 }
 
-function deletePrinterHandler(printerId, event) {
-  event.stopPropagation(); // Чтобы не открывалась страница принтера
-  
-  if (confirm('Удалить этот принтер?')) {
-    if (deletePrinter(printerId)) {
-      loadPrinters();
-    }
-  }
-}
-
 // ===== ИНИЦИАЛИЗАЦИЯ =====
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -749,7 +780,6 @@ window.showAddModal = showAddModal;
 window.closeAddModal = closeAddModal;
 window.addNewPrinter = addNewPrinter;
 window.openPrinter = openPrinter;
-window.deletePrinterHandler = deletePrinterHandler;
 </script>
 
 </body>
