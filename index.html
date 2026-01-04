@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
+/* Тот же самый CSS стиль из вашего нового файла */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -759,7 +760,7 @@ function showPage(page) {
   if (page === 'printers') {
     document.querySelectorAll('.nav-item')[0].classList.add('active');
     document.getElementById('page-title').textContent = 'Ферма принтеров';
-    renderPrinters(true); // Принудительное обновление
+    renderPrinters();
   } else if (page === 'logs') {
     document.querySelectorAll('.nav-item')[2].classList.add('active');
     document.getElementById('page-title').textContent = 'История действий';
@@ -769,7 +770,7 @@ function showPage(page) {
   currentPage = page;
 }
 
-// ВАЖНО: функция обновления статусов
+// ВАЖНО: ФИКСИРОВАННАЯ ФУНКЦИЯ ОБНОВЛЕНИЯ СТАТУСОВ
 function updatePrintersStatus() {
   const printers = getPrinters();
   const now = Date.now();
@@ -792,25 +793,18 @@ function updatePrintersStatus() {
         
         addLog(`Принтер "${printer.name}" завершил печать: ${printer.printName}`, 'info');
       }
-      
-      printers[index] = printer;
     }
   });
   
   if (updated) {
     savePrinters(printers);
-    if (currentPage === 'printers') {
-      renderPrinters(false); // Обновляем отображение
-    }
   }
   
   return updated;
 }
 
-function renderPrinters(forceUpdate = false) {
-  const now = Date.now();
-  
-  // Обновляем статусы перед отрисовкой
+function renderPrinters() {
+  // Всегда обновляем статусы перед отрисовкой
   updatePrintersStatus();
   
   const printers = getPrinters();
@@ -829,27 +823,13 @@ function renderPrinters(forceUpdate = false) {
   
   let html = '';
   printers.forEach(printer => {
-    // Рассчитываем актуальный прогресс
-    let displayProgress = printer.progress;
-    let displayStatus = printer.status;
+    const statusText = getStatusText(printer.status);
+    const statusColor = getStatusColor(printer.status);
+    const progressColor = getProgressColor(printer.status);
     
-    if (printer.status === 'printing' && printer.startTime && printer.printDuration) {
-      const elapsed = now - printer.startTime;
-      displayProgress = Math.min(100, Math.floor((elapsed / printer.printDuration) * 100));
-      
-      if (displayProgress >= 100) {
-        displayStatus = 'finished';
-        displayProgress = 100;
-      }
-    }
-    
-    const statusText = getStatusText(displayStatus);
-    const statusColor = getStatusColor(displayStatus);
-    const progressColor = getProgressColor(displayStatus);
-    
-    const pulseClass = (displayStatus === 'finished' && printer.finishedNotified === false) ? 'pulse-animation' : '';
-    const showProblemBadge = displayStatus === 'repair';
-    const showFinishedBadge = displayStatus === 'finished' && printer.finishedNotified === false;
+    const pulseClass = (printer.status === 'finished' && printer.finishedNotified === false) ? 'pulse-animation' : '';
+    const showProblemBadge = printer.status === 'repair';
+    const showFinishedBadge = printer.status === 'finished' && printer.finishedNotified === false;
     
     html += `
       <div class="card" onclick="openPrinter('${printer.id}')">
@@ -876,8 +856,8 @@ function renderPrinters(forceUpdate = false) {
           </div>
         </div>
         <div class="progress">
-          <div class="progress-bar ${pulseClass}" style="width:${displayProgress}%; background:${progressColor}"></div>
-          <div class="progress-text">${displayProgress}%</div>
+          <div class="progress-bar ${pulseClass}" style="width:${printer.progress}%; background:${progressColor}"></div>
+          <div class="progress-text">${printer.progress}%</div>
         </div>
       </div>
     `;
@@ -885,7 +865,7 @@ function renderPrinters(forceUpdate = false) {
   
   container.innerHTML = html;
   updateNotificationBadge();
-  lastUpdateTime = now;
+  lastUpdateTime = Date.now();
 }
 
 // ===== ОТОБРАЖЕНИЕ ЛОГОВ =====
@@ -959,7 +939,7 @@ function addNewPrinter() {
   
   if (newPrinter) {
     closeAddModal();
-    renderPrinters(true);
+    renderPrinters();
     showNotification(`Принтер "${name}" добавлен!`);
   } else {
     alert('Ошибка при добавлении принтера');
@@ -1005,18 +985,11 @@ function openPrinter(printerId) {
 // ===== ИНИЦИАЛИЗАЦИЯ =====
 
 document.addEventListener('DOMContentLoaded', function() {
-  renderPrinters(true);
+  renderPrinters();
   
-  document.getElementById('add-printer-btn').onclick = showAddModal;
-  
-  document.getElementById('add-modal').addEventListener('click', function(e) {
-    if (e.target === this) {
-      closeAddModal();
-    }
-  });
-  
+  // Назначаем обработчики
   document.querySelectorAll('.nav-item').forEach((item, index) => {
-    if (index !== 1) {
+    if (index !== 1) { // Пропускаем среднюю кнопку (+)
       item.addEventListener('click', function() {
         const page = index === 0 ? 'printers' : 'logs';
         showPage(page);
@@ -1024,35 +997,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // ВАЖНО: Автообновление каждую секунду
+  // Модальное окно
+  document.getElementById('add-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeAddModal();
+    }
+  });
+  
+  // КРИТИЧЕСКИ ВАЖНО: Автообновление каждую секунду
   setInterval(() => {
     if (currentPage === 'printers') {
-      const now = Date.now();
-      // Обновляем каждую секунду или если прошло больше 2 секунд
-      if (now - lastUpdateTime >= 1000) {
-        renderPrinters();
-      }
+      renderPrinters();
     }
   }, 1000);
   
   // Обновляем при возвращении на страницу
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden && currentPage === 'printers') {
-      renderPrinters(true);
+      renderPrinters();
     }
   });
   
   // Обновляем при фокусе на страницу
   window.addEventListener('focus', function() {
     if (currentPage === 'printers') {
-      renderPrinters(true);
-    }
-  });
-  
-  // Обновляем при загрузке страницы (возврат из принтера)
-  window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-      renderPrinters(true);
+      renderPrinters();
     }
   });
 });
