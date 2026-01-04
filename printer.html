@@ -16,7 +16,7 @@ body{margin:0;background:#1e1e1e;color:#fff;font-family:Arial,sans-serif;opacity
 
 .top-block{display:flex;gap:16px;padding:0 16px;}
 .photo-block{width:50%;}
-.photo-block img{width:100%;height:auto;border-radius:7px;object-fit:contain;}
+.photo-block img{width:100%;height:200px;border-radius:7px;object-fit:cover;}
 .info-block{width:50%;background:#2a2a2a;border-radius:7px;padding:16px;}
 .model-label{font-size:18px;opacity:0.7;}
 .model-value{font-size:20px;font-weight:bold;white-space:nowrap;}
@@ -67,11 +67,11 @@ button#repair{background:orange;color:#fff;flex:0 0 200px;}
 
 <div class="top-block">
   <div class="photo-block">
-    <img src="foto/1.png" alt="Bambu Lab A1">
+    <img src="foto/1.png" alt="Принтер">
   </div>
   <div class="info-block">
     <div class="model-label">Модель</div>
-    <div class="model-value" id="model-value">Bambu Lab A1</div>
+    <div class="model-value" id="model-value">—</div>
     <div class="problem-value" id="problem-value">Проблема: нет</div>
   </div>
 </div>
@@ -159,30 +159,42 @@ const problemValue = document.getElementById("problem-value");
 
 let selectedColor = "red";
 
+// ===== Работа с ID принтера =====
+function getPrinterId(){
+  const params = new URLSearchParams(location.search);
+  return params.get("id") || "1";
+}
+
 function getPrinterData(){
+  const id = getPrinterId();
   return {
-    status: localStorage.getItem("printerStatus") || "idle",
-    printName: localStorage.getItem("printerPrintName") || "",
-    totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
-    startTime: parseInt(localStorage.getItem("printerStartTime")) || 0,
-    savedPercent: parseInt(localStorage.getItem("printerSavedPercent")) || 0,
-    color: localStorage.getItem("printerColor") || "red",
-    finishedNotified: localStorage.getItem("printerFinishedNotified") === "true",
-    problem: localStorage.getItem("printerProblem") || "нет"
+    status: localStorage.getItem(`printer_${id}_status`) || "idle",
+    printName: localStorage.getItem(`printer_${id}_printName`) || "",
+    totalSeconds: parseInt(localStorage.getItem(`printer_${id}_totalSeconds`)) || 0,
+    startTime: parseInt(localStorage.getItem(`printer_${id}_startTime`)) || 0,
+    savedPercent: parseInt(localStorage.getItem(`printer_${id}_savedPercent`)) || 0,
+    color: localStorage.getItem(`printer_${id}_color`) || "red",
+    finishedNotified: localStorage.getItem(`printer_${id}_finishedNotified`) === "true",
+    problem: localStorage.getItem(`printer_${id}_problem`) || "нет"
   };
 }
 
 function savePrinterData(printer){
-  localStorage.setItem("printerStatus", printer.status);
-  localStorage.setItem("printerPrintName", printer.printName);
-  localStorage.setItem("printerTotalSeconds", printer.totalSeconds);
-  localStorage.setItem("printerStartTime", printer.startTime);
-  localStorage.setItem("printerSavedPercent", printer.savedPercent);
-  localStorage.setItem("printerColor", printer.color);
-  localStorage.setItem("printerFinishedNotified", printer.finishedNotified);
-  localStorage.setItem("printerProblem", printer.problem);
+  const id = getPrinterId();
+  localStorage.setItem(`printer_${id}_status`, printer.status);
+  localStorage.setItem(`printer_${id}_printName`, printer.printName);
+  localStorage.setItem(`printer_${id}_totalSeconds`, printer.totalSeconds);
+  localStorage.setItem(`printer_${id}_startTime`, printer.startTime);
+  localStorage.setItem(`printer_${id}_savedPercent`, printer.savedPercent);
+  localStorage.setItem(`printer_${id}_color`, printer.color);
+  localStorage.setItem(`printer_${id}_finishedNotified`, printer.finishedNotified);
+  localStorage.setItem(`printer_${id}_problem`, printer.problem);
 }
 
+// Обновляем заголовок страницы
+document.querySelector(".title").textContent = "Принтер " + getPrinterId();
+
+// ===== UI обновление =====
 function updateUI(){
   let printer = getPrinterData();
   const now = Date.now();
