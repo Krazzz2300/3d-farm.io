@@ -124,7 +124,8 @@ function getPrinterData() {
     status: localStorage.getItem("printerStatus") || "idle",
     printName: localStorage.getItem("printerPrintName") || "",
     totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
-    elapsed: parseInt(localStorage.getItem("printerElapsed")) || 0
+    startTime: parseInt(localStorage.getItem("printerStartTime")) || 0,
+    endTime: parseInt(localStorage.getItem("printerEndTime")) || 0
   };
 }
 
@@ -132,38 +133,46 @@ function savePrinterData(printer){
   localStorage.setItem("printerStatus", printer.status);
   localStorage.setItem("printerPrintName", printer.printName);
   localStorage.setItem("printerTotalSeconds", printer.totalSeconds);
-  localStorage.setItem("printerElapsed", printer.elapsed);
+  localStorage.setItem("printerStartTime", printer.startTime);
+  localStorage.setItem("printerEndTime", printer.endTime);
 }
 
+// ===== ОБНОВЛЕНИЕ UI =====
 function updateUI(){
   let printer = getPrinterData();
+  let elapsed = 0;
+  const now = Date.now();
+
+  if(printer.status==="printing"){
+    elapsed = Math.floor((now - printer.startTime)/1000);
+    if(elapsed >= printer.totalSeconds){
+      printer.status="idle";
+      elapsed = printer.totalSeconds;
+      savePrinterData(printer);
+    }
+  }
+
   statusText.textContent = printer.status==="idle"?"Простаивает":printer.status==="printing"?"Печать":"Печать остановлена";
   printNameText.textContent = printer.printName || "—";
-  let percent = printer.totalSeconds?Math.floor((printer.elapsed/printer.totalSeconds)*100):0;
+  let percent = printer.totalSeconds ? Math.floor((elapsed/printer.totalSeconds)*100) : 0;
   progressText.textContent = percent+"%";
-  let remaining = printer.totalSeconds - printer.elapsed;
+  let remaining = printer.totalSeconds - elapsed;
   timeRemainingText.textContent = printer.status==="printing"?remaining+"с":"0с";
   progressBar.style.width = percent+"%";
 
-  startBtn.classList.toggle("disabled",printer.status==="printing");
-  stopBtn.classList.toggle("disabled",printer.status!=="printing");
+  startBtn.classList.toggle("disabled", printer.status==="printing");
+  stopBtn.classList.toggle("disabled", printer.status!=="printing");
 }
 updateUI();
 
-let timer = setInterval(()=>{
-  let printer = getPrinterData();
-  if(printer.status==="printing" && printer.elapsed < printer.totalSeconds){
-    printer.elapsed++;
-    savePrinterData(printer);
-    updateUI();
-  }
-},1000);
+// ===== ТАЙМЕР =====
+setInterval(updateUI,1000);
 
-startBtn.onclick=()=>{
+// ===== КНОПКИ =====
+startBtn.onclick = ()=>{
   let printer = getPrinterData();
   if(printer.status!=="printing") modal.style.display="flex";
 }
-
 function closeModal(){ modal.style.display="none"; }
 
 function startPrint(){
@@ -173,7 +182,8 @@ function startPrint(){
 
   printer.printName=name;
   printer.totalSeconds=time;
-  printer.elapsed=0;
+  printer.startTime=Date.now();
+  printer.endTime=printer.startTime+time*1000;
   printer.status="printing";
   savePrinterData(printer);
   updateUI();
