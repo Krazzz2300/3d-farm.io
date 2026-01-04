@@ -1,0 +1,12 @@
+body{margin:0;background:#1e1e1e;color:#fff;font-family:Arial,sans-serif;}
+.container{display:flex;flex-wrap:wrap;gap:64px;padding:32px;justify-content:center;}
+.card{position:relative;background:#2a2a2a;border-radius:7px;width:45%;min-width:140px;padding:12px;cursor:pointer;transition:transform 0.15s;}
+.card:active{transform:scale(0.97);}
+.card img{width:100%;border-radius:7px;object-fit:contain;}
+.card-title{font-size:20px;font-weight:bold;margin-top:8px;display:flex;align-items:center;gap:8px;}
+.color-indicator{width:16px;height:16px;border-radius:50%;background:red;}
+.status-row{display:flex;justify-content:space-between;margin-top:8px;font-size:16px;}
+.progress{margin-top:8px;height:18px;background:#444;border-radius:9px;overflow:hidden;}
+.progress-bar{height:100%;width:0%;background:#4caf50;transition:width 0.3s;}
+.red-badge{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;background:red;color:#fff;font-size:12px;font-weight:bold;display:none;align-items:center;justify-content:center;}
+@keyframes pulse{0%{background-color:#4caf50;}50%{background-color:#00ff00;}100%{background-color:#4caf50;}}
