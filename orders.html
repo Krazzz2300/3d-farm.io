@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ферма принтеров - Заказы</title>
+<style>
+/* Стили для вкладки Заказы */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #1e1e1e;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+/* Хедер как в основном приложении */
+.header {
+  background: #2a2a2a;
+  padding: 15px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  border-bottom: 1px solid #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Контейнер заказов */
+.orders-container {
+  padding: 15px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding-bottom: 80px;
+}
+
+/* Карточка заказа */
+.order-card {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 12px;
+  border-left: 4px solid #4caf50;
+  animation: slideIn 0.3s ease-out;
+}
+
+.order-card.urgent {
+  border-left-color: #f44336;
+  background: rgba(244, 67, 54, 0.05);
+}
+
+.order-card.in-progress {
+  border-left-color: #2196f3;
+}
+
+/* Шапка карточки */
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.order-name {
+  font-size: 18px;
+  font-weight: bold;
+  flex: 1;
+}
+
+.order-id {
+  font-size: 12px;
+  color: #888;
+  background: #333;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* Тело карточки */
+.order-body {
+  margin-bottom: 15px;
+}
+
+.order-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.stat-item {
+  text-align: center;
+  flex: 1;
+}
+
+.stat-label {
+  color: #aaa;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.stat-value.reserve { color: #ff9800; }
+.stat-value.in-print { color: #2196f3; }
+.stat-value.need { color: #4caf50; }
+
+/* Прогресс-бар для заказа */
+.order-progress {
+  height: 8px;
+  background: #333;
+  border-radius: 4px;
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+.order-progress-bar {
+  height: 100%;
+  background: #4caf50;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* Кнопки */
+.order-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.assign-btn {
+  background: #4caf50;
+  color: white;
+}
+
+.details-btn {
+  background: #666;
+  color: white;
+}
+
+/* Панель управления */
+.controls-panel {
+  background: #2a2a2a;
+  padding: 15px;
+  border-top: 1px solid #444;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.controls-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stats-summary {
+  font-size: 14px;
+  color: #888;
+}
+
+.refresh-btn {
+  background: #2196f3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+}
+
+.refresh-btn:active {
+  background: #1976d2;
+  transform: scale(0.95);
+}
+
+/* Состояния */
+.empty-orders {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+}
+
+.empty-orders i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.loading {
+  text-align: center;
+  padding: 30px;
+  color: #888;
+}
+
+.loading-spinner {
+  border: 3px solid #333;
+  border-top: 3px solid #4caf50;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Модальное окно выбора принтеров */
+.modal-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 15px;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: #2a2a2a;
+  padding: 20px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.printer-selection {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 15px 0;
+}
+
+.printer-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #333;
+  margin-bottom: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.printer-option:hover {
+  background: #3a3a3a;
+}
+
+.printer-option.selected {
+  border-color: #4caf50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.printer-info {
+  flex: 1;
+}
+
+.printer-name {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.printer-status {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.printer-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #444;
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.quantity-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #444;
+  color: white;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity-input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #444;
+  background: #1e1e1e;
+  color: white;
+  font-size: 18px;
+  text-align: center;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.cancel-btn { background: #666; color: white; }
+.confirm-btn { background: #4caf50; color: white; }
+
+/* Уведомления */
+.notification {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(76, 175, 80, 0.9);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 10px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  font-weight: bold;
+  backdrop-filter: blur(10px);
+  animation: slideIn 0.3s ease-out;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span id="page-title">Заказы на печать</span>
+  <button class="refresh-btn" onclick="loadOrders()">
+    <i class="fas fa-sync-alt"></i> Обновить
+  </button>
+</div>
+
+<div class="orders-container" id="orders-container">
+  <!-- Заказы будут загружены здесь -->
+  <div class="loading">
+    <div class="loading-spinner"></div>
+    <p>Загружаем заказы...</p>
+  </div>
+</div>
+
+<div class="controls-panel">
+  <div class="controls-content">
+    <div class="stats-summary" id="stats-summary">
+      Заказов: 0 | Надо поставить: 0
+    </div>
+    <button class="refresh-btn" onclick="loadOrders()">
+      <i class="fas fa-sync-alt"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Модальное окно для назначения на печать -->
+<div class="modal-bg" id="assign-modal">
+  <div class="modal">
+    <h3 id="modal-title">Назначить на печать</h3>
+    
+    <div class="printer-selection" id="printer-selection">
+      <!-- Принтеры будут добавлены здесь -->
+    </div>
+    
+    <div class="quantity-selector">
+      <button class="quantity-btn" onclick="changeQuantity(-1)">-</button>
+      <input type="number" class="quantity-input" id="print-quantity" value="1" min="1">
+      <button class="quantity-btn" onclick="changeQuantity(1)">+</button>
+    </div>
+    
+    <div class="modal-buttons">
+      <button class="cancel-btn" onclick="closeAssignModal()">Отмена</button>
+      <button class="confirm-btn" onclick="confirmAssignment()">Назначить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== КОНСТАНТЫ =====
+const SHEET_ID = '12cvna-mOg3z9PofZ2tEPSwQjz7WOhkGnjQpYBnwTKoc';
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+const STORAGE_KEY = '3d_printer_farm_data'; // Ключ из основного приложения
+
+// ===== ПЕРЕМЕННЫЕ =====
+let allOrders = []; // Все заказы из таблицы
+let selectedOrder = null; // Выбранный заказ для назначения
+let selectedPrinters = []; // Выбранные принтеры
+
+// ===== ФУНКЦИИ ДЛЯ РАБОТЫ С GOOGLE SHEETS =====
+
+async function fetchOrdersFromSheet() {
+  try {
+    console.log('Загружаем заказы из Google Sheets...');
+    
+    const response = await fetch(SHEET_URL);
+    const text = await response.text();
+    
+    // Google Sheets возвращает данные в специальном формате
+    const jsonText = text.substring(47).slice(0, -2);
+    const data = JSON.parse(jsonText);
+    
+    // Обрабатываем данные таблицы
+    const orders = processSheetData(data);
+    console.log('Загружено заказов:', orders.length);
+    
+    return orders;
+  } catch (error) {
+    console.error('Ошибка при загрузке заказов:', error);
+    showNotification('Ошибка загрузки заказов');
+    return [];
+  }
+}
+
+function processSheetData(data) {
+  const orders = [];
+  const rows = data.table.rows;
+  
+  // Проходим по всем строкам таблицы
+  for (let i = 1; i < rows.length; i++) { // Начинаем с 1, пропускаем заголовок
+    const row = rows[i];
+    const cells = row.c;
+    
+    // Колонка B (индекс 1) - название игрушки
+    // Колонка F (индекс 5) - резерв
+    if (cells && cells[1] && cells[5]) {
+      const name = cells[1].v;
+      const reserve = parseFloat(cells[5].v);
+      
+      // Если резерв есть и это число
+      if (name && !isNaN(reserve) && reserve > 0) {
+        orders.push({
+          id: `order-${i}`,
+          name: name.trim(),
+          reserve: Math.floor(reserve),
+          inPrint: 0, // Будем считать из статусов принтеров
+          need: 0     // Будем вычислять
+        });
+      }
+    }
+  }
+  
+  return orders;
+}
+
+// ===== ФУНКЦИИ ДЛЯ РАБОТЫ С ДАННЫМИ ПРИНТЕРОВ =====
+
+function getPrinters() {
+  try {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    return savedData ? JSON.parse(savedData) : [];
+  } catch (error) {
+    console.error("Ошибка при чтении данных принтеров:", error);
+    return [];
+  }
+}
+
+function calculateOrdersInPrint() {
+  const printers = getPrinters();
+  const ordersInPrint = {};
+  
+  // Проходим по всем принтерам
+  printers.forEach(printer => {
+    if (printer.status === 'printing' && printer.printName) {
+      // Парсим название и количество из printName
+      // Формат: "Хорёк ×3" или просто "Хорёк"
+      const match = printer.printName.match(/^(.+?)(?:\s*×\s*(\d+))?$/);
+      
+      if (match) {
+        const itemName = match[1].trim();
+        const quantity = match[2] ? parseInt(match[2]) : 1;
+        
+        if (!ordersInPrint[itemName]) {
+          ordersInPrint[itemName] = 0;
+        }
+        ordersInPrint[itemName] += quantity;
+      }
+    }
+  });
+  
+  return ordersInPrint;
+}
+
+// ===== ОСНОВНАЯ ЛОГИКА =====
+
+async function loadOrders() {
+  const container = document.getElementById('orders-container');
+  container.innerHTML = `
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Загружаем заказы...</p>
+    </div>
+  `;
+  
+  try {
+    // 1. Загружаем заказы из Google Sheets
+    const ordersFromSheet = await fetchOrdersFromSheet();
+    
+    // 2. Считаем что уже в печати
+    const inPrintCounts = calculateOrdersInPrint();
+    
+    // 3. Объединяем данные
+    allOrders = ordersFromSheet.map(order => {
+      const inPrint = inPrintCounts[order.name] || 0;
+      const need = Math.max(0, order.reserve - inPrint);
+      
+      return {
+        ...order,
+        inPrint: inPrint,
+        need: need
+      };
+    });
+    
+    // 4. Фильтруем: показываем только те, где need > 0
+    const ordersToShow = allOrders.filter(order => order.need > 0);
+    
+    // 5. Сортируем по need (больше need - выше)
+    ordersToShow.sort((a, b) => b.need - a.need);
+    
+    // 6. Отображаем
+    renderOrders(ordersToShow);
+    
+    // 7. Обновляем статистику
+    updateStats(ordersToShow);
+    
+  } catch (error) {
+    console.error('Ошибка при загрузке:', error);
+    container.innerHTML = `
+      <div class="empty-orders">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3>Ошибка загрузки</h3>
+        <p>Не удалось загрузить заказы</p>
+        <button class="action-btn assign-btn" onclick="loadOrders()">
+          <i class="fas fa-sync-alt"></i> Попробовать снова
+        </button>
+      </div>
+    `;
+  }
+}
+
+function renderOrders(orders) {
+  const container = document.getElementById('orders-container');
+  
+  if (orders.length === 0) {
+    container.innerHTML = `
+      <div class="empty-orders">
+        <i class="fas fa-check-circle"></i>
+        <h3>Нет заказов на печать</h3>
+        <p>Все заказы выполнены или в работе</p>
+      </div>
+    `;
+    return;
+  }
+  
+  let html = '';
+  
+  orders.forEach(order => {
+    const progress = order.reserve > 0 ? Math.floor((order.inPrint / order.reserve) * 100) : 0;
+    
+    html += `
+      <div class="order-card ${order.need >= 10 ? 'urgent' : ''}">
+        <div class="order-header">
+          <div class="order-name">${order.name}</div>
+          <div class="order-id">${order.id}</div>
+        </div>
+        
+        <div class="order-body">
+          <div class="order-stats">
+            <div class="stat-item">
+              <div class="stat-label">Резерв</div>
+              <div class="stat-value reserve">${order.reserve}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">В печати</div>
+              <div class="stat-value in-print">${order.inPrint}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Надо поставить</div>
+              <div class="stat-value need">${order.need}</div>
+            </div>
+          </div>
+          
+          <div class="order-progress">
+            <div class="order-progress-bar" style="width: ${progress}%"></div>
+          </div>
+          <div style="text-align: center; font-size: 12px; color: #888; margin-top: 5px;">
+            Готово: ${progress}%
+          </div>
+        </div>
+        
+        <div class="order-actions">
+          <button class="action-btn assign-btn" onclick="openAssignModal('${order.id}')">
+            <i class="fas fa-print"></i> Поставить в печать
+          </button>
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+}
+
+function updateStats(orders) {
+  const totalOrders = orders.length;
+  const totalNeed = orders.reduce((sum, order) => sum + order.need, 0);
+  
+  document.getElementById('stats-summary').innerHTML = `
+    Заказов: ${totalOrders} | Надо поставить: ${totalNeed}
+  `;
+}
+
+// ===== МОДАЛЬНОЕ ОКНО ДЛЯ НАЗНАЧЕНИЯ =====
+
+function openAssignModal(orderId) {
+  selectedOrder = allOrders.find(order => order.id === orderId);
+  selectedPrinters = [];
+  
+  if (!selectedOrder) return;
+  
+  document.getElementById('modal-title').textContent = `Назначить: ${selectedOrder.name}`;
+  document.getElementById('print-quantity').value = Math.min(selectedOrder.need, 1);
+  document.getElementById('print-quantity').max = selectedOrder.need;
+  
+  // Загружаем список доступных принтеров
+  renderPrinterSelection();
+  
+  document.getElementById('assign-modal').style.display = 'flex';
+}
+
+function closeAssignModal() {
+  document.getElementById('assign-modal').style.display = 'none';
+  selectedOrder = null;
+  selectedPrinters = [];
+}
+
+function renderPrinterSelection() {
+  const printers = getPrinters();
+  const container = document.getElementById('printer-selection');
+  
+  let html = '';
+  
+  // Свободные принтеры
+  const freePrinters = printers.filter(p => p.status === 'idle');
+  const busyPrinters = printers.filter(p => p.status !== 'idle');
+  
+  if (freePrinters.length === 0) {
+    html += `
+      <div style="text-align: center; padding: 20px; color: #888;">
+        <i class="fas fa-print" style="font-size: 32px; margin-bottom: 10px;"></i>
+        <p>Нет свободных принтеров</p>
+      </div>
+    `;
+  } else {
+    freePrinters.forEach(printer => {
+      const isSelected = selectedPrinters.includes(printer.id);
+      
+      html += `
+        <div class="printer-option ${isSelected ? 'selected' : ''}" 
+             onclick="togglePrinterSelection('${printer.id}')">
+          <div class="printer-color" style="background: ${printer.color || 'gray'}"></div>
+          <div class="printer-info">
+            <div class="printer-name">${printer.name}</div>
+            <div class="printer-status">Свободен • ${printer.model}</div>
+          </div>
+          <i class="fas fa-check" style="color: #4caf50; ${!isSelected ? 'display: none;' : ''}"></i>
+        </div>
+      `;
+    });
+  }
+  
+  // Занятые принтеры (только для информации)
+  if (busyPrinters.length > 0) {
+    html += `
+      <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #444;">
+        <div style="font-size: 12px; color: #888; margin-bottom: 10px;">Занятые принтеры:</div>
+    `;
+    
+    busyPrinters.forEach(printer => {
+      const statusText = getPrinterStatusText(printer.status);
+      
+      html += `
+        <div class="printer-option" style="opacity: 0.5; cursor: not-allowed;">
+          <div class="printer-color" style="background: ${printer.color || 'gray'}"></div>
+          <div class="printer-info">
+            <div class="printer-name">${printer.name}</div>
+            <div class="printer-status">${statusText} • ${printer.printName || printer.model}</div>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += `</div>`;
+  }
+  
+  container.innerHTML = html;
+}
+
+function getPrinterStatusText(status) {
+  const statusMap = {
+    'idle': 'Свободен',
+    'printing': 'Печатает',
+    'stopped': 'Остановлен',
+    'finished': 'Готово',
+    'repair': 'Ремонт'
+  };
+  return statusMap[status] || status;
+}
+
+function togglePrinterSelection(printerId) {
+  const index = selectedPrinters.indexOf(printerId);
+  
+  if (index === -1) {
+    selectedPrinters.push(printerId);
+  } else {
+    selectedPrinters.splice(index, 1);
+  }
+  
+  renderPrinterSelection();
+}
+
+function changeQuantity(delta) {
+  const input = document.getElementById('print-quantity');
+  let value = parseInt(input.value) || 1;
+  const max = parseInt(input.max) || selectedOrder.need;
+  
+  value += delta;
+  if (value < 1) value = 1;
+  if (value > max) value = max;
+  
+  input.value = value;
+}
+
+// ===== НАЗНАЧЕНИЕ НА ПЕЧАТЬ =====
+
+function confirmAssignment() {
+  if (!selectedOrder) return;
+  
+  const quantity = parseInt(document.getElementById('print-quantity').value) || 1;
+  
+  if (selectedPrinters.length === 0) {
+    showNotification('Выберите хотя бы один принтер');
+    return;
+  }
+  
+  if (quantity > selectedOrder.need) {
+    showNotification(`Максимум можно поставить: ${selectedOrder.need}`);
+    return;
+  }
+  
+  // Здесь будет логика назначения на принтеры
+  // Пока просто показываем уведомление
+  showNotification(`Назначено: ${selectedOrder.name} ×${quantity} на ${selectedPrinters.length} принтер(ов)`);
+  
+  // Закрываем модальное окно
+  closeAssignModal();
+  
+  // Обновляем список заказов
+  setTimeout(() => {
+    loadOrders();
+  }, 1000);
+}
+
+// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.textContent = message;
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease-out';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        document.body.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
+}
+
+// ===== ИНИЦИАЛИЗАЦИЯ =====
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Загружаем заказы при загрузке страницы
+  loadOrders();
+  
+  // Автообновление каждые 2 минуты
+  setInterval(loadOrders, 2 * 60 * 1000);
+  
+  // Закрытие модального окна при клике на фон
+  document.getElementById('assign-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeAssignModal();
+    }
+  });
+});
+
+// Глобальные функции
+window.loadOrders = loadOrders;
+window.openAssignModal = openAssignModal;
+window.closeAssignModal = closeAssignModal;
+window.togglePrinterSelection = togglePrinterSelection;
+window.changeQuantity = changeQuantity;
+window.confirmAssignment = confirmAssignment;
+</script>
+
+<!-- Иконки FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Добавляем анимацию slideOut -->
+<style>
+@keyframes slideOut {
+  from { transform: translateX(-50%) translateY(0); opacity: 1; }
+  to { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+}
+</style>
+
+</body>
+</html>

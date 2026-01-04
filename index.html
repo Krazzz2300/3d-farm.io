@@ -226,6 +226,7 @@ body {
   padding: 8px 0;
   transition: color 0.2s;
   font-size: 12px;
+  cursor: pointer;
 }
 
 .nav-item.active {
@@ -591,6 +592,195 @@ body {
   display: none !important;
 }
 
+/* ===== СТИЛИ ДЛЯ ВКЛАДКИ "ПЛАН ПЕЧАТИ" ===== */
+.plan-container {
+  padding: 15px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-bottom: 80px;
+}
+
+.plan-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  border: 1px solid #444;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.stat-number.total { color: #2196f3; }
+.stat-number.today { color: #4caf50; }
+.stat-number.progress { color: #ff9800; }
+.stat-number.free { color: #9c27b0; }
+
+.stat-label {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.plan-section {
+  margin-bottom: 25px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title i {
+  color: #4caf50;
+}
+
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.order-item {
+  background: #2a2a2a;
+  border-radius: 10px;
+  padding: 12px;
+  border-left: 4px solid #2196f3;
+  animation: slideIn 0.3s ease-out;
+}
+
+.order-item.urgent {
+  border-left-color: #f44336;
+  background: rgba(244, 67, 54, 0.05);
+}
+
+.order-item.in-progress {
+  border-left-color: #4caf50;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.order-name {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.order-quantity {
+  background: #333;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.order-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 8px;
+}
+
+.order-progress-bar {
+  height: 6px;
+  background: #333;
+  border-radius: 3px;
+  margin: 8px 0;
+  overflow: hidden;
+}
+
+.order-progress-fill {
+  height: 100%;
+  background: #4caf50;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.order-status {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.order-assigned {
+  color: #2196f3;
+}
+
+.empty-plan {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+}
+
+.empty-plan i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.plan-actions {
+  position: fixed;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  background: #2a2a2a;
+  padding: 15px;
+  border-top: 1px solid #444;
+  z-index: 50;
+}
+
+.plan-actions-content {
+  display: flex;
+  gap: 10px;
+}
+
+.plan-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.plan-btn:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.plan-btn.primary {
+  background: #4caf50;
+  color: white;
+}
+
+.plan-btn.secondary {
+  background: #666;
+  color: white;
+}
+
 @media (min-width: 768px) {
   .printers-container {
     gap: 15px;
@@ -624,8 +814,21 @@ body {
     border-top: none;
   }
   
+  .plan-actions {
+    max-width: 500px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 0 0 20px 20px;
+    border: 1px solid #444;
+    border-top: none;
+  }
+  
   .modal {
     max-width: 400px;
+  }
+  
+  .plan-stats {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
@@ -652,10 +855,34 @@ body {
   </div>
 </div>
 
+<!-- Страница принтеров -->
 <div id="printers-page" class="page">
   <div class="printers-container" id="printers-container"></div>
 </div>
 
+<!-- Страница плана печати -->
+<div id="plan-page" class="page hidden">
+  <div class="plan-container" id="plan-container">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Загружаем план печати...</p>
+    </div>
+  </div>
+  
+  <!-- Панель действий -->
+  <div class="plan-actions">
+    <div class="plan-actions-content">
+      <button class="plan-btn primary" onclick="loadPlanData()">
+        <i class="fas fa-sync-alt"></i> Обновить
+      </button>
+      <button class="plan-btn secondary" onclick="openOrdersPage()">
+        <i class="fas fa-external-link-alt"></i> Все заказы
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Страница логов -->
 <div id="logs-page" class="page hidden">
   <div class="logs-container" id="logs-container"></div>
   
@@ -670,33 +897,39 @@ body {
   </div>
 </div>
 
+<!-- Нижняя навигация -->
 <div class="bottom-nav">
+  <!-- Принтеры -->
   <div class="nav-item active" onclick="showPage('printers')">
     <i class="fas fa-home nav-icon"></i>
     <span>Принтеры</span>
   </div>
   
+  <!-- План печати -->
+  <div class="nav-item" onclick="showPage('plan')">
+    <i class="fas fa-calendar-alt nav-icon"></i>
+    <span>План</span>
+  </div>
+  
+  <!-- Кнопка добавления принтера -->
   <div class="nav-item nav-add">
     <button class="add-nav-btn" onclick="showAddModal()">
       <i class="fas fa-plus"></i>
     </button>
   </div>
   
+  <!-- Логи -->
   <div class="nav-item" onclick="showPage('logs')">
     <i class="fas fa-history nav-icon"></i>
     <span>Логи</span>
   </div>
 </div>
 
-<!-- Модальное окно выбора модели принтера (ШАГ 1) -->
+<!-- Модальные окна (остаются как были) -->
 <div class="modal-bg" id="choose-model-modal">
   <div class="modal">
     <h3>Выберите модель принтера</h3>
-    
-    <div class="printer-list" id="printer-list">
-      <!-- Список принтеров будет добавлен через JavaScript -->
-    </div>
-    
+    <div class="printer-list" id="printer-list"></div>
     <div class="modal-buttons">
       <button class="cancel-btn" onclick="closeChooseModelModal()">Отмена</button>
       <button class="next-btn" onclick="goToNameStep()">Далее</button>
@@ -704,11 +937,9 @@ body {
   </div>
 </div>
 
-<!-- Модальное окно ввода названия (ШАГ 2) -->
 <div class="modal-bg" id="choose-name-modal">
   <div class="modal">
     <h3>Введите название принтера</h3>
-    
     <div id="selected-printer-info" style="background: #333; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
       <div class="printer-option-image" id="selected-printer-image">
         <i class="fas fa-print printer-icon"></i>
@@ -718,14 +949,11 @@ body {
         <div id="selected-printer-model" style="font-size: 16px; font-weight: bold;">Модель</div>
       </div>
     </div>
-    
     <label>Название принтера:</label>
     <input type="text" id="new-printer-name" placeholder="Например: Принтер 3" required>
-    
     <small style="color: #888; font-size: 12px; display: block; margin-top: 4px;">
       Это название будет отображаться на главном экране
     </small>
-    
     <div class="modal-buttons">
       <button class="back-btn" onclick="goBackToModelStep()">Назад</button>
       <button class="save-btn" onclick="addNewPrinter()">Добавить</button>
@@ -738,32 +966,23 @@ body {
 const STORAGE_KEY = '3d_printer_farm_data';
 const LOGS_STORAGE_KEY = 'printer_farm_logs';
 const MAX_LOGS = 50;
+const SHEET_ID = '12cvna-mOg3z9PofZ2tEPSwQjz7WOhkGnjQpYBnwTKoc';
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
 
-// Список популярных принтеров (у каждой модели СВОЁ фото)
+// Список популярных принтеров
 const POPULAR_PRINTERS = [
-  // Anycubic
   { brand: "Anycubic", model: "Cobra 2", image: "foto/anycubic_cobra2.jpg" },
-  
-  // Creality
   { brand: "Creality", model: "Ender 3", image: "foto/creality_ender3.jpg" },
   { brand: "Creality", model: "Ender 5", image: "foto/creality_ender5.jpg" },
   { brand: "Creality", model: "K1", image: "foto/creality_k1.jpg" },
-  
-  // Bambu Lab
   { brand: "Bambu Lab", model: "A1 Mini", image: "foto/bambulab_a1mini.jpg" },
   { brand: "Bambu Lab", model: "A1", image: "foto/bambulab_a1.jpg" },
   { brand: "Bambu Lab", model: "X1 Carbon", image: "foto/bambulab_x1carbon.jpg" },
-  
-  // Elegoo (исправлено с Anycubic на Elegoo)
   { brand: "Elegoo", model: "Neptune 3", image: "foto/elegoo_neptune3.jpg" },
   { brand: "Elegoo", model: "Neptune 4", image: "foto/elegoo_neptune4.jpg" },
-  
-  // Flashforge
   { brand: "Flashforge", model: "AD5X", image: "foto/flashforge_ad5x.jpg" },
   { brand: "Flashforge", model: "Adventurer 5M", image: "foto/flashforge_adventurer5m.jpg" },
   { brand: "Flashforge", model: "Adventurer 3", image: "foto/flashforge_adventurer3.jpg" },
-  
-  // Другие
   { brand: "Artillery", model: "Sidewinder X2", image: "foto/artillery_sidewinderx2.jpg" },
   { brand: "Sovol", model: "SV06", image: "foto/sovol_sv06.jpg" }
 ];
@@ -799,15 +1018,289 @@ const DEFAULT_PRINTERS = [
   }
 ];
 
-// Переменные для добавления принтера
+// Переменные
 let selectedPrinter = null;
-let currentStep = 'model'; // 'model' или 'name'
+let currentStep = 'model';
+let currentPage = 'printers';
+let lastUpdateTime = Date.now();
 
-// ===== СИСТЕМА ЛОГОВ =====
+// ===== ФУНКЦИИ ДЛЯ ВКЛАДКИ "ПЛАН ПЕЧАТИ" =====
 
+async function fetchOrdersFromSheet() {
+  try {
+    const response = await fetch(SHEET_URL);
+    const text = await response.text();
+    const jsonText = text.substring(47).slice(0, -2);
+    const data = JSON.parse(jsonText);
+    
+    const orders = [];
+    const rows = data.table.rows;
+    
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      const cells = row.c;
+      
+      if (cells && cells[1] && cells[5]) {
+        const name = cells[1].v;
+        const reserve = parseFloat(cells[5].v);
+        
+        if (name && !isNaN(reserve) && reserve > 0) {
+          orders.push({
+            id: `order-${i}`,
+            name: name.trim(),
+            reserve: Math.floor(reserve),
+            inPrint: 0,
+            need: 0
+          });
+        }
+      }
+    }
+    
+    return orders;
+  } catch (error) {
+    console.error('Ошибка при загрузке заказов:', error);
+    return [];
+  }
+}
+
+function calculateOrdersInPrint() {
+  const printers = getPrinters();
+  const ordersInPrint = {};
+  
+  printers.forEach(printer => {
+    if (printer.status === 'printing' && printer.printName) {
+      const match = printer.printName.match(/^(.+?)(?:\s*×\s*(\d+))?$/);
+      
+      if (match) {
+        const itemName = match[1].trim();
+        const quantity = match[2] ? parseInt(match[2]) : 1;
+        
+        if (!ordersInPrint[itemName]) {
+          ordersInPrint[itemName] = 0;
+        }
+        ordersInPrint[itemName] += quantity;
+      }
+    }
+  });
+  
+  return ordersInPrint;
+}
+
+async function loadPlanData() {
+  if (currentPage !== 'plan') return;
+  
+  const container = document.getElementById('plan-container');
+  container.innerHTML = `
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Загружаем план печати...</p>
+    </div>
+  `;
+  
+  try {
+    // Загружаем заказы из таблицы
+    const ordersFromSheet = await fetchOrdersFromSheet();
+    
+    // Считаем что уже в печати
+    const inPrintCounts = calculateOrdersInPrint();
+    
+    // Объединяем данные
+    const allOrders = ordersFromSheet.map(order => {
+      const inPrint = inPrintCounts[order.name] || 0;
+      const need = Math.max(0, order.reserve - inPrint);
+      
+      return {
+        ...order,
+        inPrint: inPrint,
+        need: need,
+        progress: order.reserve > 0 ? Math.floor((inPrint / order.reserve) * 100) : 0
+      };
+    });
+    
+    // Фильтруем и сортируем
+    const urgentOrders = allOrders.filter(o => o.need >= 10).sort((a, b) => b.need - a.need);
+    const regularOrders = allOrders.filter(o => o.need > 0 && o.need < 10).sort((a, b) => b.need - a.need);
+    const inProgressOrders = allOrders.filter(o => o.inPrint > 0).sort((a, b) => b.inPrint - a.inPrint);
+    
+    // Рендерим план
+    renderPlan(urgentOrders, regularOrders, inProgressOrders);
+    
+  } catch (error) {
+    console.error('Ошибка при загрузке плана:', error);
+    container.innerHTML = `
+      <div class="empty-plan">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3>Ошибка загрузки</h3>
+        <p>Не удалось загрузить план печати</p>
+        <button class="plan-btn primary" onclick="loadPlanData()" style="margin-top: 15px;">
+          <i class="fas fa-sync-alt"></i> Попробовать снова
+        </button>
+      </div>
+    `;
+  }
+}
+
+function renderPlan(urgentOrders, regularOrders, inProgressOrders) {
+  const container = document.getElementById('plan-container');
+  
+  // Статистика
+  const totalOrders = urgentOrders.length + regularOrders.length;
+  const totalNeed = [...urgentOrders, ...regularOrders].reduce((sum, o) => sum + o.need, 0);
+  const totalInProgress = inProgressOrders.reduce((sum, o) => sum + o.inPrint, 0);
+  const freePrinters = getPrinters().filter(p => p.status === 'idle').length;
+  
+  let html = `
+    <div class="plan-stats">
+      <div class="stat-card">
+        <div class="stat-label">Всего заказов</div>
+        <div class="stat-number total">${totalOrders}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Надо поставить</div>
+        <div class="stat-number today">${totalNeed}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">В печати сейчас</div>
+        <div class="stat-number progress">${totalInProgress}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Свободных принтеров</div>
+        <div class="stat-number free">${freePrinters}</div>
+      </div>
+    </div>
+  `;
+  
+  // Срочные заказы
+  if (urgentOrders.length > 0) {
+    html += `
+      <div class="plan-section">
+        <div class="section-title">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>СРОЧНЫЕ ЗАКАЗЫ</span>
+        </div>
+        <div class="order-list">
+    `;
+    
+    urgentOrders.forEach(order => {
+      html += `
+        <div class="order-item urgent">
+          <div class="order-header">
+            <div class="order-name">${order.name}</div>
+            <div class="order-quantity">${order.need} шт</div>
+          </div>
+          <div class="order-details">
+            <span>Резерв: ${order.reserve}</span>
+            <span>В печати: ${order.inPrint}</span>
+          </div>
+          <div class="order-progress-bar">
+            <div class="order-progress-fill" style="width: ${order.progress}%"></div>
+          </div>
+          <div class="order-status">
+            <span>Готово: ${order.progress}%</span>
+            <span class="order-assigned">Надо: ${order.need} шт</span>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += `</div></div>`;
+  }
+  
+  // Обычные заказы
+  if (regularOrders.length > 0) {
+    html += `
+      <div class="plan-section">
+        <div class="section-title">
+          <i class="fas fa-list-alt"></i>
+          <span>ОБЫЧНЫЕ ЗАКАЗЫ</span>
+        </div>
+        <div class="order-list">
+    `;
+    
+    regularOrders.forEach(order => {
+      html += `
+        <div class="order-item">
+          <div class="order-header">
+            <div class="order-name">${order.name}</div>
+            <div class="order-quantity">${order.need} шт</div>
+          </div>
+          <div class="order-details">
+            <span>Резерв: ${order.reserve}</span>
+            <span>В печати: ${order.inPrint}</span>
+          </div>
+          <div class="order-progress-bar">
+            <div class="order-progress-fill" style="width: ${order.progress}%"></div>
+          </div>
+          <div class="order-status">
+            <span>Готово: ${order.progress}%</span>
+            <span class="order-assigned">Надо: ${order.need} шт</span>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += `</div></div>`;
+  }
+  
+  // В работе
+  if (inProgressOrders.length > 0) {
+    html += `
+      <div class="plan-section">
+        <div class="section-title">
+          <i class="fas fa-print"></i>
+          <span>В ПЕЧАТИ СЕЙЧАС</span>
+        </div>
+        <div class="order-list">
+    `;
+    
+    inProgressOrders.forEach(order => {
+      html += `
+        <div class="order-item in-progress">
+          <div class="order-header">
+            <div class="order-name">${order.name}</div>
+            <div class="order-quantity">${order.inPrint} шт</div>
+          </div>
+          <div class="order-details">
+            <span>Резерв: ${order.reserve}</span>
+            <span>Осталось: ${order.need}</span>
+          </div>
+          <div class="order-progress-bar">
+            <div class="order-progress-fill" style="width: ${order.progress}%"></div>
+          </div>
+          <div class="order-status">
+            <span>Готово: ${order.progress}%</span>
+            <span class="order-assigned">В печати: ${order.inPrint} шт</span>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += `</div></div>`;
+  }
+  
+  // Если нет заказов
+  if (urgentOrders.length === 0 && regularOrders.length === 0 && inProgressOrders.length === 0) {
+    html += `
+      <div class="empty-plan">
+        <i class="fas fa-check-circle"></i>
+        <h3>Нет заказов на печать</h3>
+        <p>Все заказы выполнены или в работе</p>
+      </div>
+    `;
+  }
+  
+  container.innerHTML = html;
+}
+
+function openOrdersPage() {
+  window.open('orders.html', '_blank');
+}
+
+// ===== СТАРЫЕ ФУНКЦИИ (оставляем как есть) =====
+
+// Функции для логов
 function addLog(message, type = 'info') {
   const logs = getLogs();
-  
   const logEntry = {
     id: Date.now(),
     timestamp: new Date().toLocaleTimeString(),
@@ -817,17 +1310,10 @@ function addLog(message, type = 'info') {
   };
   
   logs.unshift(logEntry);
-  
-  if (logs.length > MAX_LOGS) {
-    logs.pop();
-  }
-  
+  if (logs.length > MAX_LOGS) logs.pop();
   localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(logs));
   
-  if (currentPage === 'logs') {
-    loadLogs();
-  }
-  
+  if (currentPage === 'logs') loadLogs();
   return logEntry;
 }
 
@@ -836,7 +1322,6 @@ function getLogs() {
     const logsJSON = localStorage.getItem(LOGS_STORAGE_KEY);
     return logsJSON ? JSON.parse(logsJSON) : [];
   } catch (error) {
-    console.error("Ошибка при чтении логов:", error);
     return [];
   }
 }
@@ -849,25 +1334,19 @@ function clearLogs() {
   }
 }
 
-// ===== ФУНКЦИИ ДЛЯ РАБОТЫ С ДАННЫМИ =====
-
+// Функции для работы с данными
 function getPrinters() {
   try {
     const savedData = localStorage.getItem(STORAGE_KEY);
-    
     if (!savedData) {
       savePrinters(DEFAULT_PRINTERS);
-      
       DEFAULT_PRINTERS.forEach(printer => {
         addLog(`Создан принтер: ${printer.name} (${printer.model})`, 'info');
       });
-      
       return DEFAULT_PRINTERS;
     }
-    
     return JSON.parse(savedData);
   } catch (error) {
-    console.error("Ошибка при чтении данных:", error);
     return DEFAULT_PRINTERS;
   }
 }
@@ -877,14 +1356,12 @@ function savePrinters(printers) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(printers));
     return true;
   } catch (error) {
-    console.error("Ошибка при сохранении:", error);
     return false;
   }
 }
 
 function addPrinter(name, model, image = "", brand = "") {
   const printers = getPrinters();
-  
   let maxId = 0;
   printers.forEach(printer => {
     const idNum = parseInt(printer.id.replace('printer', ''));
@@ -922,18 +1399,15 @@ function addPrinter(name, model, image = "", brand = "") {
 function getNotificationCount() {
   const printers = getPrinters();
   let count = 0;
-  
   printers.forEach(printer => {
     if (printer.status === 'finished' && printer.finishedNotified === false) {
       count++;
     }
   });
-  
   return count;
 }
 
-// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
-
+// Вспомогательные функции
 function getStatusText(status) {
   const statusMap = {
     'idle': 'Простаивает',
@@ -967,27 +1441,32 @@ function getProgressColor(status) {
   return colorMap[status] || '#444';
 }
 
-// ===== ОТОБРАЖЕНИЕ ПРИНТЕРОВ =====
-
-let currentPage = 'printers';
-let lastUpdateTime = Date.now();
-
+// Отображение принтеров
 function showPage(page) {
+  // Скрываем все страницы
   document.getElementById('printers-page').classList.add('hidden');
+  document.getElementById('plan-page').classList.add('hidden');
   document.getElementById('logs-page').classList.add('hidden');
   
+  // Снимаем активный класс со всех кнопок
   document.querySelectorAll('.nav-item').forEach(item => {
     item.classList.remove('active');
   });
   
+  // Показываем выбранную страницу
   document.getElementById(page + '-page').classList.remove('hidden');
   
+  // Устанавливаем активный класс на кнопку
   if (page === 'printers') {
     document.querySelectorAll('.nav-item')[0].classList.add('active');
     document.getElementById('page-title').textContent = 'Ферма принтеров';
     renderPrinters();
+  } else if (page === 'plan') {
+    document.querySelectorAll('.nav-item')[1].classList.add('active');
+    document.getElementById('page-title').textContent = 'План печати';
+    loadPlanData();
   } else if (page === 'logs') {
-    document.querySelectorAll('.nav-item')[2].classList.add('active');
+    document.querySelectorAll('.nav-item')[3].classList.add('active');
     document.getElementById('page-title').textContent = 'История действий';
     loadLogs();
   }
@@ -995,7 +1474,6 @@ function showPage(page) {
   currentPage = page;
 }
 
-// ФУНКЦИЯ ОБНОВЛЕНИЯ СТАТУСОВ
 function updatePrintersStatus() {
   const printers = getPrinters();
   const now = Date.now();
@@ -1015,23 +1493,17 @@ function updatePrintersStatus() {
         printer.status = 'finished';
         printer.finishedNotified = false;
         updated = true;
-        
         addLog(`Принтер "${printer.name}" завершил печать: ${printer.printName}`, 'info');
       }
     }
   });
   
-  if (updated) {
-    savePrinters(printers);
-  }
-  
+  if (updated) savePrinters(printers);
   return updated;
 }
 
 function renderPrinters() {
-  // Всегда обновляем статусы перед отрисовкой
   updatePrintersStatus();
-  
   const printers = getPrinters();
   const container = document.getElementById('printers-container');
   
@@ -1093,14 +1565,12 @@ function renderPrinters() {
   lastUpdateTime = Date.now();
 }
 
-// ===== ОТОБРАЖЕНИЕ ЛОГОВ =====
-
+// Отображение логов
 function loadLogs() {
   const logs = getLogs();
   const container = document.getElementById('logs-container');
   const statsContainer = document.getElementById('logs-stats');
   
-  // Обновляем статистику
   if (statsContainer) {
     const totalLogs = logs.length;
     const infoLogs = logs.filter(log => log.type === 'info').length;
@@ -1144,11 +1614,7 @@ function loadLogs() {
   });
   
   container.innerHTML = html;
-  
-  // Автопрокрутка к началу (самые новые сверху)
-  setTimeout(() => {
-    container.scrollTop = 0;
-  }, 100);
+  setTimeout(() => { container.scrollTop = 0; }, 100);
 }
 
 function getLogIcon(type) {
@@ -1180,16 +1646,11 @@ function updateNotificationBadge() {
   badge.style.display = count > 0 ? 'flex' : 'none';
 }
 
-// ===== ДОБАВЛЕНИЕ ПРИНТЕРА (ДВУХЭТАПНОЕ) =====
-
+// Добавление принтера
 function showAddModal() {
   selectedPrinter = null;
   currentStep = 'model';
-  
-  // Создаем список принтеров
   createPrinterList();
-  
-  // Показываем первый шаг
   document.getElementById('choose-model-modal').style.display = 'flex';
   document.getElementById('choose-name-modal').style.display = 'none';
 }
@@ -1221,15 +1682,10 @@ function createPrinterList() {
     `;
     
     option.onclick = function() {
-      // Снимаем выделение со всех
       document.querySelectorAll('.printer-option').forEach(el => {
         el.classList.remove('selected');
       });
-      
-      // Выделяем выбранный
       this.classList.add('selected');
-      
-      // Сохраняем выбранный принтер
       selectedPrinter = {
         brand: this.dataset.brand,
         model: this.dataset.model,
@@ -1247,28 +1703,23 @@ function goToNameStep() {
     return;
   }
   
-  // Обновляем информацию о выбранном принтере
   document.getElementById('selected-printer-brand').textContent = selectedPrinter.brand;
   document.getElementById('selected-printer-model').textContent = selectedPrinter.model;
   
-  // Обновляем изображение
   const imageContainer = document.getElementById('selected-printer-image');
   imageContainer.innerHTML = `<img src="${selectedPrinter.image}" alt="${selectedPrinter.brand}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-print printer-icon\\'></i>'">`;
   
-  // Генерируем предложение для названия
   const printerCount = getPrinters().length;
   document.getElementById('new-printer-name').value = `${selectedPrinter.brand} ${printerCount + 1}`;
   document.getElementById('new-printer-name').focus();
   document.getElementById('new-printer-name').select();
   
-  // Переходим ко второму шагу
   document.getElementById('choose-model-modal').style.display = 'none';
   document.getElementById('choose-name-modal').style.display = 'flex';
   currentStep = 'name';
 }
 
 function goBackToModelStep() {
-  // Возвращаемся к первому шагу
   document.getElementById('choose-name-modal').style.display = 'none';
   document.getElementById('choose-model-modal').style.display = 'flex';
   currentStep = 'model';
@@ -1290,10 +1741,8 @@ function addNewPrinter() {
   const newPrinter = addPrinter(name, `${selectedPrinter.brand} ${selectedPrinter.model}`, selectedPrinter.image, selectedPrinter.brand);
   
   if (newPrinter) {
-    // Закрываем все модальные окна
     document.getElementById('choose-name-modal').style.display = 'none';
     selectedPrinter = null;
-    
     renderPrinters();
     showNotification(`Принтер "${name}" добавлен!`);
   } else {
@@ -1301,8 +1750,7 @@ function addNewPrinter() {
   }
 }
 
-// ===== УВЕДОМЛЕНИЯ =====
-
+// Уведомления
 function showNotification(message) {
   const notification = document.createElement('div');
   notification.className = 'notification';
@@ -1321,8 +1769,7 @@ function showNotification(message) {
   }, 3000);
 }
 
-// ===== ОБРАБОТЧИКИ СОБЫТИЙ =====
-
+// Обработчики событий
 function openPrinter(printerId) {
   const printers = getPrinters();
   const printer = printers.find(p => p.id === printerId);
@@ -1337,53 +1784,48 @@ function openPrinter(printerId) {
   window.location.href = `printer.html?id=${printerId}`;
 }
 
-// ===== ИНИЦИАЛИЗАЦИЯ =====
-
+// Инициализация
 document.addEventListener('DOMContentLoaded', function() {
   renderPrinters();
   
-  // Назначаем обработчики
+  // Назначаем обработчики навигации
   document.querySelectorAll('.nav-item').forEach((item, index) => {
-    if (index !== 1) { // Пропускаем среднюю кнопку (+)
+    if (index !== 2) { // Пропускаем среднюю кнопку (+)
       item.addEventListener('click', function() {
-        const page = index === 0 ? 'printers' : 'logs';
-        showPage(page);
+        const pages = ['printers', 'plan', 'logs'];
+        const pageIndex = index > 2 ? 2 : (index > 1 ? 1 : 0);
+        showPage(pages[pageIndex]);
       });
     }
   });
   
-  // Закрытие модальных окон при клике на фон
+  // Закрытие модальных окон
   document.getElementById('choose-model-modal').addEventListener('click', function(e) {
-    if (e.target === this) {
-      closeChooseModelModal();
-    }
+    if (e.target === this) closeChooseModelModal();
   });
   
   document.getElementById('choose-name-modal').addEventListener('click', function(e) {
-    if (e.target === this) {
-      // Закрываем только если это второй шаг
-      if (currentStep === 'name') {
-        document.getElementById('choose-name-modal').style.display = 'none';
-        selectedPrinter = null;
-      }
+    if (e.target === this && currentStep === 'name') {
+      document.getElementById('choose-name-modal').style.display = 'none';
+      selectedPrinter = null;
     }
   });
   
-  // Автообновление каждую секунду
+  // Автообновление
   setInterval(() => {
     if (currentPage === 'printers') {
       renderPrinters();
+    } else if (currentPage === 'plan') {
+      loadPlanData();
     }
   }, 1000);
   
-  // Обновляем при возвращении на страницу
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden && currentPage === 'printers') {
       renderPrinters();
     }
   });
   
-  // Обновляем при фокусе на страницу
   window.addEventListener('focus', function() {
     if (currentPage === 'printers') {
       renderPrinters();
@@ -1398,6 +1840,8 @@ window.addNewPrinter = addNewPrinter;
 window.openPrinter = openPrinter;
 window.showPage = showPage;
 window.clearLogs = clearLogs;
+window.loadPlanData = loadPlanData;
+window.openOrdersPage = openOrdersPage;
 </script>
 
 </body>
