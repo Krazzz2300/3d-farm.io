@@ -6,13 +6,13 @@
 <title>Принтер</title>
 <style>
 body{margin:0;background:#1e1e1e;color:#fff;font-family:Arial,sans-serif;opacity:0;transform:translateX(40px);animation:pageEnter 0.25s forwards ease-out;}
-@keyframes pageEnter{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);} }
-@keyframes pageExit{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(40px);} }
+@keyframes pageEnter{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
+@keyframes pageExit{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(40px);}}
 
 .header{display:flex;align-items:center;gap:16px;padding:16px;}
 .back-btn{background:#2e2e2e;color:#fff;border:none;border-radius:12px;padding:20px;font-size:18px;font-weight:bold;cursor:pointer;}
 .back-btn:active{transform:scale(0.95);}
-.title{font-size:32px;font-weight:bold;display:flex;align-items:center;gap:8px;}
+.title{font-size:32px;font-weight:bold;}
 
 .top-block{display:flex;gap:16px;padding:0 16px;}
 .photo-block{width:50%;}
@@ -27,7 +27,13 @@ body{margin:0;background:#1e1e1e;color:#fff;font-family:Arial,sans-serif;opacity
 .status-value{font-size:22px;padding-left:12px;}
 .progress{margin-top:16px;height:18px;background:#444;border-radius:9px;overflow:hidden;}
 .progress-bar{height:100%;width:0%;background:#4caf50;transition:width 0.3s;}
-@keyframes pulse{0%{background-color:#4caf50;}50%{background-color:#00ff00;}100%{background-color:#4caf50;}}
+.progress-bar.completed{animation: greenPulse 1s infinite;}
+
+@keyframes greenPulse{
+  0% { background-color: #4caf50; }
+  50% { background-color: #7CFC00; }
+  100% { background-color: #4caf50; }
+}
 
 .color-block{margin:0 16px 24px;background:#2a2a2a;border-radius:7px;padding:20px;display:flex;align-items:center;gap:16px;font-size:22px;}
 .color-circle{width:32px;height:32px;border-radius:50%;background:red;}
@@ -38,27 +44,28 @@ button#start{background:#4caf50;color:#fff;}
 button#stop{background:#f44336;color:#fff;}
 button.disabled{opacity:0.5;cursor:default;}
 
-.modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:none;justify-content:center;align-items:center;z-index:10;}
-.modal{background:#2a2a2a;padding:24px;border-radius:10px;width:90%;max-width:400px;}
+.modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:none;justify-content:center;align-items:center;}
+.modal{background:#2a2a2a;padding:24px;border-radius:10px;width:90%;max-width:400px;text-align:center;}
 .modal label{display:block;margin:12px 0 4px;}
 .modal input{width:100%;padding:8px;font-size:18px;border-radius:6px;border:none;}
 .color-options{display:grid;grid-template-columns:3fr 3fr 3fr;gap:12px;margin-top:12px;}
 .color-option{width:36px;height:36px;border-radius:50%;cursor:pointer;border:2px solid #2a2a2a;}
 .color-option.selected{border:3px solid #fff;}
-.modal-buttons{display:flex;justify-content:space-between;margin-top:16px;}
-.modal-buttons button{flex:1;margin:0 4px;padding:12px;font-size:18px;border-radius:7px;border:none;font-weight:bold;}
+.modal-buttons{display:flex;justify-content:center;margin-top:24px;gap:12px;}
+.modal-buttons button{flex:1;padding:20px;font-size:20px;border-radius:12px;border:none;font-weight:bold;cursor:pointer;}
 .modal-buttons button.cancel{background:#f44336;color:#fff;}
 .modal-buttons button.ok{background:#4caf50;color:#fff;}
 
-#finished-popup {display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:20;}
-#finished-popup .modal {text-align:center;}
+/* уведомление о завершении */
+.complete-modal .modal{max-width:300px;}
+.complete-modal .modal button.ok{background:#4caf50;color:#fff;width:100%;}
 </style>
 </head>
 <body>
 
 <div class="header">
   <button class="back-btn" onclick="goBack()">←</button>
-  <div class="title">Принтер 1</div>
+  <div class="title" id="printer-title">Принтер 1</div>
 </div>
 
 <div class="top-block">
@@ -81,6 +88,10 @@ button.disabled{opacity:0.5;cursor:default;}
     <div class="status-value" id="print-name">—</div>
   </div>
   <div class="status-row">
+    <div class="status-label">Модель</div>
+    <div class="status-value" id="print-model">—</div>
+  </div>
+  <div class="status-row">
     <div class="status-label">Готово</div>
     <div class="status-value" id="progress-text">0%</div>
   </div>
@@ -99,10 +110,10 @@ button.disabled{opacity:0.5;cursor:default;}
   <button id="stop" class="control-btn disabled">Остановить печать</button>
 </div>
 
-<!-- Модалка для установки печати -->
+<!-- Модальное окно для создания новой печати -->
 <div class="modal-bg" id="modal">
   <div class="modal">
-    <label>Модель/Название печати:</label>
+    <label>Название печати:</label>
     <input type="text" id="modal-model" placeholder="Корпус">
     <label>Время печати (секунды):</label>
     <input type="number" id="modal-time" placeholder="60">
@@ -125,28 +136,30 @@ button.disabled{opacity:0.5;cursor:default;}
   </div>
 </div>
 
-<!-- Попап завершения печати -->
-<div id="finished-popup" class="modal-bg">
+<!-- Модальное окно о завершении печати -->
+<div class="modal-bg complete-modal" id="completeModal">
   <div class="modal">
-    <h2>Печать завершена</h2>
-    <button onclick="ackFinish()">Окей</button>
+    <div style="font-size:20px;margin-bottom:16px;">Печать завершена!</div>
+    <button class="ok" onclick="confirmComplete()">Окей</button>
   </div>
 </div>
 
 <script>
 const statusText = document.getElementById("status-text");
 const printNameText = document.getElementById("print-name");
+const printModelText = document.getElementById("print-model");
 const progressText = document.getElementById("progress-text");
 const progressBar = document.getElementById("progress-bar");
 const startBtn = document.getElementById("start");
 const stopBtn = document.getElementById("stop");
 const modal = document.getElementById("modal");
+const completeModal = document.getElementById("completeModal");
 const colorCircle = document.getElementById("color-circle");
 const colorOptions = document.getElementById("color-options").children;
-const finishedPopup = document.getElementById("finished-popup");
 
 let selectedColor = "red";
 
+// ===== localStorage =====
 function getPrinterData(){
   return {
     status: localStorage.getItem("printerStatus") || "idle",
@@ -155,7 +168,7 @@ function getPrinterData(){
     startTime: parseInt(localStorage.getItem("printerStartTime")) || 0,
     savedPercent: parseInt(localStorage.getItem("printerSavedPercent")) || 0,
     color: localStorage.getItem("printerColor") || "red",
-    finishedNotified: localStorage.getItem("printerFinishedNotified") === "true"
+    completedNotified: localStorage.getItem("printerCompletedNotified")==="true"
   };
 }
 
@@ -166,9 +179,10 @@ function savePrinterData(printer){
   localStorage.setItem("printerStartTime", printer.startTime);
   localStorage.setItem("printerSavedPercent", printer.savedPercent);
   localStorage.setItem("printerColor", printer.color);
-  localStorage.setItem("printerFinishedNotified", printer.finishedNotified);
+  localStorage.setItem("printerCompletedNotified", printer.completedNotified);
 }
 
+// ===== UI =====
 function updateUI(){
   let printer = getPrinterData();
   const now = Date.now();
@@ -177,47 +191,38 @@ function updateUI(){
   if(printer.status==="printing"){
     elapsed = Math.floor((now - printer.startTime)/1000);
     if(elapsed >= printer.totalSeconds){
-      printer.status="finished";
-      printer.savedPercent=100;
-      printer.finishedNotified=false;
-      savePrinterData(printer);
+      printer.status="completed";
+      printer.completedNotified=false;
+      elapsed = printer.totalSeconds;
+      printer.savedPercent = 100;
     }
   } else if(printer.status==="stopped"){
     elapsed = Math.floor(printer.totalSeconds * printer.savedPercent / 100);
+  } else if(printer.status==="completed"){
+    elapsed = printer.totalSeconds;
   }
 
   let percent = printer.totalSeconds ? Math.floor((elapsed/printer.totalSeconds)*100) : 0;
   if(printer.status==="stopped") percent = printer.savedPercent;
   else printer.savedPercent = percent;
 
-  statusText.textContent = printer.status==="idle"?"Простаивает":printer.status==="printing"?"Печать":"Готово";
-  printNameText.textContent = printer.status==="idle"?"—":printer.printName || "—";
+  statusText.textContent = printer.status==="idle"?"Простаивает":printer.status==="printing"?"Печать":printer.status==="stopped"?"Печать остановлена":"Готово";
+  printNameText.textContent = printer.printName || "—";
+  printModelText.textContent = printer.printName || "—";
   progressText.textContent = percent+"%";
 
-  if(printer.status==="stopped"){
-    statusText.style.color="orange";
-    progressBar.style.background="orange";
-    progressBar.style.animation="none";
-  } else if(printer.status==="finished"){
-    statusText.style.color="#4caf50";
-    progressBar.style.animation="pulse 1s infinite";
-    progressBar.style.background="#4caf50";
-    if(!printer.finishedNotified){
-      finishedPopup.style.display="flex";
-      printer.finishedNotified=true;
-      savePrinterData(printer);
-    }
+  progressBar.style.width = percent+"%";
+
+  if(printer.status==="completed"){
+    progressBar.classList.add("completed");
+    statusText.style.color="#7CFC00";
   } else {
-    statusText.style.color="#fff";
-    progressBar.style.background="#4caf50";
-    progressBar.style.animation="none";
+    progressBar.classList.remove("completed");
+    statusText.style.color = printer.status==="stopped"?"orange":"#fff";
+    progressBar.style.background = printer.status==="stopped"?"orange":"#4caf50";
   }
 
-  progressBar.style.width = percent+"%";
   colorCircle.style.background = printer.color;
-
-  startBtn.classList.toggle("disabled", printer.status==="printing");
-  stopBtn.classList.toggle("disabled", printer.status!=="printing");
 
   savePrinterData(printer);
 }
@@ -231,7 +236,7 @@ function closeModal(){modal.style.display="none";}
 
 for(let c of colorOptions){
   c.onclick=()=>{
-    selectedColor=c.dataset.color;
+    selectedColor = c.dataset.color;
     for(let cc of colorOptions) cc.classList.remove("selected");
     c.classList.add("selected");
   }
@@ -239,16 +244,16 @@ for(let c of colorOptions){
 
 function startPrint(){
   let printer = getPrinterData();
-  let name=document.getElementById("modal-model").value||"Корпус";
-  let time=parseInt(document.getElementById("modal-time").value)||60;
+  let name = document.getElementById("modal-model").value || "Корпус";
+  let time = parseInt(document.getElementById("modal-time").value) || 60;
 
   printer.printName=name;
   printer.totalSeconds=time;
   printer.startTime=Date.now();
   printer.status="printing";
   printer.savedPercent=0;
-  printer.color=selectedColor;
-  printer.finishedNotified=false;
+  printer.color = selectedColor;
+  printer.completedNotified=false;
 
   savePrinterData(printer);
   updateUI();
@@ -256,7 +261,7 @@ function startPrint(){
 }
 
 stopBtn.onclick=()=>{
-  let printer=getPrinterData();
+  let printer = getPrinterData();
   if(printer.status==="printing"){
     if(confirm("Точно остановить печать?")){
       const now = Date.now();
@@ -269,20 +274,26 @@ stopBtn.onclick=()=>{
   }
 }
 
-function ackFinish(){
+function goBack(){document.body.style.animation="pageExit 0.2s forwards ease-in"; setTimeout(()=>history.back(),200);}
+
+// ===== Подтверждение завершения печати =====
+setInterval(()=>{
+  let printer = getPrinterData();
+  if(printer.status==="completed" && !printer.completedNotified){
+    completeModal.style.display="flex";
+  }
+},500);
+
+function confirmComplete(){
   let printer = getPrinterData();
   printer.status="idle";
   printer.savedPercent=0;
+  printer.completedNotified=true;
   printer.printName="";
-  printer.finishedNotified=false;
   savePrinterData(printer);
-  finishedPopup.style.display="none";
+  completeModal.style.display="none";
   updateUI();
 }
-
-function goBack(){document.body.style.animation="pageExit 0.2s forwards ease-in"; setTimeout(()=>history.back(),200);}
 </script>
-
 </body>
 </html>
-
