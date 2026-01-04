@@ -1,23 +1,83 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>3D Farm</title>
-  <link rel="stylesheet" href="style.css?v=9">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ферма принтеров</title>
+<style>
+body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; }
+.container { display: flex; flex-wrap: wrap; gap:16px; padding:16px; justify-content: center; }
+.card {
+  background:#2a2a2a;
+  border-radius: 7px;
+  width:45%;
+  min-width:140px;
+  padding:12px;
+  cursor:pointer;
+  transition: transform 0.15s;
+}
+.card:active { transform: scale(0.97); }
+.card img { width:100%; border-radius:7px; object-fit:contain; }
+.card-title { font-size:20px; font-weight:bold; margin-top:8px; }
+.status-row { display:flex; justify-content: space-between; margin-top:8px; font-size:16px; }
+.progress { margin-top:8px; height:12px; background:#444; border-radius:6px; overflow:hidden; }
+.progress-bar { height:100%; width:0%; background:#4caf50; transition: width 0.3s; }
+</style>
 </head>
 <body>
 
-<div class="grid">
-
-  <a href="printer.html?id=1" class="printer-link">
-    <div class="printer">
-      <div class="number">Принтер №1</div>
-      <img src="foto/1.png">
-      <div class="status green">Печать • 42% • 3ч 20м</div>
+<div class="container">
+  <div class="card" onclick="openPrinter(1)">
+    <img src="foto/1.png" alt="Bambu Lab A1">
+    <div class="card-title">Принтер 1</div>
+    <div class="status-row">
+      <div>Готово:</div>
+      <div id="main-progress-1">0%</div>
     </div>
-  </a>
-
+    <div class="status-row">
+      <div>Осталось:</div>
+      <div id="main-time-1">0с</div>
+    </div>
+    <div class="progress">
+      <div id="main-bar-1" class="progress-bar"></div>
+    </div>
+  </div>
 </div>
+
+<script>
+// ===== ОБЪЕКТ ПРИНТЕРА =====
+let printer = {
+  id:1,
+  totalSeconds: 135,
+  elapsed: parseInt(localStorage.getItem("printer1Elapsed")) || 0
+};
+
+// ===== ОБНОВЛЕНИЕ КАРТОЧКИ =====
+function updateCard() {
+  let progressPercent = Math.floor((printer.elapsed / printer.totalSeconds) * 100);
+  document.getElementById("main-progress-1").textContent = progressPercent + "%";
+  let remaining = printer.totalSeconds - printer.elapsed;
+  document.getElementById("main-time-1").textContent = remaining + "с";
+  document.getElementById("main-bar-1").style.width = progressPercent + "%";
+}
+
+// ===== ТАЙМЕР =====
+setInterval(() => {
+  if(printer.elapsed < printer.totalSeconds){
+    printer.elapsed++;
+    localStorage.setItem("printer1Elapsed", printer.elapsed);
+    updateCard();
+  }
+}, 1000);
+
+// ===== Переход к странице принтера =====
+function openPrinter(id){
+  window.location.href = "printer.html";
+}
+
+// Инициализация
+updateCard();
+</script>
 
 </body>
 </html>
