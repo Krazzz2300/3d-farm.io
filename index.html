@@ -435,68 +435,81 @@ body {
   outline: none;
 }
 
-/* ГАЛЕРЕЯ ВЫБОРА ФОТО */
-.photo-gallery {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+/* СПИСОК ПРИНТЕРОВ */
+.printer-list {
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   margin: 15px 0;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
-.photo-option {
-  width: 100%;
-  aspect-ratio: 1;
+.printer-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #333;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: 2px solid transparent;
+}
+
+.printer-option:hover {
+  background: #3a3a3a;
+}
+
+.printer-option.selected {
+  border-color: #4caf50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.printer-option:active {
+  background: #444;
+}
+
+.printer-option-image {
+  width: 60px;
+  height: 60px;
   border-radius: 8px;
   overflow: hidden;
-  cursor: pointer;
-  border: 3px solid transparent;
-  transition: border-color 0.2s, transform 0.2s;
-  background: #1e1e1e;
-  position: relative;
+  flex-shrink: 0;
+  background: #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.photo-option.selected {
-  border-color: #4caf50;
-  transform: scale(0.95);
-}
-
-.photo-option:active {
-  transform: scale(0.9);
-}
-
-.photo-option img {
+.printer-option-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.photo-label {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0,0,0,0.7);
-  color: white;
-  font-size: 10px;
-  padding: 4px;
-  text-align: center;
+.printer-option-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.printer-option-brand {
+  font-size: 14px;
+  color: #aaa;
+  margin-bottom: 4px;
+}
+
+.printer-option-model {
+  font-size: 16px;
+  font-weight: bold;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.default-photo-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: #333;
-  color: #aaa;
-  font-size: 24px;
-}
-
-.default-photo-option .photo-label {
-  background: rgba(51,51,51,0.9);
+.printer-icon {
+  font-size: 28px;
+  color: #666;
 }
 
 .modal-buttons {
@@ -527,6 +540,16 @@ body {
 
 .save-btn { 
   background: #4caf50; 
+  color: white; 
+}
+
+.next-btn { 
+  background: #2196f3; 
+  color: white; 
+}
+
+.back-btn { 
+  background: #666; 
   color: white; 
 }
 
@@ -604,10 +627,6 @@ body {
   .modal {
     max-width: 400px;
   }
-  
-  .photo-gallery {
-    grid-template-columns: repeat(5, 1fr);
-  }
 }
 
 @media (min-width: 1024px) {
@@ -669,28 +688,46 @@ body {
   </div>
 </div>
 
-<div class="modal-bg" id="add-modal">
+<!-- Модальное окно выбора модели принтера (ШАГ 1) -->
+<div class="modal-bg" id="choose-model-modal">
   <div class="modal">
-    <h3>Добавить принтер</h3>
+    <h3>Выберите модель принтера</h3>
+    
+    <div class="printer-list" id="printer-list">
+      <!-- Список принтеров будет добавлен через JavaScript -->
+    </div>
+    
+    <div class="modal-buttons">
+      <button class="cancel-btn" onclick="closeChooseModelModal()">Отмена</button>
+      <button class="next-btn" onclick="goToNameStep()">Далее</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно ввода названия (ШАГ 2) -->
+<div class="modal-bg" id="choose-name-modal">
+  <div class="modal">
+    <h3>Введите название принтера</h3>
+    
+    <div id="selected-printer-info" style="background: #333; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+      <div class="printer-option-image" id="selected-printer-image">
+        <i class="fas fa-print printer-icon"></i>
+      </div>
+      <div>
+        <div id="selected-printer-brand" style="font-size: 14px; color: #aaa;">Бренд</div>
+        <div id="selected-printer-model" style="font-size: 16px; font-weight: bold;">Модель</div>
+      </div>
+    </div>
     
     <label>Название принтера:</label>
     <input type="text" id="new-printer-name" placeholder="Например: Принтер 3" required>
     
-    <label>Модель принтера:</label>
-    <input type="text" id="new-printer-model" placeholder="Например: Creality Ender 3 V2" required>
-    
-    <label>Выберите фото принтера:</label>
-    
-    <div class="photo-gallery" id="photo-gallery">
-      <!-- Фото будут добавлены через JavaScript -->
-    </div>
-    
     <small style="color: #888; font-size: 12px; display: block; margin-top: 4px;">
-      Выберите изображение для принтера
+      Это название будет отображаться на главном экране
     </small>
     
     <div class="modal-buttons">
-      <button class="cancel-btn" onclick="closeAddModal()">Отмена</button>
+      <button class="back-btn" onclick="goBackToModelStep()">Назад</button>
       <button class="save-btn" onclick="addNewPrinter()">Добавить</button>
     </div>
   </div>
@@ -702,14 +739,33 @@ const STORAGE_KEY = '3d_printer_farm_data';
 const LOGS_STORAGE_KEY = 'printer_farm_logs';
 const MAX_LOGS = 50;
 
-// Доступные фото принтеров
-const PRINTER_PHOTOS = [
-  { id: 'creality', name: 'Creality', url: 'foto/creality.jpg' },
-  { id: 'anycubic', name: 'Anycubic', url: 'foto/anycubic.jpg' },
-  { id: 'bambu', name: 'Bambu Lab', url: 'foto/bambu.jpg' },
-  { id: 'prusa', name: 'Prusa', url: 'foto/prusa.jpg' },
-  { id: 'elegoo', name: 'Elegoo', url: 'foto/elegoo.jpg' },
-  { id: 'default', name: 'Стандартное', url: 'foto/default.png' }
+// Список популярных принтеров (у каждой модели СВОЁ фото)
+const POPULAR_PRINTERS = [
+  // Anycubic
+  { brand: "Anycubic", model: "Cobra 2", image: "foto/anycubic_cobra2.jpg" },
+  
+  // Creality
+  { brand: "Creality", model: "Ender 3", image: "foto/creality_ender3.jpg" },
+  { brand: "Creality", model: "Ender 5", image: "foto/creality_ender5.jpg" },
+  { brand: "Creality", model: "K1", image: "foto/creality_k1.jpg" },
+  
+  // Bambu Lab
+  { brand: "Bambu Lab", model: "A1 Mini", image: "foto/bambulab_a1mini.jpg" },
+  { brand: "Bambu Lab", model: "A1", image: "foto/bambulab_a1.jpg" },
+  { brand: "Bambu Lab", model: "X1 Carbon", image: "foto/bambulab_x1carbon.jpg" },
+  
+  // Elegoo (исправлено с Anycubic на Elegoo)
+  { brand: "Elegoo", model: "Neptune 3", image: "foto/elegoo_neptune3.jpg" },
+  { brand: "Elegoo", model: "Neptune 4", image: "foto/elegoo_neptune4.jpg" },
+  
+  // Flashforge
+  { brand: "Flashforge", model: "AD5X", image: "foto/flashforge_ad5x.jpg" },
+  { brand: "Flashforge", model: "Adventurer 5M", image: "foto/flashforge_adventurer5m.jpg" },
+  { brand: "Flashforge", model: "Adventurer 3", image: "foto/flashforge_adventurer3.jpg" },
+  
+  // Другие
+  { brand: "Artillery", model: "Sidewinder X2", image: "foto/artillery_sidewinderx2.jpg" },
+  { brand: "Sovol", model: "SV06", image: "foto/sovol_sv06.jpg" }
 ];
 
 const DEFAULT_PRINTERS = [
@@ -721,7 +777,7 @@ const DEFAULT_PRINTERS = [
     color: "red",
     progress: 0,
     printName: "",
-    image: "foto/bambu.jpg",
+    image: "foto/bambulab_a1.jpg",
     startTime: null,
     printDuration: null,
     finishedNotified: false,
@@ -735,13 +791,17 @@ const DEFAULT_PRINTERS = [
     color: "blue",
     progress: 0,
     printName: "",
-    image: "foto/creality.jpg",
+    image: "foto/creality_ender3.jpg",
     startTime: null,
     printDuration: null,
     finishedNotified: false,
     problem: ""
   }
 ];
+
+// Переменные для добавления принтера
+let selectedPrinter = null;
+let currentStep = 'model'; // 'model' или 'name'
 
 // ===== СИСТЕМА ЛОГОВ =====
 
@@ -822,7 +882,7 @@ function savePrinters(printers) {
   }
 }
 
-function addPrinter(name, model, image = "") {
+function addPrinter(name, model, image = "", brand = "") {
   const printers = getPrinters();
   
   let maxId = 0;
@@ -911,7 +971,6 @@ function getProgressColor(status) {
 
 let currentPage = 'printers';
 let lastUpdateTime = Date.now();
-let selectedPhoto = 'foto/default.png';
 
 function showPage(page) {
   document.getElementById('printers-page').classList.add('hidden');
@@ -1121,76 +1180,120 @@ function updateNotificationBadge() {
   badge.style.display = count > 0 ? 'flex' : 'none';
 }
 
-// ===== УПРАВЛЕНИЕ МОДАЛЬНЫМ ОКНОМ С ФОТО =====
+// ===== ДОБАВЛЕНИЕ ПРИНТЕРА (ДВУХЭТАПНОЕ) =====
 
 function showAddModal() {
-  document.getElementById('add-modal').style.display = 'flex';
-  document.getElementById('new-printer-name').focus();
+  selectedPrinter = null;
+  currentStep = 'model';
   
-  // Сбрасываем выбранное фото
-  selectedPhoto = 'foto/default.png';
+  // Создаем список принтеров
+  createPrinterList();
   
-  // Создаем галерею фото
-  createPhotoGallery();
+  // Показываем первый шаг
+  document.getElementById('choose-model-modal').style.display = 'flex';
+  document.getElementById('choose-name-modal').style.display = 'none';
 }
 
-function createPhotoGallery() {
-  const gallery = document.getElementById('photo-gallery');
-  gallery.innerHTML = '';
+function closeChooseModelModal() {
+  document.getElementById('choose-model-modal').style.display = 'none';
+  selectedPrinter = null;
+}
+
+function createPrinterList() {
+  const list = document.getElementById('printer-list');
+  list.innerHTML = '';
   
-  PRINTER_PHOTOS.forEach(photo => {
-    const photoOption = document.createElement('div');
-    photoOption.className = `photo-option ${selectedPhoto === photo.url ? 'selected' : ''}`;
-    photoOption.dataset.photo = photo.url;
+  POPULAR_PRINTERS.forEach(printer => {
+    const option = document.createElement('div');
+    option.className = 'printer-option';
+    option.dataset.brand = printer.brand;
+    option.dataset.model = printer.model;
+    option.dataset.image = printer.image;
     
-    if (photo.id === 'default') {
-      photoOption.classList.add('default-photo-option');
-      photoOption.innerHTML = `
-        <i class="fas fa-print" style="font-size: 24px; margin-bottom: 8px;"></i>
-        <div class="photo-label">${photo.name}</div>
-      `;
-    } else {
-      photoOption.innerHTML = `
-        <img src="${photo.url}" alt="${photo.name}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-print\\' style=\\'font-size:24px;\\'></i><div class=\\'photo-label\\'>${photo.name}</div>'">
-        <div class="photo-label">${photo.name}</div>
-      `;
-    }
+    option.innerHTML = `
+      <div class="printer-option-image">
+        <img src="${printer.image}" alt="${printer.brand}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-print printer-icon\\'></i>'">
+      </div>
+      <div class="printer-option-info">
+        <div class="printer-option-brand">${printer.brand}</div>
+        <div class="printer-option-model">${printer.model}</div>
+      </div>
+    `;
     
-    photoOption.onclick = function() {
-      // Снимаем выделение со всех фото
-      document.querySelectorAll('.photo-option').forEach(el => {
+    option.onclick = function() {
+      // Снимаем выделение со всех
+      document.querySelectorAll('.printer-option').forEach(el => {
         el.classList.remove('selected');
       });
       
-      // Выделяем выбранное фото
+      // Выделяем выбранный
       this.classList.add('selected');
-      selectedPhoto = this.dataset.photo;
+      
+      // Сохраняем выбранный принтер
+      selectedPrinter = {
+        brand: this.dataset.brand,
+        model: this.dataset.model,
+        image: this.dataset.image
+      };
     };
     
-    gallery.appendChild(photoOption);
+    list.appendChild(option);
   });
 }
 
-function closeAddModal() {
-  document.getElementById('add-modal').style.display = 'none';
-  document.getElementById('new-printer-name').value = '';
-  document.getElementById('new-printer-model').value = '';
-  selectedPhoto = 'foto/default.png';
+function goToNameStep() {
+  if (!selectedPrinter) {
+    alert('Выберите модель принтера');
+    return;
+  }
+  
+  // Обновляем информацию о выбранном принтере
+  document.getElementById('selected-printer-brand').textContent = selectedPrinter.brand;
+  document.getElementById('selected-printer-model').textContent = selectedPrinter.model;
+  
+  // Обновляем изображение
+  const imageContainer = document.getElementById('selected-printer-image');
+  imageContainer.innerHTML = `<img src="${selectedPrinter.image}" alt="${selectedPrinter.brand}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-print printer-icon\\'></i>'">`;
+  
+  // Генерируем предложение для названия
+  const printerCount = getPrinters().length;
+  document.getElementById('new-printer-name').value = `${selectedPrinter.brand} ${printerCount + 1}`;
+  document.getElementById('new-printer-name').focus();
+  document.getElementById('new-printer-name').select();
+  
+  // Переходим ко второму шагу
+  document.getElementById('choose-model-modal').style.display = 'none';
+  document.getElementById('choose-name-modal').style.display = 'flex';
+  currentStep = 'name';
+}
+
+function goBackToModelStep() {
+  // Возвращаемся к первому шагу
+  document.getElementById('choose-name-modal').style.display = 'none';
+  document.getElementById('choose-model-modal').style.display = 'flex';
+  currentStep = 'model';
 }
 
 function addNewPrinter() {
   const name = document.getElementById('new-printer-name').value.trim();
-  const model = document.getElementById('new-printer-model').value.trim();
   
-  if (!name || !model) {
-    alert('Заполните название и модель принтера');
+  if (!name) {
+    alert('Введите название принтера');
     return;
   }
   
-  const newPrinter = addPrinter(name, model, selectedPhoto);
+  if (!selectedPrinter) {
+    alert('Ошибка: модель принтера не выбрана');
+    return;
+  }
+  
+  const newPrinter = addPrinter(name, `${selectedPrinter.brand} ${selectedPrinter.model}`, selectedPrinter.image, selectedPrinter.brand);
   
   if (newPrinter) {
-    closeAddModal();
+    // Закрываем все модальные окна
+    document.getElementById('choose-name-modal').style.display = 'none';
+    selectedPrinter = null;
+    
     renderPrinters();
     showNotification(`Принтер "${name}" добавлен!`);
   } else {
@@ -1249,10 +1352,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Модальное окно
-  document.getElementById('add-modal').addEventListener('click', function(e) {
+  // Закрытие модальных окон при клике на фон
+  document.getElementById('choose-model-modal').addEventListener('click', function(e) {
     if (e.target === this) {
-      closeAddModal();
+      closeChooseModelModal();
+    }
+  });
+  
+  document.getElementById('choose-name-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      // Закрываем только если это второй шаг
+      if (currentStep === 'name') {
+        document.getElementById('choose-name-modal').style.display = 'none';
+        selectedPrinter = null;
+      }
     }
   });
   
@@ -1280,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Глобальные функции
 window.showAddModal = showAddModal;
-window.closeAddModal = closeAddModal;
+window.closeAddModal = closeChooseModelModal;
 window.addNewPrinter = addNewPrinter;
 window.openPrinter = openPrinter;
 window.showPage = showPage;
