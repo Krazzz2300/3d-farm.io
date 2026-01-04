@@ -1,117 +1,127 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ферма принтеров</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Принтер</title>
 <style>
-body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; }
-.container { display: flex; flex-wrap: wrap; gap:64px; padding:32px; justify-content: center; }
-.card {
-  position: relative;
-  background:#2a2a2a;
-  border-radius: 7px;
-  width:45%;
-  min-width:140px;
-  padding:12px;
-  cursor:pointer;
-  transition: transform 0.15s;
+body{margin:0;background:#1e1e1e;color:#fff;font-family:Arial,sans-serif;}
+.header{display:flex;align-items:center;gap:16px;padding:16px;}
+.back-btn{background:#2e2e2e;color:#fff;border:none;border-radius:12px;padding:20px;font-size:18px;font-weight:bold;cursor:pointer;}
+.back-btn:active{transform:scale(0.95);}
+.title{font-size:32px;font-weight:bold;}
+.status-block{margin:24px 16px;background:#2a2a2a;border-radius:7px;padding:20px;}
+.status-row{display:grid;grid-template-columns:140px 1fr;align-items:center;margin-bottom:12px;}
+.status-label{background:#242424;border-radius:6px;padding:6px 10px;font-size:18px;opacity:0.85;}
+.status-value{font-size:22px;padding-left:12px;}
+.progress{margin-top:16px;height:18px;background:#444;border-radius:9px;overflow:hidden;}
+.progress-bar{height:100%;width:0%;background:#4caf50;transition:width 0.3s;}
+.progress-bar.completed{animation:greenPulse 1s infinite;}
+@keyframes greenPulse{
+  0%{background-color:#4caf50;}
+  50%{background-color:#7CFC00;}
+  100%{background-color:#4caf50;}
 }
-.card:active { transform: scale(0.97); }
-.card img { width:100%; border-radius:7px; object-fit:contain; }
-.card-title { font-size:20px; font-weight:bold; margin-top:8px; display:flex; align-items:center; gap:8px; }
-.color-indicator { width:16px; height:16px; border-radius:50%; background:red; }
-
-.status-row { display:flex; justify-content: space-between; margin-top:8px; font-size:16px; }
-.progress { margin-top:8px; height:18px; background:#444; border-radius:9px; overflow:hidden; }
-.progress-bar { height:100%; width:0%; background:#4caf50; transition: width 0.3s; }
-
-@keyframes greenPulse {
-  0% { background-color: #4caf50; }
-  50% { background-color: #7CFC00; }
-  100% { background-color: #4caf50; }
-}
-.progress-bar.completed { animation: greenPulse 1s infinite; }
-
-.notification {
-  position: absolute;
-  top:8px;
-  right:8px;
-  width:20px;
-  height:20px;
-  border-radius:50%;
-  background:red;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:14px;
-  font-weight:bold;
-  color:#fff;
-  display:none;
-}
+.control-block{display:flex;justify-content:space-between;margin:0 16px 24px;}
+button.control-btn{flex:1;margin:0 8px;padding:20px;font-size:20px;font-weight:bold;border:none;border-radius:12px;cursor:pointer;}
+button#start{background:#4caf50;color:#fff;}
+button#stop{background:#f44336;color:#fff;}
+button.disabled{opacity:0.5;cursor:default;}
+.modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:none;justify-content:center;align-items:center;}
+.modal{background:#2a2a2a;padding:24px;border-radius:10px;width:90%;max-width:400px;text-align:center;}
+.modal-buttons{display:flex;justify-content:center;margin-top:24px;gap:12px;}
+.modal-buttons button{flex:1;padding:20px;font-size:20px;border-radius:12px;border:none;font-weight:bold;cursor:pointer;}
+.modal-buttons button.ok{background:#4caf50;color:#fff;}
+.complete-modal .modal{max-width:300px;}
+.complete-modal .modal button.ok{background:#4caf50;color:#fff;width:100%;}
 </style>
 </head>
 <body>
 
-<div class="container" id="printer-container">
-  <div class="card" data-id="1" onclick="openPrinter(1)">
-    <img src="foto/1.png" alt="Bambu Lab A1">
-    <div class="card-title">
-      Принтер 1
-      <div class="color-indicator" id="main-color-1"></div>
-    </div>
-    <div class="status-row">
-      <div>Статус:</div>
-      <div id="main-status-1">Простаивает</div>
-    </div>
-    <div class="status-row">
-      <div>Модель:</div>
-      <div id="main-print-1">—</div>
-    </div>
-    <div class="progress">
-      <div id="main-bar-1" class="progress-bar"></div>
-    </div>
-    <div class="notification" id="notif-1">1</div>
+<div class="header">
+  <button class="back-btn" onclick="goBack()">←</button>
+  <div class="title" id="printer-title">Принтер</div>
+</div>
+
+<div class="status-block">
+  <div class="status-row">
+    <div class="status-label">Статус</div>
+    <div class="status-value" id="status-text">Простаивает</div>
+  </div>
+  <div class="status-row">
+    <div class="status-label">Модель</div>
+    <div class="status-value" id="print-name">—</div>
+  </div>
+  <div class="status-row">
+    <div class="status-label">Готово</div>
+    <div class="status-value" id="progress-text">0%</div>
+  </div>
+  <div class="progress">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+</div>
+
+<div class="control-block">
+  <button id="start" class="control-btn">Поставить в печать</button>
+  <button id="stop" class="control-btn disabled">Остановить печать</button>
+</div>
+
+<!-- Модальное окно завершения -->
+<div class="modal-bg complete-modal" id="completeModal">
+  <div class="modal">
+    <div style="font-size:20px;margin-bottom:16px;">Печать завершена!</div>
+    <button class="ok" onclick="confirmComplete()">Окей</button>
   </div>
 </div>
 
 <script>
-// ===== ПОЛУЧЕНИЕ ДАННЫХ ПРИНТЕРА =====
-function getPrinterData(id) {
+const urlParams = new URLSearchParams(window.location.search);
+const printerId = urlParams.get('id') || 1;
+
+const statusText = document.getElementById("status-text");
+const printNameText = document.getElementById("print-name");
+const progressText = document.getElementById("progress-text");
+const progressBar = document.getElementById("progress-bar");
+const startBtn = document.getElementById("start");
+const stopBtn = document.getElementById("stop");
+const completeModal = document.getElementById("completeModal");
+
+// ===== localStorage с учетом id =====
+function getPrinterData(){
   return {
-    status: localStorage.getItem(`printerStatus_${id}`) || "idle",
-    printName: localStorage.getItem(`printerPrintName_${id}`) || "",
-    totalSeconds: parseInt(localStorage.getItem(`printerTotalSeconds_${id}`)) || 0,
-    startTime: parseInt(localStorage.getItem(`printerStartTime_${id}`)) || 0,
-    savedPercent: parseInt(localStorage.getItem(`printerSavedPercent_${id}`)) || 0,
-    color: localStorage.getItem(`printerColor_${id}`) || "red",
-    completedNotified: localStorage.getItem(`printerCompletedNotified_${id}`) === "true"
+    status: localStorage.getItem(`printerStatus_${printerId}`) || "idle",
+    printName: localStorage.getItem(`printerPrintName_${printerId}`) || "",
+    totalSeconds: parseInt(localStorage.getItem(`printerTotalSeconds_${printerId}`)) || 0,
+    startTime: parseInt(localStorage.getItem(`printerStartTime_${printerId}`)) || 0,
+    savedPercent: parseInt(localStorage.getItem(`printerSavedPercent_${printerId}`)) || 0,
+    color: localStorage.getItem(`printerColor_${printerId}`) || "red",
+    completedNotified: localStorage.getItem(`printerCompletedNotified_${printerId}`)==="true"
   };
 }
 
-function savePrinterData(id, data){
-  localStorage.setItem(`printerStatus_${id}`, data.status);
-  localStorage.setItem(`printerPrintName_${id}`, data.printName);
-  localStorage.setItem(`printerTotalSeconds_${id}`, data.totalSeconds);
-  localStorage.setItem(`printerStartTime_${id}`, data.startTime);
-  localStorage.setItem(`printerSavedPercent_${id}`, data.savedPercent);
-  localStorage.setItem(`printerColor_${id}`, data.color);
-  localStorage.setItem(`printerCompletedNotified_${id}`, data.completedNotified);
+function savePrinterData(data){
+  localStorage.setItem(`printerStatus_${printerId}`, data.status);
+  localStorage.setItem(`printerPrintName_${printerId}`, data.printName);
+  localStorage.setItem(`printerTotalSeconds_${printerId}`, data.totalSeconds);
+  localStorage.setItem(`printerStartTime_${printerId}`, data.startTime);
+  localStorage.setItem(`printerSavedPercent_${printerId}`, data.savedPercent);
+  localStorage.setItem(`printerColor_${printerId}`, data.color);
+  localStorage.setItem(`printerCompletedNotified_${printerId}`, data.completedNotified);
 }
 
-// ===== ОБНОВЛЕНИЕ UI =====
-function updateCard(id){
-  let printer = getPrinterData(id);
+// ===== UI =====
+function updateUI(){
+  let printer = getPrinterData();
   const now = Date.now();
   let elapsed = 0;
 
   if(printer.status==="printing"){
     elapsed = Math.floor((now - printer.startTime)/1000);
     if(elapsed >= printer.totalSeconds){
-      printer.status="completed"; // отметка, что завершено
+      printer.status="completed";
+      printer.completedNotified=false;
       elapsed = printer.totalSeconds;
       printer.savedPercent = 100;
-      printer.completedNotified = false;
     }
   } else if(printer.status==="stopped"){
     elapsed = Math.floor(printer.totalSeconds * printer.savedPercent / 100);
@@ -123,54 +133,44 @@ function updateCard(id){
   if(printer.status==="stopped") percent = printer.savedPercent;
   else printer.savedPercent = percent;
 
-  document.getElementById(`main-status-${id}`).textContent = 
-    printer.status==="idle" ? "Простаивает" : 
-    printer.status==="printing" ? "Печать" : 
-    printer.status==="stopped" ? "Печать остановлена" : 
-    "Готово";
+  statusText.textContent = printer.status==="idle"?"Простаивает":printer.status==="printing"?"Печать":printer.status==="stopped"?"Печать остановлена":"Готово";
+  printNameText.textContent = printer.printName || "—";
+  progressText.textContent = percent+"%";
 
-  document.getElementById(`main-print-${id}`).textContent = printer.printName || "—";
+  progressBar.style.width = percent+"%";
+  if(printer.status==="completed") progressBar.classList.add("completed");
+  else progressBar.classList.remove("completed");
 
-  const bar = document.getElementById(`main-bar-${id}`);
-  bar.style.width = percent + "%";
+  savePrinterData(printer);
+}
 
-  if(printer.status==="stopped"){
-    bar.style.background="orange";
-    bar.classList.remove("completed");
-    document.getElementById(`main-status-${id}`).style.color="orange";
-  } else if(printer.status==="completed"){
-    bar.classList.add("completed");
-    document.getElementById(`main-status-${id}`).style.color="#7CFC00";
-  } else {
-    bar.style.background="#4caf50";
-    bar.classList.remove("completed");
-    document.getElementById(`main-status-${id}`).style.color="#fff";
+setInterval(updateUI,1000);
+updateUI();
+
+// ===== Подтверждение завершения печати =====
+setInterval(()=>{
+  let printer = getPrinterData();
+  if(printer.status==="completed" && !printer.completedNotified){
+    completeModal.style.display="flex";
   }
+},500);
 
-  document.getElementById(`main-color-${id}`).style.background = printer.color;
-
-  // уведомление
-  const notif = document.getElementById(`notif-${id}`);
-  notif.style.display = (printer.status==="completed" && !printer.completedNotified) ? "flex" : "none";
-
-  savePrinterData(id, printer);
+function confirmComplete(){
+  let printer = getPrinterData();
+  printer.status="idle";
+  printer.savedPercent=0;
+  printer.completedNotified=true;
+  printer.printName="";
+  savePrinterData(printer);
+  completeModal.style.display="none";
+  updateUI();
 }
 
-function updateAllCards(){
-  const cards = document.querySelectorAll(".card");
-  cards.forEach(c=>{
-    const id = c.dataset.id;
-    updateCard(id);
-  });
-}
+// ===== Кнопки =====
+startBtn.onclick=()=>alert("Добавить модальное окно для запуска печати");
+stopBtn.onclick=()=>alert("Добавить остановку печати");
 
-setInterval(updateAllCards, 1000);
-updateAllCards();
-
-function openPrinter(id){
-  window.location.href = `printer.html?id=${id}`;
-}
+function goBack(){history.back();}
 </script>
-
 </body>
 </html>
