@@ -30,7 +30,7 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 
 .progress { margin-top:8px; height:18px; background:#444; border-radius:9px; overflow:hidden; }
 
-.progress-bar { height:100%; width:0%; transition: width 0.3s, background 0.3s; }
+.progress-bar { height:100%; width:0%; background:#4caf50; transition: width 0.3s; }
 
 .red-badge {
   position: absolute;
@@ -126,43 +126,44 @@ function updateCard() {
   else printer.savedPercent = percent;
 
   // Статус и модель
-  document.getElementById("main-status-1").textContent =
+  const statusText = document.getElementById("main-status-1");
+  const modelText = document.getElementById("main-model-1");
+  const bar = document.getElementById("main-bar-1");
+  const notify = document.getElementById("main-notify-1");
+
+  statusText.textContent =
     printer.status==="idle" ? "Простаивает" :
     printer.status==="printing" ? "Печать" :
     printer.status==="stopped" ? "Печать остановлена" :
     "Готово";
 
-  document.getElementById("main-model-1").textContent =
+  modelText.textContent =
     printer.status==="idle" ? "—" : printer.printName || "—";
 
   // Полоска прогресса
-  const bar = document.getElementById("main-bar-1");
-  const statusText = document.getElementById("main-status-1");
-  const notify = document.getElementById("main-notify-1");
-
   if(printer.status==="idle"){
-    bar.style.background="#888";
     bar.style.animation="none";
-    statusText.style.color="#fff";
-    notify.style.display="none";
-  } else if(printer.status==="printing"){
-    bar.style.background="#4caf50";
-    bar.style.animation="none";
+    bar.style.background="#444"; // серый при простое
     statusText.style.color="#fff";
     notify.style.display="none";
   } else if(printer.status==="stopped"){
-    bar.style.background="orange";
     bar.style.animation="none";
+    bar.style.background="orange";
     statusText.style.color="orange";
     notify.style.display="none";
   } else if(printer.status==="finished"){
-    bar.style.background="#4caf50";
     bar.style.animation="pulse 1s infinite";
+    bar.style.background="#4caf50"; // зелёная
     statusText.style.color="#4caf50";
     notify.style.display="flex";
+  } else if(printer.status==="printing"){
+    bar.style.animation="none";
+    bar.style.background="#4caf50";
+    statusText.style.color="#fff";
+    notify.style.display="none";
   }
 
-  bar.style.width = percent+"%";
+  bar.style.width = percent + "%";
   document.getElementById("main-color-1").style.background = printer.color;
 
   savePrinterData(printer);
