@@ -78,7 +78,6 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 </div>
 
 <script>
-// ===== Получение данных принтера =====
 function getPrinterData(id){
   return {
     status: localStorage.getItem(`printerStatus_${id}`) || "idle",
@@ -91,17 +90,6 @@ function getPrinterData(id){
   };
 }
 
-function savePrinterData(id, data){
-  localStorage.setItem(`printerStatus_${id}`, data.status);
-  localStorage.setItem(`printerPrintName_${id}`, data.printName);
-  localStorage.setItem(`printerTotalSeconds_${id}`, data.totalSeconds);
-  localStorage.setItem(`printerStartTime_${id}`, data.startTime);
-  localStorage.setItem(`printerSavedPercent_${id}`, data.savedPercent);
-  localStorage.setItem(`printerColor_${id}`, data.color);
-  localStorage.setItem(`printerCompletedNotified_${id}`, data.completedNotified);
-}
-
-// ===== Обновление UI =====
 function updateCard(id){
   let printer = getPrinterData(id);
   const now = Date.now();
@@ -126,47 +114,43 @@ function updateCard(id){
   else printer.savedPercent = percent;
 
   document.getElementById(`main-status-${id}`).textContent = 
-    printer.status==="idle" ? "Простаивает" :
-    printer.status==="printing" ? "Печать" :
-    printer.status==="stopped" ? "Печать остановлена" :
+    printer.status==="idle"?"Простаивает":
+    printer.status==="printing"?"Печать":
+    printer.status==="stopped"?"Печать остановлена":
     "Готово";
 
   document.getElementById(`main-print-${id}`).textContent = printer.printName || "—";
 
   const bar = document.getElementById(`main-bar-${id}`);
-  bar.style.width = percent + "%";
+  bar.style.width = percent+"%";
 
-  if(printer.status==="stopped"){
-    bar.style.background="orange";
-    bar.classList.remove("completed");
-    document.getElementById(`main-status-${id}`).style.color="orange";
-  } else if(printer.status==="completed"){
+  if(printer.status==="completed"){
     bar.classList.add("completed");
     document.getElementById(`main-status-${id}`).style.color="#7CFC00";
-  } else {
-    bar.style.background="#4caf50";
+  } else if(printer.status==="stopped"){
     bar.classList.remove("completed");
+    bar.style.background="orange";
+    document.getElementById(`main-status-${id}`).style.color="orange";
+  } else {
+    bar.classList.remove("completed");
+    bar.style.background="#4caf50";
     document.getElementById(`main-status-${id}`).style.color="#fff";
   }
 
   document.getElementById(`main-color-${id}`).style.background = printer.color;
 
-  // уведомление
   const notif = document.getElementById(`notif-${id}`);
   notif.style.display = (printer.status==="completed" && !printer.completedNotified) ? "flex" : "none";
-
-  savePrinterData(id, printer);
 }
 
 function updateAllCards(){
-  const cards = document.querySelectorAll(".card");
-  cards.forEach(c=>{
-    const id = c.dataset.id;
-    updateCard(id);
+  document.querySelectorAll(".card").forEach(c=>{
+    updateCard(c.dataset.id);
   });
 }
 
-setInterval(updateAllCards,1000);
+// Обновление каждые 500ms для синхронизации
+setInterval(updateAllCards,500);
 updateAllCards();
 
 function openPrinter(id){
