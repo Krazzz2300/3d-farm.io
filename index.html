@@ -382,6 +382,160 @@ body {
   transform: scale(0.95);
 }
 
+/* СТРАНИЦА ПЛАНИРОВАНИЯ */
+.plan-container {
+  padding: 15px;
+  max-height: calc(100vh - 130px);
+  overflow-y: auto;
+}
+
+.plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.plan-stats {
+  background: #2a2a2a;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.stat-item {
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 5px;
+}
+
+.print-job {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-left: 4px solid #2196f3;
+  position: relative;
+}
+
+.print-job.priority-high {
+  border-left-color: #f44336;
+}
+
+.print-job.priority-medium {
+  border-left-color: #ff9800;
+}
+
+.print-job.priority-low {
+  border-left-color: #4caf50;
+}
+
+.print-job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.print-job-title {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.print-job-priority {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.priority-high { background: #f44336; }
+.priority-medium { background: #ff9800; }
+.priority-low { background: #4caf50; }
+
+.print-job-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.print-job-detail {
+  display: flex;
+  justify-content: space-between;
+}
+
+.detail-label {
+  color: #aaa;
+}
+
+.detail-value {
+  font-weight: bold;
+}
+
+.print-job-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.action-btn:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}
+
+.assign-btn { background: #2196f3; }
+.start-btn { background: #4caf50; }
+.complete-btn { background: #ff9800; }
+.delete-btn { background: #f44336; }
+
+.empty-plan {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+}
+
+.empty-plan i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.empty-plan h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+/* МОДАЛЬНЫЕ ОКНА */
 .modal-bg {
   position: fixed;
   top: 0;
@@ -420,7 +574,7 @@ body {
   font-size: 14px;
 }
 
-.modal input {
+.modal input, .modal select, .modal textarea {
   width: 100%;
   padding: 12px;
   border-radius: 10px;
@@ -430,9 +584,15 @@ body {
   font-size: 16px;
 }
 
-.modal input:focus {
+.modal input:focus, .modal select:focus, .modal textarea:focus {
   border-color: #4caf50;
   outline: none;
+}
+
+.modal textarea {
+  min-height: 100px;
+  resize: vertical;
+  font-family: Arial, sans-serif;
 }
 
 /* СПИСОК ПРИНТЕРОВ */
@@ -553,6 +713,45 @@ body {
   color: white; 
 }
 
+/* ФОРМА ИМПОРТА ИЗ GOOGLE SHEETS */
+.import-form {
+  margin: 15px 0;
+}
+
+.import-instructions {
+  background: #333;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 13px;
+  color: #aaa;
+}
+
+.import-instructions h4 {
+  color: white;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.import-instructions ol {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.import-instructions li {
+  margin-bottom: 5px;
+}
+
+.import-example {
+  background: #2a2a2a;
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 10px;
+  font-family: monospace;
+  font-size: 12px;
+  overflow-x: auto;
+}
+
 .notification {
   position: fixed;
   top: 70px;
@@ -627,6 +826,10 @@ body {
   .modal {
     max-width: 400px;
   }
+  
+  .print-job-details {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -670,10 +873,54 @@ body {
   </div>
 </div>
 
+<div id="plan-page" class="page hidden">
+  <div class="plan-container">
+    <div class="plan-header">
+      <h2 style="font-size: 22px;">📅 План печати</h2>
+      <div style="display: flex; gap: 10px;">
+        <button onclick="showImportModal()" style="background: #2196f3; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold;">
+          <i class="fas fa-file-import"></i> Импорт
+        </button>
+        <button onclick="showAddJobModal()" style="background: #4caf50; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold;">
+          <i class="fas fa-plus"></i> Добавить
+        </button>
+      </div>
+    </div>
+    
+    <div class="plan-stats">
+      <div class="stat-item">
+        <div class="stat-number" id="total-jobs">0</div>
+        <div class="stat-label">Всего заданий</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" id="pending-jobs">0</div>
+        <div class="stat-label">В ожидании</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" id="in-progress-jobs">0</div>
+        <div class="stat-label">В работе</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" id="completed-jobs">0</div>
+        <div class="stat-label">Завершено</div>
+      </div>
+    </div>
+    
+    <div id="jobs-container">
+      <!-- Задания будут здесь -->
+    </div>
+  </div>
+</div>
+
 <div class="bottom-nav">
   <div class="nav-item active" onclick="showPage('printers')">
     <i class="fas fa-home nav-icon"></i>
     <span>Принтеры</span>
+  </div>
+  
+  <div class="nav-item" onclick="showPage('plan')">
+    <i class="fas fa-calendar-alt nav-icon"></i>
+    <span>План</span>
   </div>
   
   <div class="nav-item nav-add">
@@ -688,7 +935,7 @@ body {
   </div>
 </div>
 
-<!-- Модальное окно выбора модели принтера (ШАГ 1) -->
+<!-- Модальное окно выбора модели принтера -->
 <div class="modal-bg" id="choose-model-modal">
   <div class="modal">
     <h3>Выберите модель принтера</h3>
@@ -704,7 +951,7 @@ body {
   </div>
 </div>
 
-<!-- Модальное окно ввода названия (ШАГ 2) -->
+<!-- Модальное окно ввода названия -->
 <div class="modal-bg" id="choose-name-modal">
   <div class="modal">
     <h3>Введите название принтера</h3>
@@ -733,10 +980,104 @@ body {
   </div>
 </div>
 
+<!-- Модальное окно добавления задания -->
+<div class="modal-bg" id="add-job-modal">
+  <div class="modal">
+    <h3>Добавить задание на печать</h3>
+    
+    <label>Название модели:</label>
+    <input type="text" id="job-model-name" placeholder="Например: Хорёк" required>
+    
+    <label>Количество:</label>
+    <input type="number" id="job-quantity" placeholder="5" min="1" value="1" required>
+    
+    <label>Приоритет:</label>
+    <select id="job-priority">
+      <option value="low">Низкий</option>
+      <option value="medium" selected>Средний</option>
+      <option value="high">Высокий</option>
+    </select>
+    
+    <label>Цвет печати:</label>
+    <input type="text" id="job-color" placeholder="Например: красный" value="серый">
+    
+    <label>Время печати (минут на 1 шт):</label>
+    <input type="number" id="job-print-time" placeholder="120" min="1" value="120">
+    
+    <label>Комментарий:</label>
+    <textarea id="job-comment" placeholder="Дополнительная информация..."></textarea>
+    
+    <div class="modal-buttons">
+      <button class="cancel-btn" onclick="closeAddJobModal()">Отмена</button>
+      <button class="save-btn" onclick="addNewJob()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно импорта из Google Sheets -->
+<div class="modal-bg" id="import-modal">
+  <div class="modal">
+    <h3>Импорт из Google Sheets</h3>
+    
+    <div class="import-form">
+      <div class="import-instructions">
+        <h4>Инструкция:</h4>
+        <ol>
+          <li>Создайте Google Таблицу со следующими столбцами:</li>
+          <li>Скопируйте данные из таблицы</li>
+          <li>Вставьте в поле ниже</li>
+        </ol>
+        
+        <div class="import-example">
+          Модель | Количество | Приоритет | Цвет | Время (мин)<br>
+          Хорёк | 5 | high | красный | 120<br>
+          Доберман | 3 | medium | чёрный | 180<br>
+          Волк | 1 | low | серый | 240
+        </div>
+      </div>
+      
+      <label>Вставьте данные из Google Sheets:</label>
+      <textarea id="import-data" placeholder="Вставьте сюда данные из таблицы..."></textarea>
+      
+      <small style="color: #888; font-size: 12px; display: block; margin-top: 4px;">
+        Формат: Модель | Количество | Приоритет | Цвет | Время
+      </small>
+    </div>
+    
+    <div class="modal-buttons">
+      <button class="cancel-btn" onclick="closeImportModal()">Отмена</button>
+      <button class="save-btn" onclick="importFromSheets()">Импорт</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно назначения принтера -->
+<div class="modal-bg" id="assign-modal">
+  <div class="modal">
+    <h3>Назначить принтер</h3>
+    
+    <div id="assign-job-info" style="background: #333; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+      <div style="font-weight: bold; margin-bottom: 5px;" id="assign-job-title"></div>
+      <div style="font-size: 14px; color: #aaa;" id="assign-job-details"></div>
+    </div>
+    
+    <label>Выберите принтер:</label>
+    <select id="assign-printer-select">
+      <!-- Принтеры будут добавлены через JS -->
+    </select>
+    
+    <div class="modal-buttons">
+      <button class="cancel-btn" onclick="closeAssignModal()">Отмена</button>
+      <button class="save-btn" onclick="assignJobToPrinter()">Назначить</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ===== КОНСТАНТЫ И ПЕРЕМЕННЫЕ =====
 const STORAGE_KEY = '3d_printer_farm_data';
 const LOGS_STORAGE_KEY = 'printer_farm_logs';
+const JOBS_STORAGE_KEY = 'printer_jobs_data';
 const MAX_LOGS = 50;
 
 // Список популярных принтеров (у каждой модели СВОЁ фото)
@@ -754,7 +1095,7 @@ const POPULAR_PRINTERS = [
   { brand: "Bambu Lab", model: "A1", image: "foto/bambulab_a1.jpg" },
   { brand: "Bambu Lab", model: "X1 Carbon", image: "foto/bambulab_x1carbon.jpg" },
   
-  // Elegoo (исправлено с Anycubic на Elegoo)
+  // Elegoo
   { brand: "Elegoo", model: "Neptune 3", image: "foto/elegoo_neptune3.jpg" },
   { brand: "Elegoo", model: "Neptune 4", image: "foto/elegoo_neptune4.jpg" },
   
@@ -801,7 +1142,10 @@ const DEFAULT_PRINTERS = [
 
 // Переменные для добавления принтера
 let selectedPrinter = null;
-let currentStep = 'model'; // 'model' или 'name'
+let currentStep = 'model';
+let currentPage = 'printers';
+let lastUpdateTime = Date.now();
+let selectedJobId = null;
 
 // ===== СИСТЕМА ЛОГОВ =====
 
@@ -849,7 +1193,7 @@ function clearLogs() {
   }
 }
 
-// ===== ФУНКЦИИ ДЛЯ РАБОТЫ С ДАННЫМИ =====
+// ===== РАБОТА С ПРИНТЕРАМИ =====
 
 function getPrinters() {
   try {
@@ -932,6 +1276,139 @@ function getNotificationCount() {
   return count;
 }
 
+// ===== РАБОТА С ЗАДАНИЯМИ =====
+
+function getJobs() {
+  try {
+    const jobsJSON = localStorage.getItem(JOBS_STORAGE_KEY);
+    return jobsJSON ? JSON.parse(jobsJSON) : [];
+  } catch (error) {
+    console.error("Ошибка при чтении заданий:", error);
+    return [];
+  }
+}
+
+function saveJobs(jobs) {
+  try {
+    localStorage.setItem(JOBS_STORAGE_KEY, JSON.stringify(jobs));
+    return true;
+  } catch (error) {
+    console.error("Ошибка при сохранении заданий:", error);
+    return false;
+  }
+}
+
+function addJob(modelName, quantity, priority, color, printTime, comment = "") {
+  const jobs = getJobs();
+  
+  const newJob = {
+    id: Date.now(),
+    modelName: modelName,
+    quantity: quantity,
+    priority: priority,
+    color: color || "серый",
+    printTime: printTime || 120,
+    comment: comment,
+    status: "pending", // pending, assigned, printing, completed
+    assignedPrinter: null,
+    createdAt: new Date().toLocaleString(),
+    startedAt: null,
+    completedAt: null,
+    progress: 0
+  };
+  
+  jobs.push(newJob);
+  
+  if (saveJobs(jobs)) {
+    addLog(`Добавлено задание: ${modelName} (${quantity} шт.)`, 'info');
+    
+    if (currentPage === 'plan') {
+      loadPlan();
+    }
+    
+    return newJob;
+  }
+  
+  return null;
+}
+
+function updateJobStatus(jobId, status, printerId = null) {
+  const jobs = getJobs();
+  const jobIndex = jobs.findIndex(job => job.id === jobId);
+  
+  if (jobIndex !== -1) {
+    jobs[jobIndex].status = status;
+    
+    if (printerId) {
+      jobs[jobIndex].assignedPrinter = printerId;
+    }
+    
+    if (status === 'assigned' && !jobs[jobIndex].startedAt) {
+      jobs[jobIndex].startedAt = new Date().toLocaleString();
+    }
+    
+    if (status === 'completed' && !jobs[jobIndex].completedAt) {
+      jobs[jobIndex].completedAt = new Date().toLocaleString();
+      jobs[jobIndex].progress = 100;
+    }
+    
+    if (saveJobs(jobs)) {
+      if (currentPage === 'plan') {
+        loadPlan();
+      }
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+function deleteJob(jobId) {
+  const jobs = getJobs();
+  const updatedJobs = jobs.filter(job => job.id !== jobId);
+  
+  if (saveJobs(updatedJobs)) {
+    addLog(`Удалено задание ID: ${jobId}`, 'warning');
+    
+    if (currentPage === 'plan') {
+      loadPlan();
+    }
+    
+    return true;
+  }
+  
+  return false;
+}
+
+function importJobsFromText(text) {
+  const lines = text.split('\n').filter(line => line.trim() !== '');
+  let imported = 0;
+  
+  lines.forEach((line, index) => {
+    // Пропускаем заголовок если он есть
+    if (index === 0 && (line.includes('Модель') || line.includes('Количество') || line.includes('Приоритет'))) {
+      return;
+    }
+    
+    const parts = line.split('|').map(part => part.trim());
+    
+    if (parts.length >= 2) {
+      const modelName = parts[0];
+      const quantity = parseInt(parts[1]) || 1;
+      const priority = parts[2] ? parts[2].toLowerCase() : 'medium';
+      const color = parts[3] || "серый";
+      const printTime = parseInt(parts[4]) || 120;
+      
+      if (modelName && quantity > 0) {
+        addJob(modelName, quantity, priority, color, printTime);
+        imported++;
+      }
+    }
+  });
+  
+  return imported;
+}
+
 // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
 
 function getStatusText(status) {
@@ -940,7 +1417,11 @@ function getStatusText(status) {
     'printing': 'Печать',
     'stopped': 'Остановлено', 
     'finished': 'Готово',
-    'repair': 'На ремонте'
+    'repair': 'На ремонте',
+    'pending': 'В ожидании',
+    'assigned': 'Назначено',
+    'printing': 'В печати',
+    'completed': 'Завершено'
   };
   return statusMap[status] || status;
 }
@@ -951,7 +1432,10 @@ function getStatusColor(status) {
     'printing': '#fff',
     'stopped': 'orange',
     'finished': '#4caf50',
-    'repair': 'red'
+    'repair': 'red',
+    'pending': '#ff9800',
+    'assigned': '#2196f3',
+    'completed': '#4caf50'
   };
   return colorMap[status] || '#fff';
 }
@@ -962,32 +1446,50 @@ function getProgressColor(status) {
     'printing': '#4caf50',
     'stopped': 'orange',
     'finished': '#4caf50',
-    'repair': 'red'
+    'repair': 'red',
+    'pending': '#444',
+    'assigned': '#2196f3',
+    'completed': '#4caf50'
   };
   return colorMap[status] || '#444';
 }
 
-// ===== ОТОБРАЖЕНИЕ ПРИНТЕРОВ =====
+function getPriorityText(priority) {
+  const priorityMap = {
+    'high': 'Высокий',
+    'medium': 'Средний',
+    'low': 'Низкий'
+  };
+  return priorityMap[priority] || priority;
+}
 
-let currentPage = 'printers';
-let lastUpdateTime = Date.now();
+// ===== ОТОБРАЖЕНИЕ СТРАНИЦ =====
 
 function showPage(page) {
+  // Скрываем все страницы
   document.getElementById('printers-page').classList.add('hidden');
   document.getElementById('logs-page').classList.add('hidden');
+  document.getElementById('plan-page').classList.add('hidden');
   
+  // Снимаем активность со всех кнопок
   document.querySelectorAll('.nav-item').forEach(item => {
     item.classList.remove('active');
   });
   
+  // Показываем выбранную страницу
   document.getElementById(page + '-page').classList.remove('hidden');
   
+  // Устанавливаем активность кнопки
   if (page === 'printers') {
     document.querySelectorAll('.nav-item')[0].classList.add('active');
     document.getElementById('page-title').textContent = 'Ферма принтеров';
     renderPrinters();
+  } else if (page === 'plan') {
+    document.querySelectorAll('.nav-item')[1].classList.add('active');
+    document.getElementById('page-title').textContent = 'План печати';
+    loadPlan();
   } else if (page === 'logs') {
-    document.querySelectorAll('.nav-item')[2].classList.add('active');
+    document.querySelectorAll('.nav-item')[3].classList.add('active');
     document.getElementById('page-title').textContent = 'История действий';
     loadLogs();
   }
@@ -995,7 +1497,8 @@ function showPage(page) {
   currentPage = page;
 }
 
-// ФУНКЦИЯ ОБНОВЛЕНИЯ СТАТУСОВ
+// ===== ГЛАВНАЯ СТРАНИЦА (ПРИНТЕРЫ) =====
+
 function updatePrintersStatus() {
   const printers = getPrinters();
   const now = Date.now();
@@ -1029,7 +1532,6 @@ function updatePrintersStatus() {
 }
 
 function renderPrinters() {
-  // Всегда обновляем статусы перед отрисовкой
   updatePrintersStatus();
   
   const printers = getPrinters();
@@ -1093,14 +1595,276 @@ function renderPrinters() {
   lastUpdateTime = Date.now();
 }
 
-// ===== ОТОБРАЖЕНИЕ ЛОГОВ =====
+// ===== СТРАНИЦА ПЛАНИРОВАНИЯ =====
+
+function loadPlan() {
+  const jobs = getJobs();
+  const container = document.getElementById('jobs-container');
+  
+  // Обновляем статистику
+  updatePlanStats(jobs);
+  
+  if (jobs.length === 0) {
+    container.innerHTML = `
+      <div class="empty-plan">
+        <i class="fas fa-calendar-alt"></i>
+        <h3>Нет заданий</h3>
+        <p>Добавьте задания на печать или импортируйте из Google Sheets</p>
+      </div>
+    `;
+    return;
+  }
+  
+  // Сортируем задания: высокий приоритет, назначенные, затем ожидающие
+  const sortedJobs = [...jobs].sort((a, b) => {
+    // Сначала по статусу: в работе > назначенные > ожидание
+    const statusOrder = { 'printing': 1, 'assigned': 2, 'pending': 3, 'completed': 4 };
+    const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+    if (statusDiff !== 0) return statusDiff;
+    
+    // Затем по приоритету: высокий > средний > низкий
+    const priorityOrder = { 'high': 1, 'medium': 2, 'low': 3 };
+    return priorityOrder[a.priority] - priorityOrder[b.priority];
+  });
+  
+  let html = '';
+  sortedJobs.forEach(job => {
+    const priorityText = getPriorityText(job.priority);
+    const totalTime = job.quantity * job.printTime;
+    const hours = Math.floor(totalTime / 60);
+    const minutes = totalTime % 60;
+    const timeText = hours > 0 ? `${hours}ч ${minutes}м` : `${minutes}м`;
+    
+    let statusBadge = '';
+    let actions = '';
+    
+    if (job.status === 'pending') {
+      statusBadge = '<span style="background: #ff9800; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">Ожидание</span>';
+      actions = `
+        <button class="action-btn assign-btn" onclick="assignJob(${job.id})">
+          <i class="fas fa-tasks"></i> Назначить
+        </button>
+        <button class="action-btn delete-btn" onclick="deleteJobHandler(${job.id})">
+          <i class="fas fa-trash"></i> Удалить
+        </button>
+      `;
+    } else if (job.status === 'assigned') {
+      statusBadge = '<span style="background: #2196f3; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">Назначено</span>';
+      actions = `
+        <button class="action-btn start-btn" onclick="startJob(${job.id})">
+          <i class="fas fa-play"></i> Начать
+        </button>
+        <button class="action-btn delete-btn" onclick="deleteJobHandler(${job.id})">
+          <i class="fas fa-trash"></i> Удалить
+        </button>
+      `;
+    } else if (job.status === 'printing') {
+      statusBadge = '<span style="background: #4caf50; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">В печати</span>';
+      actions = `
+        <button class="action-btn complete-btn" onclick="completeJob(${job.id})">
+          <i class="fas fa-check"></i> Завершить
+        </button>
+      `;
+    } else if (job.status === 'completed') {
+      statusBadge = '<span style="background: #666; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">Завершено</span>';
+      actions = `
+        <button class="action-btn delete-btn" onclick="deleteJobHandler(${job.id})">
+          <i class="fas fa-trash"></i> Удалить
+        </button>
+      `;
+    }
+    
+    html += `
+      <div class="print-job priority-${job.priority}">
+        <div class="print-job-header">
+          <div class="print-job-title">${job.modelName} × ${job.quantity}</div>
+          ${statusBadge}
+        </div>
+        
+        <div class="print-job-details">
+          <div class="print-job-detail">
+            <span class="detail-label">Приоритет:</span>
+            <span class="detail-value">${priorityText}</span>
+          </div>
+          <div class="print-job-detail">
+            <span class="detail-label">Цвет:</span>
+            <span class="detail-value">${job.color}</span>
+          </div>
+          <div class="print-job-detail">
+            <span class="detail-label">Время:</span>
+            <span class="detail-value">${timeText}</span>
+          </div>
+          <div class="print-job-detail">
+            <span class="detail-label">Создано:</span>
+            <span class="detail-value">${job.createdAt}</span>
+          </div>
+          ${job.startedAt ? `
+          <div class="print-job-detail">
+            <span class="detail-label">Начало:</span>
+            <span class="detail-value">${job.startedAt}</span>
+          </div>
+          ` : ''}
+          ${job.completedAt ? `
+          <div class="print-job-detail">
+            <span class="detail-label">Завершено:</span>
+            <span class="detail-value">${job.completedAt}</span>
+          </div>
+          ` : ''}
+        </div>
+        
+        ${job.comment ? `<div style="font-size: 13px; color: #aaa; margin: 10px 0;">💬 ${job.comment}</div>` : ''}
+        
+        <div class="print-job-actions">
+          ${actions}
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+}
+
+function updatePlanStats(jobs) {
+  const total = jobs.length;
+  const pending = jobs.filter(job => job.status === 'pending').length;
+  const inProgress = jobs.filter(job => job.status === 'assigned' || job.status === 'printing').length;
+  const completed = jobs.filter(job => job.status === 'completed').length;
+  
+  document.getElementById('total-jobs').textContent = total;
+  document.getElementById('pending-jobs').textContent = pending;
+  document.getElementById('in-progress-jobs').textContent = inProgress;
+  document.getElementById('completed-jobs').textContent = completed;
+}
+
+// ===== ДЕЙСТВИЯ С ЗАДАНИЯМИ =====
+
+function assignJob(jobId) {
+  selectedJobId = jobId;
+  const jobs = getJobs();
+  const job = jobs.find(j => j.id === jobId);
+  
+  if (!job) return;
+  
+  document.getElementById('assign-job-title').textContent = `${job.modelName} × ${job.quantity}`;
+  document.getElementById('assign-job-details').textContent = `Цвет: ${job.color} | Время: ${job.quantity * job.printTime} мин`;
+  
+  // Заполняем список принтеров
+  const printers = getPrinters();
+  const select = document.getElementById('assign-printer-select');
+  select.innerHTML = '<option value="">Выберите принтер</option>';
+  
+  printers.forEach(printer => {
+    if (printer.status === 'idle' || printer.status === 'finished') {
+      const option = document.createElement('option');
+      option.value = printer.id;
+      option.textContent = `${printer.name} (${printer.model})`;
+      select.appendChild(option);
+    }
+  });
+  
+  document.getElementById('assign-modal').style.display = 'flex';
+}
+
+function assignJobToPrinter() {
+  const printerId = document.getElementById('assign-printer-select').value;
+  
+  if (!printerId) {
+    alert('Выберите принтер');
+    return;
+  }
+  
+  if (updateJobStatus(selectedJobId, 'assigned', printerId)) {
+    addLog(`Задание назначено на принтер ID: ${printerId}`, 'info');
+    showNotification('Задание назначено!');
+    closeAssignModal();
+  }
+}
+
+function startJob(jobId) {
+  const jobs = getJobs();
+  const job = jobs.find(j => j.id === jobId);
+  
+  if (!job || !job.assignedPrinter) return;
+  
+  const printers = getPrinters();
+  const printer = printers.find(p => p.id === job.assignedPrinter);
+  
+  if (printer && printer.status === 'idle') {
+    // Обновляем статус задания
+    updateJobStatus(jobId, 'printing');
+    
+    // Обновляем принтер
+    const printDuration = job.quantity * job.printTime * 1000; // в миллисекундах
+    
+    const updatedPrinter = {
+      ...printer,
+      status: 'printing',
+      printName: `${job.modelName} (${job.quantity} шт.)`,
+      progress: 0,
+      startTime: Date.now(),
+      printDuration: printDuration,
+      color: job.color || 'gray',
+      finishedNotified: false
+    };
+    
+    const updatedPrinters = printers.map(p => 
+      p.id === printer.id ? updatedPrinter : p
+    );
+    
+    savePrinters(updatedPrinters);
+    
+    addLog(`Начата печать задания: ${job.modelName} (${job.quantity} шт.) на принтере "${printer.name}"`, 'info');
+    showNotification('Печать начата!');
+    
+    if (currentPage === 'printers') {
+      renderPrinters();
+    }
+  }
+}
+
+function completeJob(jobId) {
+  if (confirm('Завершить это задание?')) {
+    updateJobStatus(jobId, 'completed');
+    addLog(`Задание завершено ID: ${jobId}`, 'info');
+    showNotification('Задание завершено!');
+  }
+}
+
+function deleteJobHandler(jobId) {
+  if (confirm('Удалить это задание?')) {
+    deleteJob(jobId);
+    showNotification('Задание удалено!');
+  }
+}
+
+// ===== ИМПОРТ ИЗ GOOGLE SHEETS =====
+
+function importFromSheets() {
+  const text = document.getElementById('import-data').value.trim();
+  
+  if (!text) {
+    alert('Вставьте данные из Google Sheets');
+    return;
+  }
+  
+  const imported = importJobsFromText(text);
+  
+  if (imported > 0) {
+    showNotification(`Импортировано ${imported} заданий!`);
+    closeImportModal();
+    document.getElementById('import-data').value = '';
+  } else {
+    alert('Не удалось импортировать задания. Проверьте формат данных.');
+  }
+}
+
+// ===== СТРАНИЦА ЛОГОВ =====
 
 function loadLogs() {
   const logs = getLogs();
   const container = document.getElementById('logs-container');
   const statsContainer = document.getElementById('logs-stats');
   
-  // Обновляем статистику
   if (statsContainer) {
     const totalLogs = logs.length;
     const infoLogs = logs.filter(log => log.type === 'info').length;
@@ -1145,7 +1909,6 @@ function loadLogs() {
   
   container.innerHTML = html;
   
-  // Автопрокрутка к началу (самые новые сверху)
   setTimeout(() => {
     container.scrollTop = 0;
   }, 100);
@@ -1173,23 +1936,12 @@ function getLogTypeText(type) {
   return textMap[type] || 'Запись';
 }
 
-function updateNotificationBadge() {
-  const count = getNotificationCount();
-  const badge = document.getElementById('global-notification');
-  badge.textContent = count;
-  badge.style.display = count > 0 ? 'flex' : 'none';
-}
-
-// ===== ДОБАВЛЕНИЕ ПРИНТЕРА (ДВУХЭТАПНОЕ) =====
+// ===== МОДАЛЬНЫЕ ОКНА =====
 
 function showAddModal() {
   selectedPrinter = null;
   currentStep = 'model';
-  
-  // Создаем список принтеров
   createPrinterList();
-  
-  // Показываем первый шаг
   document.getElementById('choose-model-modal').style.display = 'flex';
   document.getElementById('choose-name-modal').style.display = 'none';
 }
@@ -1221,15 +1973,10 @@ function createPrinterList() {
     `;
     
     option.onclick = function() {
-      // Снимаем выделение со всех
       document.querySelectorAll('.printer-option').forEach(el => {
         el.classList.remove('selected');
       });
-      
-      // Выделяем выбранный
       this.classList.add('selected');
-      
-      // Сохраняем выбранный принтер
       selectedPrinter = {
         brand: this.dataset.brand,
         model: this.dataset.model,
@@ -1247,28 +1994,23 @@ function goToNameStep() {
     return;
   }
   
-  // Обновляем информацию о выбранном принтере
   document.getElementById('selected-printer-brand').textContent = selectedPrinter.brand;
   document.getElementById('selected-printer-model').textContent = selectedPrinter.model;
   
-  // Обновляем изображение
   const imageContainer = document.getElementById('selected-printer-image');
   imageContainer.innerHTML = `<img src="${selectedPrinter.image}" alt="${selectedPrinter.brand}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-print printer-icon\\'></i>'">`;
   
-  // Генерируем предложение для названия
   const printerCount = getPrinters().length;
   document.getElementById('new-printer-name').value = `${selectedPrinter.brand} ${printerCount + 1}`;
   document.getElementById('new-printer-name').focus();
   document.getElementById('new-printer-name').select();
   
-  // Переходим ко второму шагу
   document.getElementById('choose-model-modal').style.display = 'none';
   document.getElementById('choose-name-modal').style.display = 'flex';
   currentStep = 'name';
 }
 
 function goBackToModelStep() {
-  // Возвращаемся к первому шагу
   document.getElementById('choose-name-modal').style.display = 'none';
   document.getElementById('choose-model-modal').style.display = 'flex';
   currentStep = 'model';
@@ -1290,15 +2032,67 @@ function addNewPrinter() {
   const newPrinter = addPrinter(name, `${selectedPrinter.brand} ${selectedPrinter.model}`, selectedPrinter.image, selectedPrinter.brand);
   
   if (newPrinter) {
-    // Закрываем все модальные окна
     document.getElementById('choose-name-modal').style.display = 'none';
     selectedPrinter = null;
-    
     renderPrinters();
     showNotification(`Принтер "${name}" добавлен!`);
   } else {
     alert('Ошибка при добавлении принтера');
   }
+}
+
+// Модальные окна для заданий
+function showAddJobModal() {
+  document.getElementById('add-job-modal').style.display = 'flex';
+  document.getElementById('job-model-name').focus();
+}
+
+function closeAddJobModal() {
+  document.getElementById('add-job-modal').style.display = 'none';
+  document.getElementById('job-model-name').value = '';
+  document.getElementById('job-quantity').value = '1';
+  document.getElementById('job-priority').value = 'medium';
+  document.getElementById('job-color').value = 'серый';
+  document.getElementById('job-print-time').value = '120';
+  document.getElementById('job-comment').value = '';
+}
+
+function addNewJob() {
+  const modelName = document.getElementById('job-model-name').value.trim();
+  const quantity = parseInt(document.getElementById('job-quantity').value);
+  const priority = document.getElementById('job-priority').value;
+  const color = document.getElementById('job-color').value.trim();
+  const printTime = parseInt(document.getElementById('job-print-time').value);
+  const comment = document.getElementById('job-comment').value.trim();
+  
+  if (!modelName || isNaN(quantity) || quantity <= 0) {
+    alert('Заполните название модели и количество');
+    return;
+  }
+  
+  const newJob = addJob(modelName, quantity, priority, color, printTime, comment);
+  
+  if (newJob) {
+    closeAddJobModal();
+    showNotification(`Задание "${modelName}" добавлено!`);
+  } else {
+    alert('Ошибка при добавлении задания');
+  }
+}
+
+function showImportModal() {
+  document.getElementById('import-modal').style.display = 'flex';
+  document.getElementById('import-data').focus();
+}
+
+function closeImportModal() {
+  document.getElementById('import-modal').style.display = 'none';
+  document.getElementById('import-data').value = '';
+}
+
+function closeAssignModal() {
+  document.getElementById('assign-modal').style.display = 'none';
+  selectedJobId = null;
 }
 
 // ===== УВЕДОМЛЕНИЯ =====
@@ -1319,6 +2113,13 @@ function showNotification(message) {
       }
     }, 300);
   }, 3000);
+}
+
+function updateNotificationBadge() {
+  const count = getNotificationCount();
+  const badge = document.getElementById('global-notification');
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'flex' : 'none';
 }
 
 // ===== ОБРАБОТЧИКИ СОБЫТИЙ =====
@@ -1342,48 +2143,43 @@ function openPrinter(printerId) {
 document.addEventListener('DOMContentLoaded', function() {
   renderPrinters();
   
-  // Назначаем обработчики
+  // Навигация
   document.querySelectorAll('.nav-item').forEach((item, index) => {
-    if (index !== 1) { // Пропускаем среднюю кнопку (+)
+    if (index !== 2) { // Пропускаем кнопку (+)
       item.addEventListener('click', function() {
-        const page = index === 0 ? 'printers' : 'logs';
-        showPage(page);
+        const pages = ['printers', 'plan', 'logs'];
+        showPage(pages[index]);
       });
     }
   });
   
   // Закрытие модальных окон при клике на фон
-  document.getElementById('choose-model-modal').addEventListener('click', function(e) {
-    if (e.target === this) {
-      closeChooseModelModal();
-    }
-  });
-  
-  document.getElementById('choose-name-modal').addEventListener('click', function(e) {
-    if (e.target === this) {
-      // Закрываем только если это второй шаг
-      if (currentStep === 'name') {
-        document.getElementById('choose-name-modal').style.display = 'none';
-        selectedPrinter = null;
+  document.querySelectorAll('.modal-bg').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.style.display = 'none';
+        
+        if (this.id === 'assign-modal') {
+          selectedJobId = null;
+        }
       }
-    }
+    });
   });
   
-  // Автообновление каждую секунду
+  // Автообновление главной страницы
   setInterval(() => {
     if (currentPage === 'printers') {
       renderPrinters();
     }
   }, 1000);
   
-  // Обновляем при возвращении на страницу
+  // Обновление при возвращении на страницу
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden && currentPage === 'printers') {
       renderPrinters();
     }
   });
   
-  // Обновляем при фокусе на страницу
   window.addEventListener('focus', function() {
     if (currentPage === 'printers') {
       renderPrinters();
@@ -1398,6 +2194,18 @@ window.addNewPrinter = addNewPrinter;
 window.openPrinter = openPrinter;
 window.showPage = showPage;
 window.clearLogs = clearLogs;
+window.showAddJobModal = showAddJobModal;
+window.closeAddJobModal = closeAddJobModal;
+window.addNewJob = addNewJob;
+window.showImportModal = showImportModal;
+window.closeImportModal = closeImportModal;
+window.importFromSheets = importFromSheets;
+window.assignJob = assignJob;
+window.assignJobToPrinter = assignJobToPrinter;
+window.closeAssignModal = closeAssignModal;
+window.startJob = startJob;
+window.completeJob = completeJob;
+window.deleteJobHandler = deleteJobHandler;
 </script>
 
 </body>
