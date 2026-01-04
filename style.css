@@ -1,71 +1,140 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  padding: 0;
   background: #2b2b2b;
   font-family: Arial, sans-serif;
-  box-sizing: border-box;
+  color: #fff;
 }
 
-/* Сетка */
+/* ===== GRID ===== */
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 блока в ряд */
-  gap: 32px; /* расстояние между блоками = боковым отступам */
-  padding: 32px; /* отступ слева и справа */
-  box-sizing: border-box;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  padding: 32px;
 }
 
-/* Блок принтера */
+.printer-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ===== PRINTER CARD ===== */
 .printer {
   background: #3a3a3a;
-  border-radius: 7px; /* скругление всего блока */
+  border-radius: 7px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
-/* Название принтера над фото */
+.printer:active {
+  transform: scale(0.96);
+  opacity: 0.85;
+}
+
 .number {
   font-size: 32px;
   font-weight: bold;
-  color: #ffffff;
   text-align: center;
   padding: 12px;
-  border-radius: 7px 7px 0 0; /* скругление сверху */
 }
 
-/* Фото */
 .printer img {
-  width: 100%;       /* фото подстраивается по ширине блока */
-  height: auto;      /* сохраняет пропорции */
-  border-radius: 7px; /* скругление фото */
-  display: block;     /* убираем лишние отступы */
-  object-fit: contain; /* полностью помещается в блок */
-  margin-bottom: 8px; /* небольшой отступ снизу */
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 7px;
+  display: block;
 }
 
-/* Статус */
 .status {
-  font-size: 32px; /* текст крупнее */
-  font-weight: bold; /* жирный */
-  padding: 28px; /* толще в 2 раза */
+  font-size: 32px;
+  font-weight: bold;
+  padding: 28px;
   text-align: center;
-  border-radius: 7px; /* скругление */
-  margin-top: 0; /* отступ сверху минимальный */
+  border-radius: 7px;
 }
 
-/* Цвета статусов */
-.green  { background: #3fa96b; color: #fff; }
-.yellow { background: #c9a93a; color: #000; }
-.red    { background: #b94a48; color: #fff; }
+.green  { background: #3fa96b; }
+.yellow { background: #c9a93a; color:#000; }
+.red    { background: #b94a48; }
 
-/* Адаптив под телефоны */
-@media (max-width: 650px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 блока в ряд */
-    gap: 32px;
-    padding-left: 32px;
-    padding-right: 32px;
-  }
+/* ===== DETAIL PAGE ===== */
+.detail {
+  padding: 32px;
 }
 
+.detail-top {
+  display: flex;
+  gap: 24px;
+}
+
+.detail-left,
+.detail-right {
+  width: 50%;
+}
+
+.detail-left img {
+  width: 100%;
+  border-radius: 7px;
+}
+
+.detail-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-block {
+  background: #3a3a3a;
+  border-radius: 7px;
+  padding: 16px;
+}
+
+.info-title {
+  font-size: 18px;
+  opacity: 0.7;
+}
+
+.info-value {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.green-text {
+  color: #3fa96b;
+}
+
+.detail-section {
+  margin-top: 32px;
+  background: #3a3a3a;
+  border-radius: 7px;
+  padding: 20px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.section-text {
+  font-size: 18px;
+}
+
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.color-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
