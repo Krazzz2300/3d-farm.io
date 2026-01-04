@@ -41,6 +41,9 @@ button.disabled{opacity:0.5;cursor:default;}
 .modal{background:#2a2a2a;padding:24px;border-radius:10px;width:90%;max-width:400px;}
 .modal label{display:block;margin:12px 0 4px;}
 .modal input{width:100%;padding:8px;font-size:18px;border-radius:6px;border:none;}
+.color-options{display:grid;grid-template-columns:3fr 3fr 3fr;gap:8px;margin-top:12px;}
+.color-option{width:36px;height:36px;border-radius:50%;cursor:pointer;border:2px solid #2a2a2a;}
+.color-option.selected{border:3px solid #fff;}
 .modal-buttons{display:flex;justify-content:space-between;margin-top:16px;}
 .modal-buttons button{flex:1;margin:0 4px;padding:12px;font-size:18px;border-radius:7px;border:none;font-weight:bold;}
 .modal-buttons button.cancel{background:#f44336;color:#fff;}
@@ -88,7 +91,7 @@ button.disabled{opacity:0.5;cursor:default;}
 
 <div class="color-block">
   <div>Цвет печати</div>
-  <div class="color-circle"></div>
+  <div class="color-circle" id="color-circle"></div>
 </div>
 
 <div class="control-block">
@@ -102,6 +105,18 @@ button.disabled{opacity:0.5;cursor:default;}
     <input type="text" id="modal-model" placeholder="Корпус">
     <label>Время печати (секунды):</label>
     <input type="number" id="modal-time" placeholder="60">
+    <label>Выберите цвет печати:</label>
+    <div class="color-options" id="color-options">
+      <div class="color-option" data-color="red" style="background:red;"></div>
+      <div class="color-option" data-color="white" style="background:white;"></div>
+      <div class="color-option" data-color="blue" style="background:blue;"></div>
+      <div class="color-option" data-color="yellow" style="background:yellow;"></div>
+      <div class="color-option" data-color="green" style="background:green;"></div>
+      <div class="color-option" data-color="orange" style="background:orange;"></div>
+      <div class="color-option" data-color="purple" style="background:purple;"></div>
+      <div class="color-option" data-color="black" style="background:black;"></div>
+      <div class="color-option" data-color="pink" style="background:pink;"></div>
+    </div>
     <div class="modal-buttons">
       <button class="cancel" onclick="closeModal()">Отмена</button>
       <button class="ok" onclick="startPrint()">Готово</button>
@@ -118,14 +133,20 @@ const progressBar = document.getElementById("progress-bar");
 const startBtn = document.getElementById("start");
 const stopBtn = document.getElementById("stop");
 const modal = document.getElementById("modal");
+const colorCircle = document.getElementById("color-circle");
+const colorOptions = document.getElementById("color-options").children;
 
+let selectedColor = "red"; // по умолчанию
+
+// ===== localStorage =====
 function getPrinterData(){
   return {
     status: localStorage.getItem("printerStatus") || "idle",
     printName: localStorage.getItem("printerPrintName") || "",
     totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
     startTime: parseInt(localStorage.getItem("printerStartTime")) || 0,
-    savedPercent: parseInt(localStorage.getItem("printerSavedPercent")) || 0
+    savedPercent: parseInt(localStorage.getItem("printerSavedPercent")) || 0,
+    color: localStorage.getItem("printerColor") || "red"
   };
 }
 
@@ -135,8 +156,10 @@ function savePrinterData(printer){
   localStorage.setItem("printerTotalSeconds", printer.totalSeconds);
   localStorage.setItem("printerStartTime", printer.startTime);
   localStorage.setItem("printerSavedPercent", printer.savedPercent);
+  localStorage.setItem("printerColor", printer.color);
 }
 
+// ===== UI =====
 function updateUI(){
   let printer = getPrinterData();
   const now = Date.now();
@@ -175,22 +198,37 @@ function updateUI(){
   startBtn.classList.toggle("disabled", printer.status==="printing");
   stopBtn.classList.toggle("disabled", printer.status!=="printing");
 
+  colorCircle.style.background = printer.color;
+
   savePrinterData(printer);
 }
 updateUI();
 setInterval(updateUI,1000);
 
+// ===== Кнопки =====
 startBtn.onclick=()=>{if(getPrinterData().status!=="printing") modal.style.display="flex";}
 function closeModal(){modal.style.display="none";}
+
+for(let c of colorOptions){
+  c.onclick=()=>{
+    selectedColor = c.dataset.color;
+    for(let cc of colorOptions) cc.classList.remove("selected");
+    c.classList.add("selected");
+  }
+}
+
 function startPrint(){
   let printer = getPrinterData();
   let name = document.getElementById("modal-model").value || "Корпус";
   let time = parseInt(document.getElementById("modal-time").value) || 60;
+
   printer.printName=name;
   printer.totalSeconds=time;
   printer.startTime=Date.now();
   printer.status="printing";
   printer.savedPercent=0;
+  printer.color = selectedColor;
+
   savePrinterData(printer);
   updateUI();
   modal.style.display="none";
