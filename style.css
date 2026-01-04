@@ -9,6 +9,37 @@ body {
   color: #fff;
 }
 
+/* ===== АНИМАЦИИ СТРАНИЦ ===== */
+.page-enter {
+  animation: slideIn 0.25s ease-out forwards;
+}
+
+.page-exit {
+  animation: slideOut 0.2s ease-in forwards;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+}
+
 /* ===== GRID ===== */
 .grid {
   display: grid;
@@ -49,7 +80,6 @@ body {
   height: auto;
   object-fit: contain;
   border-radius: 7px;
-  display: block;
 }
 
 .status {
@@ -60,11 +90,16 @@ body {
   border-radius: 7px;
 }
 
-.green  { background: #3fa96b; }
-.yellow { background: #c9a93a; color:#000; }
-.red    { background: #b94a48; }
+.green { background: #3fa96b; }
 
 /* ===== DETAIL PAGE ===== */
+.back-button {
+  font-size: 20px;
+  padding: 20px 32px;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
 .detail {
   padding: 32px;
 }
