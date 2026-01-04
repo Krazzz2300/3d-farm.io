@@ -18,7 +18,7 @@ body {
   background: #1e1e1e; 
   color: #fff; 
   font-family: Arial, sans-serif;
-  padding-bottom: 80px;
+  padding-bottom: 70px; /* Место для нижней навигации */
 }
 
 .header {
@@ -67,6 +67,7 @@ body {
   border: 1px solid #444;
   position: relative;
   transition: transform 0.2s, box-shadow 0.2s;
+  overflow: hidden;
 }
 
 .card:active {
@@ -74,13 +75,25 @@ body {
   background: #333;
 }
 
-.card img {
+.card-image-container {
   width: 100%;
-  height: 110px;
+  height: 120px;
   border-radius: 8px;
-  object-fit: contain;
   background: #1e1e1e;
   margin-bottom: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Растягиваем изображение чтобы заполнить блок */
+  transition: transform 0.3s;
+}
+
+.card:hover .card-image {
+  transform: scale(1.05);
 }
 
 .card-title {
@@ -103,6 +116,9 @@ body {
   font-size: 12px;
   color: #aaa;
   margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .status-row {
@@ -149,8 +165,8 @@ body {
   right: 10px;
   background: #f44336;
   color: white;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -167,8 +183,8 @@ body {
   left: 10px;
   background: #4caf50;
   color: white;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -188,10 +204,50 @@ body {
   animation: pulse 1s infinite;
 }
 
-.add-printer-btn {
+/* НИЖНЯЯ НАВИГАЦИЯ */
+.bottom-nav {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #2a2a2a;
+  border-top: 1px solid #444;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 0;
+  z-index: 100;
+  height: 60px;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  text-decoration: none;
+  flex: 1;
+  padding: 8px 0;
+  transition: color 0.2s;
+  font-size: 12px;
+}
+
+.nav-item.active {
+  color: #4caf50;
+}
+
+.nav-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.nav-add {
+  position: relative;
+  margin-top: -20px;
+}
+
+.add-nav-btn {
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -200,39 +256,80 @@ body {
   border: none;
   font-size: 24px;
   cursor: pointer;
-  z-index: 100;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.add-printer-btn:active {
+.add-nav-btn:active {
   background: #45a049;
   transform: scale(0.95);
 }
 
-.empty-state {
+/* СТРАНИЦА ЛОГОВ */
+.logs-container {
+  padding: 15px;
+  max-height: calc(100vh - 130px);
+  overflow-y: auto;
+}
+
+.log-item {
+  background: #2a2a2a;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-left: 4px solid #4caf50;
+  animation: slideIn 0.3s ease-out;
+}
+
+.log-item.repair {
+  border-left-color: orange;
+}
+
+.log-item.problem {
+  border-left-color: #f44336;
+}
+
+.log-item.info {
+  border-left-color: #2196f3;
+}
+
+.log-item.warning {
+  border-left-color: #ff9800;
+}
+
+.log-time {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.log-message {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.log-printer {
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.empty-logs {
   text-align: center;
   padding: 40px 20px;
   color: #888;
-  width: 100%;
 }
 
-.empty-state i {
+.empty-logs i {
   font-size: 48px;
   margin-bottom: 15px;
   opacity: 0.5;
 }
 
-.empty-state h3 {
+.empty-logs h3 {
   font-size: 20px;
   margin-bottom: 10px;
-}
-
-.empty-state p {
-  font-size: 14px;
-  opacity: 0.7;
 }
 
 /* Модальное окно */
@@ -248,14 +345,17 @@ body {
   align-items: center;
   z-index: 1000;
   padding: 15px;
+  backdrop-filter: blur(4px);
 }
 
 .modal {
   background: #2a2a2a;
   padding: 20px;
-  border-radius: 12px;
+  border-radius: 16px;
   width: 100%;
-  max-width: 320px;
+  max-width: 340px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .modal h3 {
@@ -264,15 +364,26 @@ body {
   font-size: 18px;
 }
 
+.modal label {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
 .modal input {
   width: 100%;
   padding: 12px;
-  margin: 8px 0;
-  border-radius: 8px;
-  border: 1px solid #666;
-  background: #333;
+  border-radius: 10px;
+  border: 2px solid #444;
+  background: #1e1e1e;
   color: white;
   font-size: 16px;
+}
+
+.modal input:focus {
+  border-color: #4caf50;
+  outline: none;
 }
 
 .modal-buttons {
@@ -283,12 +394,17 @@ body {
 
 .modal-buttons button {
   flex: 1;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 14px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
   font-size: 16px;
   font-weight: bold;
+  transition: opacity 0.2s;
+}
+
+.modal-buttons button:active {
+  opacity: 0.8;
 }
 
 .cancel-btn { 
@@ -318,13 +434,13 @@ body {
 }
 
 @keyframes slideIn {
-  from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
-  to { transform: translateX(-50%) translateY(0); opacity: 1; }
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes slideOut {
-  from { transform: translateX(-50%) translateY(0); opacity: 1; }
-  to { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-10px); opacity: 0; }
 }
 
 /* Для планшетов */
@@ -335,19 +451,28 @@ body {
   }
   
   .card {
-    width: calc(33.333% - 10px); /* 3 в ряд */
+    width: calc(33.333% - 10px);
     min-height: 240px;
   }
   
-  .card img {
-    height: 130px;
+  .card-image-container {
+    height: 140px;
+  }
+  
+  .bottom-nav {
+    max-width: 500px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 20px 20px 0 0;
+    border: 1px solid #444;
+    border-bottom: none;
   }
 }
 
 /* Для ПК */
 @media (min-width: 1024px) {
   .card {
-    width: calc(25% - 12px); /* 4 в ряд */
+    width: calc(25% - 12px);
   }
   
   .printers-container {
@@ -355,33 +480,83 @@ body {
     margin: 0 auto;
   }
 }
+
+/* Анимации */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.page {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.hidden {
+  display: none !important;
+}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-  <span>Ферма принтеров</span>
+  <span id="page-title">Ферма принтеров</span>
   <div style="position: relative;">
     <i class="fas fa-bell" style="font-size: 18px;"></i>
     <div class="notification-badge" id="global-notification">0</div>
   </div>
 </div>
 
-<div class="printers-container" id="printers-container">
-  <!-- Принтеры будут здесь -->
+<!-- СТРАНИЦА ПРИНТЕРОВ -->
+<div id="printers-page" class="page">
+  <div class="printers-container" id="printers-container">
+    <!-- Принтеры будут здесь -->
+  </div>
 </div>
 
-<button class="add-printer-btn" id="add-printer-btn">
-  <i class="fas fa-plus"></i>
-</button>
+<!-- СТРАНИЦА ЛОГОВ -->
+<div id="logs-page" class="page hidden">
+  <div class="logs-container" id="logs-container">
+    <!-- Логи будут здесь -->
+  </div>
+</div>
+
+<!-- НИЖНЯЯ НАВИГАЦИЯ -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="showPage('printers')">
+    <i class="fas fa-home nav-icon"></i>
+    <span>Принтеры</span>
+  </div>
+  
+  <div class="nav-item nav-add">
+    <button class="add-nav-btn" onclick="showAddModal()">
+      <i class="fas fa-plus"></i>
+    </button>
+  </div>
+  
+  <div class="nav-item" onclick="showPage('logs')">
+    <i class="fas fa-history nav-icon"></i>
+    <span>Логи</span>
+  </div>
+</div>
 
 <!-- Модальное окно добавления -->
 <div class="modal-bg" id="add-modal">
   <div class="modal">
     <h3>Добавить принтер</h3>
-    <input type="text" id="new-printer-name" placeholder="Название принтера" required>
-    <input type="text" id="new-printer-model" placeholder="Модель принтера" required>
+    
+    <label>Название принтера:</label>
+    <input type="text" id="new-printer-name" placeholder="Например: Принтер 3" required>
+    
+    <label>Модель принтера:</label>
+    <input type="text" id="new-printer-model" placeholder="Например: Creality Ender 3 V2" required>
+    
+    <label>Ссылка на изображение:</label>
+    <input type="text" id="new-printer-image" placeholder="https://example.com/printer.jpg">
+    <small style="color: #888; font-size: 12px; display: block; margin-top: 4px;">
+      Можно оставить пустым для изображения по умолчанию
+    </small>
+    
     <div class="modal-buttons">
       <button class="cancel-btn" onclick="closeAddModal()">Отмена</button>
       <button class="save-btn" onclick="addNewPrinter()">Добавить</button>
@@ -390,12 +565,12 @@ body {
 </div>
 
 <script>
-// ===== ПРОСТАЯ СИСТЕМА ДЛЯ TELEGRAM MINI APPS =====
-
-// Ключ для хранения данных
+// ===== КОНСТАНТЫ И ПЕРЕМЕННЫЕ =====
 const STORAGE_KEY = '3d_printer_farm_data';
+const LOGS_STORAGE_KEY = 'printer_farm_logs';
+const MAX_LOGS = 50; // Максимальное количество логов
 
-// Стандартные принтеры (если нет сохраненных данных)
+// Стандартные принтеры
 const DEFAULT_PRINTERS = [
   {
     id: "printer1",
@@ -427,24 +602,80 @@ const DEFAULT_PRINTERS = [
   }
 ];
 
+// ===== СИСТЕМА ЛОГОВ =====
+
+// Добавить запись в логи
+function addLog(message, type = 'info') {
+  const logs = getLogs();
+  
+  const logEntry = {
+    id: Date.now(),
+    timestamp: new Date().toLocaleTimeString(),
+    date: new Date().toLocaleDateString(),
+    message: message,
+    type: type
+  };
+  
+  // Добавляем в начало массива (новые сверху)
+  logs.unshift(logEntry);
+  
+  // Ограничиваем количество логов
+  if (logs.length > MAX_LOGS) {
+    logs.pop();
+  }
+  
+  // Сохраняем
+  localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(logs));
+  
+  // Обновляем отображение если открыта страница логов
+  if (currentPage === 'logs') {
+    loadLogs();
+  }
+  
+  return logEntry;
+}
+
+// Получить все логи
+function getLogs() {
+  try {
+    const logsJSON = localStorage.getItem(LOGS_STORAGE_KEY);
+    return logsJSON ? JSON.parse(logsJSON) : [];
+  } catch (error) {
+    console.error("Ошибка при чтении логов:", error);
+    return [];
+  }
+}
+
+// Очистить все логи
+function clearLogs() {
+  if (confirm('Очистить всю историю действий?')) {
+    localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify([]));
+    loadLogs();
+    showNotification('История очищена');
+  }
+}
+
 // ===== ФУНКЦИИ ДЛЯ РАБОТЫ С ДАННЫМИ =====
 
 // Получить все принтеры из хранилища
 function getPrinters() {
   try {
-    // Пробуем получить данные
     const savedData = localStorage.getItem(STORAGE_KEY);
     
     if (!savedData) {
-      // Если данных нет, сохраняем стандартные
       savePrinters(DEFAULT_PRINTERS);
+      
+      // Добавляем логи для стандартных принтеров
+      DEFAULT_PRINTERS.forEach(printer => {
+        addLog(`Создан принтер: ${printer.name} (${printer.model})`, 'info');
+      });
+      
       return DEFAULT_PRINTERS;
     }
     
     return JSON.parse(savedData);
   } catch (error) {
     console.error("Ошибка при чтении данных:", error);
-    // Возвращаем стандартные принтеры при ошибке
     return DEFAULT_PRINTERS;
   }
 }
@@ -453,7 +684,6 @@ function getPrinters() {
 function savePrinters(printers) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(printers));
-    console.log("Данные сохранены:", printers.length, "принтеров");
     return true;
   } catch (error) {
     console.error("Ошибка при сохранении:", error);
@@ -462,7 +692,7 @@ function savePrinters(printers) {
 }
 
 // Добавить новый принтер
-function addPrinter(name, model) {
+function addPrinter(name, model, image = "") {
   const printers = getPrinters();
   
   // Создаем новый ID
@@ -474,6 +704,9 @@ function addPrinter(name, model) {
   
   const newId = 'printer' + (maxId + 1);
   
+  // Используем указанное изображение или дефолтное
+  const imageUrl = image.trim() || 'foto/default.png';
+  
   // Создаем новый принтер
   const newPrinter = {
     id: newId,
@@ -483,7 +716,7 @@ function addPrinter(name, model) {
     color: "gray",
     progress: 0,
     printName: "",
-    image: "foto/default.png",
+    image: imageUrl,
     startTime: null,
     printDuration: null,
     finishedNotified: false,
@@ -495,6 +728,9 @@ function addPrinter(name, model) {
   
   // Сохраняем
   if (savePrinters(printers)) {
+    // Добавляем запись в логи
+    addLog(`Добавлен новый принтер: ${name} (${model})`, 'info');
+    
     console.log("Принтер добавлен:", newPrinter);
     return newPrinter;
   }
@@ -516,12 +752,14 @@ function updateAllPrintersProgress() {
       if (progress !== printer.progress) {
         printer.progress = progress;
         
-        if (progress >= 100) {
+        if (progress >= 100 && printer.status !== 'finished') {
           printer.status = 'finished';
           // Добавляем уведомление
           if (!printer.finishedNotified) {
             printer.finishedNotified = true;
             showNotification(`✅ ${printer.name} завершил печать!`);
+            // Добавляем запись в логи
+            addLog(`Принтер "${printer.name}" завершил печать: ${printer.printName}`, 'info');
           }
         }
         
@@ -532,7 +770,7 @@ function updateAllPrintersProgress() {
   
   if (updated) {
     savePrinters(printers);
-    loadPrinters(); // Перерисовываем карточки
+    loadPrinters();
   }
   
   return updated;
@@ -589,16 +827,42 @@ function getProgressColor(status) {
 
 // ===== ОТОБРАЖЕНИЕ ПРИНТЕРОВ =====
 
+let currentPage = 'printers';
+
+function showPage(page) {
+  // Скрываем все страницы
+  document.getElementById('printers-page').classList.add('hidden');
+  document.getElementById('logs-page').classList.add('hidden');
+  
+  // Убираем активный класс у всех кнопок навигации
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  
+  // Показываем нужную страницу
+  document.getElementById(page + '-page').classList.remove('hidden');
+  
+  // Обновляем активную кнопку навигации
+  if (page === 'printers') {
+    document.querySelectorAll('.nav-item')[0].classList.add('active');
+    document.getElementById('page-title').textContent = 'Ферма принтеров';
+  } else if (page === 'logs') {
+    document.querySelectorAll('.nav-item')[2].classList.add('active');
+    document.getElementById('page-title').textContent = 'История действий';
+    loadLogs();
+  }
+  
+  currentPage = page;
+}
+
 function loadPrinters() {
   const printers = getPrinters();
   const container = document.getElementById('printers-container');
   
-  console.log("Загружаем", printers.length, "принтеров");
-  
   if (printers.length === 0) {
     container.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-print"></i>
+      <div style="text-align:center; padding:40px; color:#888; width:100%;">
+        <i class="fas fa-print" style="font-size:48px; margin-bottom:15px; opacity:0.5;"></i>
         <h3>Нет принтеров</h3>
         <p>Добавьте первый принтер</p>
       </div>
@@ -624,8 +888,10 @@ function loadPrinters() {
         ${showProblemBadge ? '<div class="problem-badge"><i class="fas fa-wrench"></i></div>' : ''}
         ${showFinishedBadge ? '<div class="finished-badge"><i class="fas fa-check"></i></div>' : ''}
         
-        <img src="${printer.image}" alt="${printer.model}" 
-             onerror="this.src='foto/default.png'">
+        <div class="card-image-container">
+          <img class="card-image" src="${printer.image}" alt="${printer.model}" 
+               onerror="this.src='foto/default.png'">
+        </div>
         <div class="card-title">
           <span>${printer.name}</span>
           <div class="color-indicator" style="background:${printer.color}"></div>
@@ -655,6 +921,60 @@ function loadPrinters() {
   updateNotificationBadge();
 }
 
+// ===== ОТОБРАЖЕНИЕ ЛОГОВ =====
+
+function loadLogs() {
+  const logs = getLogs();
+  const container = document.getElementById('logs-container');
+  
+  if (logs.length === 0) {
+    container.innerHTML = `
+      <div class="empty-logs">
+        <i class="fas fa-history"></i>
+        <h3>История действий пуста</h3>
+        <p>Здесь будут отображаться все действия с принтерами</p>
+      </div>
+    `;
+    return;
+  }
+  
+  let html = '';
+  logs.forEach(log => {
+    const typeClass = log.type || 'info';
+    
+    html += `
+      <div class="log-item ${typeClass}">
+        <div class="log-time">
+          ${log.date} ${log.timestamp}
+        </div>
+        <div class="log-message">${log.message}</div>
+      </div>
+    `;
+  });
+  
+  // Добавляем кнопку очистки
+  html += `
+    <div style="text-align: center; margin-top: 20px;">
+      <button onclick="clearLogs()" style="
+        background: #666;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+      ">
+        <i class="fas fa-trash"></i> Очистить историю
+      </button>
+    </div>
+  `;
+  
+  container.innerHTML = html;
+  
+  // Прокручиваем вверх
+  container.scrollTop = 0;
+}
+
 // Обновить бейдж уведомлений
 function updateNotificationBadge() {
   const count = getNotificationCount();
@@ -666,7 +986,6 @@ function updateNotificationBadge() {
 // ===== УПРАВЛЕНИЕ МОДАЛЬНЫМ ОКНОМ =====
 
 function showAddModal() {
-  console.log("Открываем модальное окно");
   document.getElementById('add-modal').style.display = 'flex';
   document.getElementById('new-printer-name').focus();
 }
@@ -675,20 +994,20 @@ function closeAddModal() {
   document.getElementById('add-modal').style.display = 'none';
   document.getElementById('new-printer-name').value = '';
   document.getElementById('new-printer-model').value = '';
+  document.getElementById('new-printer-image').value = '';
 }
 
 function addNewPrinter() {
   const name = document.getElementById('new-printer-name').value.trim();
   const model = document.getElementById('new-printer-model').value.trim();
-  
-  console.log("Добавляем принтер:", name, model);
+  const image = document.getElementById('new-printer-image').value.trim();
   
   if (!name || !model) {
     alert('Заполните название и модель принтера');
     return;
   }
   
-  const newPrinter = addPrinter(name, model);
+  const newPrinter = addPrinter(name, model, image);
   
   if (newPrinter) {
     closeAddModal();
@@ -705,7 +1024,6 @@ function addNewPrinter() {
 // ===== УВЕДОМЛЕНИЯ =====
 
 function showNotification(message) {
-  // Создаем элемент для уведомления
   const notification = document.createElement('div');
   notification.className = 'notification';
   notification.textContent = message;
@@ -713,7 +1031,6 @@ function showNotification(message) {
   
   document.body.appendChild(notification);
   
-  // Удаляем через 3 секунды
   setTimeout(() => {
     notification.style.animation = 'slideOut 0.3s ease-out';
     setTimeout(() => {
@@ -727,20 +1044,15 @@ function showNotification(message) {
 // ===== ОБРАБОТЧИКИ СОБЫТИЙ =====
 
 function openPrinter(printerId) {
-  console.log("Открываем принтер:", printerId);
-  
-  // Проверяем, есть ли завершенная печать без уведомления
   const printers = getPrinters();
   const printer = printers.find(p => p.id === printerId);
   
   if (printer && printer.status === 'finished' && printer.finishedNotified === false) {
-    // Помечаем как просмотренное
     printer.finishedNotified = true;
     savePrinters(printers);
-    loadPrinters(); // Обновляем отображение
+    loadPrinters();
   }
   
-  // Переходим на страницу принтера
   window.location.href = `printer.html?id=${printerId}`;
 }
 
@@ -752,13 +1064,23 @@ document.addEventListener('DOMContentLoaded', function() {
   // Загружаем принтеры
   loadPrinters();
   
-  // Кнопка добавления
+  // Кнопка добавления в навигации
   document.getElementById('add-printer-btn').onclick = showAddModal;
   
   // Закрытие модального окна при клике на фон
   document.getElementById('add-modal').addEventListener('click', function(e) {
     if (e.target === this) {
       closeAddModal();
+    }
+  });
+  
+  // Назначаем обработчики навигации
+  document.querySelectorAll('.nav-item').forEach((item, index) => {
+    if (index !== 1) { // Пропускаем среднюю кнопку (добавление)
+      item.addEventListener('click', function() {
+        const page = index === 0 ? 'printers' : 'logs';
+        showPage(page);
+      });
     }
   });
   
@@ -780,6 +1102,8 @@ window.showAddModal = showAddModal;
 window.closeAddModal = closeAddModal;
 window.addNewPrinter = addNewPrinter;
 window.openPrinter = openPrinter;
+window.showPage = showPage;
+window.clearLogs = clearLogs;
 </script>
 
 </body>
