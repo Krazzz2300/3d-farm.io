@@ -33,12 +33,14 @@ body{margin:0;background:#1e1e1e;color:#fff;font-family:Arial,sans-serif;opacity
 .color-block{margin:0 16px 24px;background:#2a2a2a;border-radius:7px;padding:20px;display:flex;align-items:center;gap:16px;font-size:22px;}
 .color-circle{width:32px;height:32px;border-radius:50%;background:red;}
 
-.control-block{display:flex;justify-content:center;gap:16px;margin:0 16px 24px;}
+.control-block{display:flex;justify-content:center;gap:16px;margin:0 16px 12px;}
 button.control-btn{flex:1;margin:0;padding:20px;font-size:20px;font-weight:bold;border:none;border-radius:12px;cursor:pointer;}
 button#start{background:#4caf50;color:#fff;}
 button#stop{background:#f44336;color:#fff;}
-button#repair{background:orange;color:#fff;}
 button.disabled{opacity:0.5;cursor:default;}
+
+.repair-block{display:flex;justify-content:center;margin:12px 16px 24px;}
+button#repair{background:orange;color:#fff;flex:0 0 200px;}
 
 .modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:none;justify-content:center;align-items:center;z-index:10;}
 .modal{background:#2a2a2a;padding:24px;border-radius:10px;width:90%;max-width:400px;}
@@ -100,6 +102,9 @@ button.disabled{opacity:0.5;cursor:default;}
 <div class="control-block">
   <button id="start" class="control-btn">Поставить в печать</button>
   <button id="stop" class="control-btn disabled">Остановить печать</button>
+</div>
+
+<div class="repair-block">
   <button id="repair" class="control-btn">Отправить на ремонт</button>
 </div>
 
@@ -295,7 +300,6 @@ stopBtn.onclick=()=>{
 repairBtn.onclick=()=>{
   let printer=getPrinterData();
   if(printer.status!=="repair"){
-    // отправка в ремонт
     let reason = prompt("Укажите причину поломки:");
     if(!reason) return;
     if(confirm("Точно отправить принтер в ремонт?")){
@@ -307,7 +311,6 @@ repairBtn.onclick=()=>{
       updateUI();
     }
   } else {
-    // снятие с ремонта
     if(confirm("Снять принтер с ремонта?")){
       printer.status="idle";
       printer.problem="нет";
@@ -335,3 +338,4 @@ function goBack(){document.body.style.animation="pageExit 0.2s forwards ease-in"
 
 </body>
 </html>
+
