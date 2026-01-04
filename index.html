@@ -7,6 +7,7 @@
 <style>
 body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; }
 .container { display: flex; flex-wrap: wrap; gap:64px; padding:32px; justify-content: center; }
+
 .card {
   position: relative;
   background:#2a2a2a;
@@ -18,36 +19,39 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
   transition: transform 0.15s;
 }
 .card:active { transform: scale(0.97); }
+
 .card img { width:100%; border-radius:7px; object-fit:contain; }
+
 .card-title { font-size:20px; font-weight:bold; margin-top:8px; display:flex; align-items:center; gap:8px; }
+
 .color-indicator { width:16px; height:16px; border-radius:50%; background:red; }
+
 .status-row { display:flex; justify-content: space-between; margin-top:8px; font-size:16px; }
+
 .progress { margin-top:8px; height:18px; background:#444; border-radius:9px; overflow:hidden; }
+
 .progress-bar { height:100%; width:0%; background:#4caf50; transition: width 0.3s; }
+
+.red-badge {
+  position: absolute;
+  top:8px;
+  right:8px;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:red;
+  color:#fff;
+  font-size:12px;
+  font-weight:bold;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
 @keyframes pulse {
   0% { background-color: #4caf50; }
   50% { background-color: #00ff00; }
   100% { background-color: #4caf50; }
-}
-.notification {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background:red;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:14px;
-  font-weight:bold;
-  color:#fff;
-  animation: blink 1s infinite;
-}
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
 }
 </style>
 </head>
@@ -71,12 +75,12 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
     <div class="progress">
       <div id="main-bar-1" class="progress-bar"></div>
     </div>
-    <div class="notification" id="main-notify-1" style="display:none;">1</div>
+    <div class="red-badge" id="main-notify-1">1</div>
   </div>
 </div>
 
 <script>
-// ===== ДАННЫЕ ПРИНТЕРА =====
+// ===== ПОЛУЧЕНИЕ ДАННЫХ ПРИНТЕРА =====
 function getPrinterData() {
   return {
     status: localStorage.getItem("printerStatus") || "idle",
@@ -109,7 +113,6 @@ function updateCard() {
     elapsed = Math.floor((now - printer.startTime)/1000);
     if(elapsed >= printer.totalSeconds){
       printer.status="finished";
-      elapsed = printer.totalSeconds;
       printer.savedPercent = 100;
       printer.finishedNotified = false;
       savePrinterData(printer);
@@ -122,6 +125,7 @@ function updateCard() {
   if(printer.status==="stopped") percent = printer.savedPercent;
   else printer.savedPercent = percent;
 
+  // Статус и модель
   document.getElementById("main-status-1").textContent =
     printer.status==="idle" ? "Простаивает" :
     printer.status==="printing" ? "Печать" :
@@ -131,11 +135,13 @@ function updateCard() {
   document.getElementById("main-model-1").textContent =
     printer.status==="idle" ? "—" : printer.printName || "—";
 
+  // Полоска прогресса
   const bar = document.getElementById("main-bar-1");
   const statusText = document.getElementById("main-status-1");
   const notify = document.getElementById("main-notify-1");
 
   if(printer.status==="stopped"){
+    bar.style.animation="none";
     bar.style.background="orange";
     statusText.style.color="orange";
     notify.style.display="none";
@@ -143,7 +149,7 @@ function updateCard() {
     bar.style.animation="pulse 1s infinite";
     statusText.style.color="#4caf50";
     notify.style.display="flex";
-  } else {
+  } else { // printing / idle
     bar.style.animation="none";
     bar.style.background="#4caf50";
     statusText.style.color="#fff";
@@ -160,13 +166,8 @@ setInterval(updateCard, 1000);
 updateCard();
 
 function openPrinter(id){
-  let printer = getPrinterData();
-  if(printer.status==="finished" && !printer.finishedNotified){
-    localStorage.setItem("showFinishedPopup", "true");
-  }
   window.location.href="printer.html";
 }
 </script>
-
 </body>
 </html>
