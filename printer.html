@@ -110,13 +110,6 @@ button.disabled{opacity:0.5;cursor:default;}
 </div>
 
 <script>
-let printer = {
-  status: localStorage.getItem("printerStatus") || "idle",
-  printName: localStorage.getItem("printerPrintName") || "",
-  totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
-  elapsed: parseInt(localStorage.getItem("printerElapsed")) || 0
-};
-
 const statusText = document.getElementById("status-text");
 const printNameText = document.getElementById("print-name");
 const progressText = document.getElementById("progress-text");
@@ -126,7 +119,24 @@ const startBtn = document.getElementById("start");
 const stopBtn = document.getElementById("stop");
 const modal = document.getElementById("modal");
 
+function getPrinterData() {
+  return {
+    status: localStorage.getItem("printerStatus") || "idle",
+    printName: localStorage.getItem("printerPrintName") || "",
+    totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
+    elapsed: parseInt(localStorage.getItem("printerElapsed")) || 0
+  };
+}
+
+function savePrinterData(printer){
+  localStorage.setItem("printerStatus", printer.status);
+  localStorage.setItem("printerPrintName", printer.printName);
+  localStorage.setItem("printerTotalSeconds", printer.totalSeconds);
+  localStorage.setItem("printerElapsed", printer.elapsed);
+}
+
 function updateUI(){
+  let printer = getPrinterData();
   statusText.textContent = printer.status==="idle"?"Простаивает":printer.status==="printing"?"Печать":"Печать остановлена";
   printNameText.textContent = printer.printName || "—";
   let percent = printer.totalSeconds?Math.floor((printer.elapsed/printer.totalSeconds)*100):0;
@@ -141,27 +151,23 @@ function updateUI(){
 updateUI();
 
 let timer = setInterval(()=>{
+  let printer = getPrinterData();
   if(printer.status==="printing" && printer.elapsed < printer.totalSeconds){
     printer.elapsed++;
-    saveData();
+    savePrinterData(printer);
     updateUI();
   }
 },1000);
 
-function saveData(){
-  localStorage.setItem("printerStatus", printer.status);
-  localStorage.setItem("printerPrintName", printer.printName);
-  localStorage.setItem("printerTotalSeconds", printer.totalSeconds);
-  localStorage.setItem("printerElapsed", printer.elapsed);
-}
-
 startBtn.onclick=()=>{
+  let printer = getPrinterData();
   if(printer.status!=="printing") modal.style.display="flex";
 }
 
 function closeModal(){ modal.style.display="none"; }
 
 function startPrint(){
+  let printer = getPrinterData();
   let name = document.getElementById("modal-model").value || "Корпус";
   let time = parseInt(document.getElementById("modal-time").value) || 60;
 
@@ -169,16 +175,17 @@ function startPrint(){
   printer.totalSeconds=time;
   printer.elapsed=0;
   printer.status="printing";
-  saveData();
+  savePrinterData(printer);
   updateUI();
   modal.style.display="none";
 }
 
 stopBtn.onclick=()=>{
+  let printer = getPrinterData();
   if(printer.status==="printing"){
     if(confirm("Точно остановить печать?")){
       printer.status="stopped";
-      saveData();
+      savePrinterData(printer);
       updateUI();
     }
   }
@@ -189,4 +196,3 @@ function goBack(){ document.body.style.animation="pageExit 0.2s forwards ease-in
 
 </body>
 </html>
-
