@@ -7,6 +7,7 @@
 <style>
 body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; }
 .container { display: flex; flex-wrap: wrap; gap:64px; padding:32px; justify-content: center; }
+
 .card {
   background:#2a2a2a;
   border-radius: 7px;
@@ -15,20 +16,39 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
   padding:12px;
   cursor:pointer;
   transition: transform 0.15s;
+  position: relative;
 }
 .card:active { transform: scale(0.97); }
 .card img { width:100%; border-radius:7px; object-fit:contain; }
+
 .card-title { font-size:20px; font-weight:bold; margin-top:8px; display:flex; align-items:center; gap:8px; }
 .color-indicator { width:16px; height:16px; border-radius:50%; background:red; }
+
 .status-row { display:flex; justify-content: space-between; margin-top:8px; font-size:16px; }
 .progress { margin-top:8px; height:18px; background:#444; border-radius:9px; overflow:hidden; }
-.progress-bar { height:100%; width:0%; background:#4caf50; transition: width 0.3s; }
+.progress-bar {
+  height:100%;
+  width:0%;
+  background:#4caf50;
+  transition: width 0.3s;
+}
+
+@keyframes glow {
+  0% { background-color: #4caf50; }
+  50% { background-color: #6ef26e; }
+  100% { background-color: #4caf50; }
+}
+
+.finished .progress-bar {
+  animation: glow 1s infinite;
+}
+.finished .status-text { color:#4caf50; font-weight:bold; }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="card" onclick="openPrinter(1)">
+  <div class="card" id="card-1" onclick="openPrinter(1)">
     <img src="foto/1.png" alt="Bambu Lab A1">
     <div class="card-title">
       Принтер 1
@@ -36,7 +56,7 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
     </div>
     <div class="status-row">
       <div>Статус:</div>
-      <div id="main-status-1">Простаивает</div>
+      <div id="main-status-1" class="status-text">Простаивает</div>
     </div>
     <div class="status-row">
       <div>Готово:</div>
@@ -53,7 +73,7 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 </div>
 
 <script>
-// ===== ПОЛУЧЕНИЕ ДАННЫХ ПРИНТЕРА =====
+// ===== ДАННЫЕ ПРИНТЕРА =====
 function getPrinterData() {
   return {
     status: localStorage.getItem("printerStatus") || "idle",
@@ -61,50 +81,72 @@ function getPrinterData() {
     totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
     startTime: parseInt(localStorage.getItem("printerStartTime")) || 0,
     savedPercent: parseInt(localStorage.getItem("printerSavedPercent")) || 0,
-    color: localStorage.getItem("printerColor") || "red"
+    color: localStorage.getItem("printerColor") || "red",
+    finishedNotified: localStorage.getItem("printerFinishedNotified") === "true"
   };
+}
+
+function savePrinterData(printer){
+  localStorage.setItem("printerStatus", printer.status);
+  localStorage.setItem("printerPrintName", printer.printName);
+  localStorage.setItem("printerTotalSeconds", printer.totalSeconds);
+  localStorage.setItem("printerStartTime", printer.startTime);
+  localStorage.setItem("printerSavedPercent", printer.savedPercent);
+  localStorage.setItem("printerColor", printer.color);
+  localStorage.setItem("printerFinishedNotified", printer.finishedNotified || false);
 }
 
 // ===== ОБНОВЛЕНИЕ UI =====
 function updateCard() {
   let printer = getPrinterData();
+  const card = document.getElementById("card-1");
   const now = Date.now();
   let elapsed = 0;
 
-  if(printer.status==="printing"){
+  if(printer.status === "printing") {
     elapsed = Math.floor((now - printer.startTime)/1000);
     if(elapsed >= printer.totalSeconds){
-      printer.status="idle";
+      printer.status = "finished";
       elapsed = printer.totalSeconds;
       printer.savedPercent = 100;
+      printer.finishedNotified = false;
     }
-  } else if(printer.status==="stopped"){
+  } else if(printer.status === "stopped") {
     elapsed = Math.floor(printer.totalSeconds * printer.savedPercent / 100);
   }
 
   let percent = printer.totalSeconds ? Math.floor((elapsed/printer.totalSeconds)*100) : 0;
-  if(printer.status==="stopped") percent = printer.savedPercent;
+  if(printer.status === "stopped") percent = printer.savedPercent;
   else printer.savedPercent = percent;
 
-  document.getElementById("main-status-1").textContent = printer.status==="idle" ? "Простаивает" : printer.status==="printing" ? "Печать" : "Печать остановлена";
+  // статус
+  const statusText = document.getElementById("main-status-1");
+  if(printer.status === "finished"){
+    statusText.textContent = "Готово";
+    card.classList.add("finished");
+  } else if(printer.status === "printing") {
+    statusText.textContent = "Печать";
+    card.classList.remove("finished");
+  } else {
+    statusText.textContent = "Простаивает";
+    card.classList.remove("finished");
+  }
+
   document.getElementById("main-progress-1").textContent = percent + "%";
   document.getElementById("main-model-1").textContent = printer.printName || "—";
-
-  const bar = document.getElementById("main-bar-1");
-  const statusText = document.getElementById("main-status-1");
-  if(printer.status==="stopped"){ bar.style.background="orange"; statusText.style.color="orange"; }
-  else { bar.style.background="#4caf50"; statusText.style.color="#fff"; }
-
-  bar.style.width = percent+"%";
-
-  // обновляем кружок цвета
   document.getElementById("main-color-1").style.background = printer.color;
+  document.getElementById("main-bar-1").style.width = percent + "%";
+
+  savePrinterData(printer);
 }
 
-setInterval(updateCard, 1000);
+setInterval(updateCard, 500);
 updateCard();
 
-function openPrinter(id){ window.location.href="printer.html"; }
+function openPrinter(id){
+  window.location.href="printer.html";
+}
 </script>
 </body>
 </html>
+
