@@ -3,75 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ферма 3D-принтеров</title>
+<title>Главная</title>
 <style>
-body{margin:0;background:#1e1e1e;color:#fff;font-family:Arial,sans-serif;}
-.container{display:grid;grid-template-columns:repeat(2,1fr);gap:24px 24px;padding:24px;} /* горизонт и вертикальный зазор одинаковый */
-.printer-block{background:#2a2a2a;border-radius:40px;overflow:hidden;cursor:pointer;transition:transform 0.15s;display:flex;flex-direction:column;}
-.printer-block:active{transform:scale(0.97);}
-.printer-photo img{width:100%;height:auto;object-fit:contain;border-bottom:1px solid #444;}
-.printer-info{padding:12px;display:flex;align-items:center;justify-content:space-between;}
-.printer-name{font-size:18px;font-weight:bold;}
-.color-circle{width:16px;height:16px;border-radius:50%;background:red;}
-.progress{margin-top:8px;height:12px;background:#444;border-radius:6px;overflow:hidden;}
-.progress-bar{height:100%;width:0%;background:#4caf50;transition:width 0.3s;}
-.status-printing{margin-top:6px;font-size:16px;opacity:0.8;}
+body {margin:0;background:#1e1e1e;color:#fff;font-family:Arial,sans-serif;}
+.container {display:flex;flex-wrap:wrap;gap:24px;padding:16px;}
+.printer-block {background:#2a2a2a;border-radius:40px;width:48%;padding:16px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;position:relative;}
+.printer-photo {width:100%;border-radius:7px;object-fit:contain;}
+.printer-name {margin-top:12px;font-size:20px;font-weight:bold;display:flex;align-items:center;justify-content:center;gap:8px;}
+.color-indicator {width:16px;height:16px;border-radius:50%;background:red;}
+.progress-bar-bg {width:100%;height:12px;background:#444;border-radius:6px;margin-top:12px;overflow:hidden;}
+.progress-bar {height:100%;width:0%;background:#4caf50;transition:width 0.3s;}
+.printing-name {margin-top:8px;font-size:16px;opacity:0.85;}
 </style>
 </head>
 <body>
 
-<div class="container" id="printers-container">
-  <!-- Блоки принтеров создаются через JS -->
+<div class="container">
+  <div class="printer-block" onclick="openPrinterPage(1)">
+    <img src="foto/1.png" alt="Bambu Lab A1" class="printer-photo">
+    <div class="printer-name">Принтер 1 <div class="color-indicator" id="color-1"></div></div>
+    <div class="progress-bar-bg"><div class="progress-bar" id="progress-1"></div></div>
+    <div class="printing-name" id="printing-1">—</div>
+  </div>
 </div>
 
 <script>
-const printersContainer = document.getElementById("printers-container");
+function openPrinterPage(id){ location.href = "printer.html?id="+id; }
 
+// === Данные принтера ===
 function getPrinterData(){
-  return [{
-    id: 1,
-    name: "Принтер 1",
-    photo: "foto/1.png",
-    status: localStorage.getItem("printerStatus") || "idle",
-    printName: localStorage.getItem("printerPrintName") || "—",
-    totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
-    startTime: parseInt(localStorage.getItem("printerStartTime")) || 0,
-    savedPercent: parseInt(localStorage.getItem("printerSavedPercent")) || 0,
-    color: localStorage.getItem("printerColor") || "red"
-  }];
+  return JSON.parse(localStorage.getItem("printerData")) || {
+    status:"idle",
+    printName:"",
+    totalSeconds:0,
+    startTime:0,
+    endTime:0,
+    color:"red"
+  };
 }
 
-function renderPrinters(){
-  const printers = getPrinterData();
-  printersContainer.innerHTML = "";
-  const now = Date.now();
+function savePrinterData(data){ localStorage.setItem("printerData",JSON.stringify(data)); }
 
-  printers.forEach(p=>{
-    let elapsed = 0;
-    if(p.status==="printing") elapsed = Math.floor((now - p.startTime)/1000);
-    else if(p.status==="stopped") elapsed = Math.floor(p.totalSeconds * p.savedPercent / 100);
-
-    const percent = p.totalSeconds ? Math.floor((elapsed/p.totalSeconds)*100) : 0;
-
-    const block = document.createElement("div");
-    block.className="printer-block";
-    block.onclick = ()=>location.href="printer.html"; // открыть страницу принтера
-
-    block.innerHTML=`
-      <div class="printer-photo"><img src="${p.photo}" alt="${p.name}"></div>
-      <div class="printer-info">
-        <div class="printer-name">${p.name}</div>
-        <div class="color-circle" style="background:${p.color};"></div>
-      </div>
-      <div class="status-printing">Печатается: ${p.printName}</div>
-      <div class="progress"><div class="progress-bar" style="width:${percent}%; background:${p.status==="stopped"?"orange":"#4caf50"}"></div></div>
-    `;
-    printersContainer.appendChild(block);
-  });
+function updateUI(){
+  let p = getPrinterData();
+  let elapsed=0, percent=0;
+  if(p.status==="printing") elapsed=Math.floor((Date.now()-p.startTime)/1000);
+  percent = p.totalSeconds?Math.floor((elapsed/p.totalSeconds)*100):0;
+  document.getElementById("progress-1").style.width = percent+"%";
+  document.getElementById("printing-1").textContent = p.printName || "—";
+  document.getElementById("color-1").style.background = p.color || "red";
 }
-
-renderPrinters();
-setInterval(renderPrinters,1000);
+setInterval(updateUI,500);
+updateUI();
 </script>
 
 </body>
