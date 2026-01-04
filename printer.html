@@ -69,7 +69,7 @@ body {
   width: 100%;
   height: 200px;
   border-radius: 12px;
-  object-fit: contain;
+  object-fit: cover; /* Растягиваем изображение */
   background: #2a2a2a;
   margin-bottom: 15px;
   padding: 10px;
@@ -167,6 +167,12 @@ body {
   color: white; 
 }
 
+.delete-btn {
+  background: #666;
+  color: white;
+  margin-top: 10px;
+}
+
 .disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -212,6 +218,7 @@ body {
   align-items: center;
   z-index: 1000;
   padding: 15px;
+  backdrop-filter: blur(4px);
 }
 
 .modal {
@@ -261,6 +268,15 @@ body {
 .pulse-animation {
   animation: pulse 1s infinite;
 }
+
+.problem-info {
+  background: rgba(244, 67, 54, 0.1);
+  border-left: 4px solid #f44336;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-size: 14px;
+}
 </style>
 </head>
 <body>
@@ -293,6 +309,12 @@ body {
       </div>
     </div>
     
+    <!-- Блок проблемы для ремонта -->
+    <div id="problem-info" class="problem-info" style="display: none;">
+      <div style="font-weight: bold; margin-bottom: 5px;">Причина ремонта:</div>
+      <div id="problem-text"></div>
+    </div>
+    
     <div class="progress-container">
       <div class="info-row">
         <div class="info-label">Прогресс:</div>
@@ -309,10 +331,7 @@ body {
     <button id="start-btn" class="control-btn start-btn">Начать печать</button>
     <button id="stop-btn" class="control-btn stop-btn disabled">Остановить печать</button>
     <button id="repair-btn" class="control-btn repair-btn">Отправить в ремонт</button>
-  </div>
-  
-  <div style="margin-top: 20px; text-align: center;">
-    <button class="control-btn" style="background:#666; color:white;" onclick="deleteThisPrinter()">Удалить этот принтер</button>
+    <button class="control-btn delete-btn" onclick="deleteThisPrinter()">Удалить этот принтер</button>
   </div>
 </div>
 
@@ -341,6 +360,7 @@ body {
 <script>
 // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
 const STORAGE_KEY = '3d_printer_farm_data';
+const LOGS_STORAGE_KEY = 'printer_farm_logs';
 const urlParams = new URLSearchParams(window.location.search);
 const printerId = urlParams.get('id') || 'printer1';
 let updateInterval;
@@ -350,6 +370,42 @@ const PRINT_COLORS = [
   'red', 'blue', 'green', 'yellow', 'orange', 
   'purple', 'pink', 'black', 'white', 'gray'
 ];
+
+// ===== СИСТЕМА ЛОГОВ =====
+
+// Добавить запись в логи
+function addLog(message, type = 'info') {
+  const logs = getLogs();
+  
+  const logEntry = {
+    id: Date.now(),
+    timestamp: new Date().toLocaleTimeString(),
+    date: new Date().toLocaleDateString(),
+    message: message,
+    type: type
+  };
+  
+  logs.unshift(logEntry);
+  
+  // Ограничиваем количество логов
+  if (logs.length > 50) {
+    logs.pop();
+  }
+  
+  localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(logs));
+  return logEntry;
+}
+
+// Получить все логи
+function getLogs() {
+  try {
+    const logsJSON = localStorage.getItem(LOGS_STORAGE_KEY);
+    return logsJSON ? JSON.parse(logsJSON) : [];
+  } catch (error) {
+    console.error("Ошибка при чтении логов:", error);
+    return [];
+  }
+}
 
 // ===== РАБОТА С ДАННЫМИ =====
 
@@ -398,6 +454,7 @@ function updatePrintProgress() {
   if (!printer) return false;
   
   let updated = false;
+  let statusChanged = false;
   
   if (printer.status === 'printing' && printer.startTime && printer.printDuration) {
     const now = Date.now();
@@ -407,10 +464,13 @@ function updatePrintProgress() {
     if (progress !== printer.progress) {
       printer.progress = progress;
       
-      if (progress >= 100) {
+      if (progress >= 100 && printer.status !== 'finished') {
         printer.status = 'finished';
         printer.finishedNotified = false;
-        showNotificationOnPage('✅ Печать завершена!');
+        statusChanged = true;
+        
+        // Добавляем запись в логи
+        addLog(`Принтер "${printer.name}" завершил печать: ${printer.printName}`, 'info');
       }
       
       updatePrinter(printer);
@@ -418,8 +478,7 @@ function updatePrintProgress() {
     }
   }
   
-  if (updated || document.hidden) {
-    // Обновляем интерфейс даже если страница неактивна
+  if (updated || statusChanged) {
     updatePrinterUI(printer);
   }
   
@@ -469,6 +528,17 @@ function updatePrinterUI(printer) {
   imageEl.onerror = function() {
     this.src = 'foto/default.png';
   };
+  
+  // Проблема (для ремонта)
+  const problemInfo = document.getElementById('problem-info');
+  const problemText = document.getElementById('problem-text');
+  
+  if (printer.status === 'repair' && printer.problem) {
+    problemInfo.style.display = 'block';
+    problemText.textContent = printer.problem;
+  } else {
+    problemInfo.style.display = 'none';
+  }
   
   // Кнопки управления
   const startBtn = document.getElementById('start-btn');
@@ -563,13 +633,17 @@ function confirmPrint() {
     startTime: Date.now(),
     printDuration: printTime * 1000,
     color: selectedColor,
-    finishedNotified: false
+    finishedNotified: false,
+    problem: "" // Сбрасываем проблему если была
   };
   
   if (updatePrinter(updatedPrinter)) {
+    // Добавляем запись в логи
+    addLog(`Принтер "${printer.name}" начал печать: ${printName} (${printTime} сек)`, 'info');
+    
     closePrintModal();
     updatePrinterUI(updatedPrinter);
-    showNotificationOnPage('🖨️ Печать начата!');
+    showNotification('🖨️ Печать начата!');
   }
 }
 
@@ -578,10 +652,17 @@ function stopPrint() {
   if (!printer || printer.status !== 'printing') return;
   
   if (confirm('Остановить печать?')) {
-    printer.status = 'stopped';
-    if (updatePrinter(printer)) {
-      updatePrinterUI(printer);
-      showNotificationOnPage('⏸️ Печать остановлена');
+    const updatedPrinter = {
+      ...printer,
+      status: 'stopped'
+    };
+    
+    if (updatePrinter(updatedPrinter)) {
+      // Добавляем запись в логи
+      addLog(`Печать остановлена на принтере "${printer.name}": ${printer.printName} (готово: ${printer.progress}%)`, 'warning');
+      
+      updatePrinterUI(updatedPrinter);
+      showNotification('⏸️ Печать остановлена');
     }
   }
 }
@@ -594,35 +675,56 @@ function toggleRepair() {
     const reason = prompt('Причина ремонта:', 'Неисправность экструдера');
     if (reason === null) return;
     
-    printer.status = 'repair';
-    printer.problem = reason;
-    printer.progress = 100;
-    printer.printName = '';
+    const updatedPrinter = {
+      ...printer,
+      status: 'repair',
+      problem: reason,
+      progress: 100,
+      printName: '',
+      startTime: null,
+      printDuration: null,
+      finishedNotified: false
+    };
     
-    if (updatePrinter(printer)) {
-      updatePrinterUI(printer);
-      showNotificationOnPage('🔧 Принтер отправлен в ремонт');
+    if (updatePrinter(updatedPrinter)) {
+      // Добавляем запись в логи
+      addLog(`Принтер "${printer.name}" отправлен в ремонт: ${reason}`, 'problem');
+      
+      updatePrinterUI(updatedPrinter);
+      showNotification('🔧 Принтер отправлен в ремонт');
     }
   } else {
-    printer.status = 'idle';
-    printer.problem = '';
-    printer.progress = 0;
-    printer.printName = '';
+    const updatedPrinter = {
+      ...printer,
+      status: 'idle',
+      problem: '',
+      progress: 0,
+      printName: ''
+    };
     
-    if (updatePrinter(printer)) {
-      updatePrinterUI(printer);
-      showNotificationOnPage('✅ Принтер снят с ремонта');
+    if (updatePrinter(updatedPrinter)) {
+      // Добавляем запись в логи
+      addLog(`Принтер "${printer.name}" снят с ремонта`, 'info');
+      
+      updatePrinterUI(updatedPrinter);
+      showNotification('✅ Принтер снят с ремонта');
     }
   }
 }
 
 function deleteThisPrinter() {
-  if (confirm('Удалить этот принтер? Это действие нельзя отменить.')) {
+  const printer = getCurrentPrinter();
+  if (!printer) return;
+  
+  if (confirm(`Удалить принтер "${printer.name}"? Это действие нельзя отменить.`)) {
     const printers = getPrinters();
     const updatedPrinters = printers.filter(p => p.id !== printerId);
     
     if (savePrinters(updatedPrinters)) {
-      showNotificationOnPage('🗑️ Принтер удален');
+      // Добавляем запись в логи
+      addLog(`Удален принтер: ${printer.name} (${printer.model})`, 'warning');
+      
+      showNotification('🗑️ Принтер удален');
       setTimeout(() => {
         window.location.href = 'index.html';
       }, 1000);
@@ -665,7 +767,7 @@ function getProgressColor(status) {
   return colorMap[status] || '#444';
 }
 
-function showNotificationOnPage(message) {
+function showNotification(message) {
   // Создаем уведомление
   const notification = document.createElement('div');
   notification.textContent = message;

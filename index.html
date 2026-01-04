@@ -738,6 +738,7 @@ function addPrinter(name, model, image = "") {
   return null;
 }
 
+// ===== ВАЖНО: ФУНКЦИЯ ОБНОВЛЕНИЯ ПРОГРЕССА =====
 // Обновить прогресс всех печатающих принтеров
 function updateAllPrintersProgress() {
   const printers = getPrinters();
@@ -758,7 +759,7 @@ function updateAllPrintersProgress() {
           if (!printer.finishedNotified) {
             printer.finishedNotified = true;
             showNotification(`✅ ${printer.name} завершил печать!`);
-            // Добавляем запись в логи
+            // ВАЖНО: Добавляем запись в логи
             addLog(`Принтер "${printer.name}" завершил печать: ${printer.printName}`, 'info');
           }
         }
@@ -1084,7 +1085,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Запускаем автообновление прогресса каждую секунду
+  // ВАЖНО: Запускаем автообновление прогресса каждую секунду
   setInterval(updateAllPrintersProgress, 1000);
   
   // Также обновляем при возвращении на страницу
