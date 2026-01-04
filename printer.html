@@ -21,7 +21,6 @@ body {
   padding: 16px;
 }
 
-/* Кнопка назад */
 .back-btn {
   background: #2e2e2e;
   color: #fff;
@@ -36,20 +35,18 @@ body {
   transform: scale(0.95);
 }
 
-/* Название */
 .title {
   font-size: 32px;
   font-weight: bold;
 }
 
-/* ===== ВЕРХНИЙ БЛОК ===== */
+/* ===== ВЕРХ ===== */
 .top-block {
   display: flex;
   gap: 16px;
   padding: 0 16px;
 }
 
-/* Фото */
 .photo-block {
   width: 50%;
 }
@@ -62,14 +59,23 @@ body {
   display: block;
 }
 
-/* Инфо */
 .info-block {
   width: 50%;
   background: #2a2a2a;
   border-radius: 7px;
   padding: 16px;
-  font-size: 24px;
-  line-height: 1.4;
+}
+
+/* Модель — меньше и аккуратнее */
+.model-label {
+  font-size: 18px;
+  opacity: 0.7;
+}
+
+.model-value {
+  font-size: 20px;
+  font-weight: bold;
+  white-space: nowrap;
 }
 
 /* ===== СТАТУС ===== */
@@ -78,11 +84,34 @@ body {
   background: #2a2a2a;
   border-radius: 7px;
   padding: 20px;
-  font-size: 24px;
 }
 
+/* Строка статуса */
+.status-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+/* Левая часть (подписи) */
+.status-label {
+  background: #242424;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 18px;
+  opacity: 0.85;
+}
+
+/* Правая часть (значения) */
+.status-value {
+  font-size: 22px;
+  padding-left: 12px;
+}
+
+/* Прогресс */
 .progress {
-  margin-top: 12px;
+  margin-top: 16px;
   height: 18px;
   background: #444;
   border-radius: 9px;
@@ -104,7 +133,7 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .color-circle {
@@ -129,14 +158,26 @@ body {
   </div>
 
   <div class="info-block">
-    <div><b>Модель:</b><br>Bambu Lab A1</div>
+    <div class="model-label">Модель</div>
+    <div class="model-value">Bambu Lab A1</div>
   </div>
 </div>
 
 <div class="status-block">
-  <div><b>Печать:</b> Корпус</div>
-  <div>Готово: 65%</div>
-  <div>Осталось: 2ч 15м</div>
+  <div class="status-row">
+    <div class="status-label">Печать</div>
+    <div class="status-value">Корпус</div>
+  </div>
+
+  <div class="status-row">
+    <div class="status-label">Готово</div>
+    <div class="status-value">65%</div>
+  </div>
+
+  <div class="status-row">
+    <div class="status-label">Осталось</div>
+    <div class="status-value">2ч 15м</div>
+  </div>
 
   <div class="progress">
     <div class="progress-bar"></div>
@@ -144,7 +185,7 @@ body {
 </div>
 
 <div class="color-block">
-  <div>Цвет печати:</div>
+  <div>Цвет печати</div>
   <div class="color-circle"></div>
 </div>
 
