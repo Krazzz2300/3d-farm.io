@@ -4,90 +4,34 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Принтер</title>
-
 <style>
-body {
-  margin: 0;
-  background: #1e1e1e;
-  color: #ffffff;
-  font-family: Arial, sans-serif;
-  opacity: 0;
-  transform: translateX(40px);
-  animation: pageEnter 0.25s forwards ease-out;
-}
+body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; opacity:0; transform: translateX(40px); animation: pageEnter 0.25s forwards ease-out;}
+@keyframes pageEnter { from {opacity:0; transform:translateX(40px);} to {opacity:1; transform:translateX(0);} }
+@keyframes pageExit { from {opacity:1; transform:translateX(0);} to {opacity:0; transform:translateX(40px);} }
 
-/* ===== Анимации ===== */
-@keyframes pageEnter {
-  from { opacity: 0; transform: translateX(40px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-@keyframes pageExit {
-  from { opacity: 1; transform: translateX(0); }
-  to { opacity: 0; transform: translateX(40px); }
-}
+.header{display:flex;align-items:center;gap:16px;padding:16px;}
+.back-btn{background:#2e2e2e;color:#fff;border:none;border-radius:12px;padding:14px 18px;font-size:18px;font-weight:bold;cursor:pointer;}
+.back-btn:active{transform:scale(0.95);}
+.title{font-size:32px;font-weight:bold;}
 
-/* ===== HEADER ===== */
-.header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-}
+.top-block{display:flex;gap:16px;padding:0 16px;}
+.photo-block{width:50%;}
+.photo-block img{width:100%;height:auto;border-radius:7px;object-fit:contain;}
+.info-block{width:50%;background:#2a2a2a;border-radius:7px;padding:16px;}
+.model-label{font-size:18px;opacity:0.7;}
+.model-value{font-size:20px;font-weight:bold;white-space:nowrap;}
 
-.back-btn {
-  background: #2e2e2e;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 14px 18px;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-}
+.status-block{margin:24px 16px;background:#2a2a2a;border-radius:7px;padding:20px;}
+.status-row{display:grid;grid-template-columns:110px 1fr;align-items:center;margin-bottom:12px;}
+.status-label{background:#242424;border-radius:6px;padding:6px 10px;font-size:18px;opacity:0.85;}
+.status-value{font-size:22px;padding-left:12px;}
+.progress{margin-top:16px;height:18px;background:#444;border-radius:9px;overflow:hidden;}
+.progress-bar{height:100%;width:0%;background:#4caf50;transition:width 0.3s;}
 
-.back-btn:active { transform: scale(0.95); }
-.title { font-size: 32px; font-weight: bold; }
-
-/* ===== ВЕРХ ===== */
-.top-block { display: flex; gap: 16px; padding: 0 16px; }
-.photo-block { width: 50%; }
-.photo-block img {
-  width: 100%;
-  height: auto;
-  border-radius: 7px;
-  object-fit: contain;
-  display: block;
-}
-.info-block {
-  width: 50%;
-  background: #2a2a2a;
-  border-radius: 7px;
-  padding: 16px;
-}
-.model-label { font-size: 18px; opacity: 0.7; }
-.model-value { font-size: 20px; font-weight: bold; white-space: nowrap; }
-
-/* ===== СТАТУС ===== */
-.status-block {
-  margin: 24px 16px;
-  background: #2a2a2a;
-  border-radius: 7px;
-  padding: 20px;
-}
-.status-row { display: grid; grid-template-columns: 110px 1fr; align-items: center; margin-bottom: 12px; }
-.status-label { background: #242424; border-radius: 6px; padding: 6px 10px; font-size: 18px; opacity: 0.85; }
-.status-value { font-size: 22px; padding-left: 12px; }
-
-/* Прогресс */
-.progress { margin-top: 16px; height: 18px; background: #444; border-radius: 9px; overflow: hidden; }
-.progress-bar { height: 100%; width: 0%; background: #4caf50; transition: width 0.3s; }
-
-/* ===== ЦВЕТ ===== */
-.color-block { margin: 0 16px 24px; background: #2a2a2a; border-radius: 7px; padding: 20px; display: flex; align-items: center; gap: 16px; font-size: 22px; }
-.color-circle { width: 32px; height: 32px; border-radius: 50%; background: red; }
+.color-block{margin:0 16px 24px;background:#2a2a2a;border-radius:7px;padding:20px;display:flex;align-items:center;gap:16px;font-size:22px;}
+.color-circle{width:32px;height:32px;border-radius:50%;background:red;}
 </style>
 </head>
-
 <body>
 
 <div class="header">
@@ -132,32 +76,33 @@ body {
 <script>
 // ===== ДАННЫЕ ПРИНТЕРА =====
 let printer = {
-  totalSeconds: 135, // 2м 15с
-  elapsed: 0
+  totalSeconds: 135,
+  elapsed: parseInt(localStorage.getItem("printer1Elapsed")) || 0
 };
 
-// ===== ФУНКЦИЯ ОБНОВЛЕНИЯ =====
+// ===== ОБНОВЛЕНИЕ =====
 function updateProgress() {
-  if (printer.elapsed >= printer.totalSeconds) return;
-
-  printer.elapsed++;
   let progressPercent = Math.floor((printer.elapsed / printer.totalSeconds) * 100);
-
-  // обновляем текст и прогресс
   document.getElementById("progress-bar").style.width = progressPercent + "%";
   document.getElementById("progress-text").textContent = progressPercent + "%";
-
   let remaining = printer.totalSeconds - printer.elapsed;
   document.getElementById("time-remaining").textContent = remaining + "с";
 }
 
 // ===== ТАЙМЕР =====
 let timer = setInterval(() => {
-  updateProgress();
-  if (printer.elapsed >= printer.totalSeconds) clearInterval(timer);
-}, 1000);
+  if(printer.elapsed < printer.totalSeconds){
+    printer.elapsed++;
+    localStorage.setItem("printer1Elapsed", printer.elapsed);
+    updateProgress();
+  } else {
+    clearInterval(timer);
+  }
+},1000);
 
-// ===== НАЗАД С АНИМАЦИЕЙ =====
+updateProgress();
+
+// ===== НАЗАД =====
 function goBack() {
   document.body.style.animation = "pageExit 0.2s forwards ease-in";
   setTimeout(() => history.back(), 200);
