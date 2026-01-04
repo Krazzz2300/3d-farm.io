@@ -1,13 +1,13 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Принтер</title>
 <style>
-body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; opacity:0; transform: translateX(40px); animation: pageEnter 0.25s forwards ease-out;}
-@keyframes pageEnter { from {opacity:0; transform:translateX(40px);} to {opacity:1; transform:translateX(0);} }
-@keyframes pageExit { from {opacity:1; transform:translateX(0);} to {opacity:0; transform:translateX(40px);} }
+body{margin:0;background:#1e1e1e;color:#fff;font-family:Arial,sans-serif;opacity:0;transform:translateX(40px);animation:pageEnter 0.25s forwards ease-out;}
+@keyframes pageEnter{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
+@keyframes pageExit{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(40px);}}
 
 .header{display:flex;align-items:center;gap:16px;padding:16px;}
 .back-btn{background:#2e2e2e;color:#fff;border:none;border-radius:12px;padding:14px 18px;font-size:18px;font-weight:bold;cursor:pointer;}
@@ -30,6 +30,23 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 
 .color-block{margin:0 16px 24px;background:#2a2a2a;border-radius:7px;padding:20px;display:flex;align-items:center;gap:16px;font-size:22px;}
 .color-circle{width:32px;height:32px;border-radius:50%;background:red;}
+
+/* ===== Кнопки ===== */
+.control-block{display:flex;justify-content:space-between;margin:0 16px 24px;}
+button.control-btn{flex:1;margin:0 8px;padding:16px;font-size:20px;font-weight:bold;border:none;border-radius:7px;cursor:pointer;}
+button#start{background:#4caf50;color:#fff;}
+button#stop{background:#f44336;color:#fff;}
+button.disabled{opacity:0.5;cursor:default;}
+
+/* ===== Всплывающее окно ===== */
+.modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:none;justify-content:center;align-items:center;}
+.modal{background:#2a2a2a;padding:24px;border-radius:10px;width:90%;max-width:400px;}
+.modal label{display:block;margin:12px 0 4px;}
+.modal input{width:100%;padding:8px;font-size:18px;border-radius:6px;border:none;}
+.modal-buttons{display:flex;justify-content:space-between;margin-top:16px;}
+.modal-buttons button{flex:1;margin:0 4px;padding:12px;font-size:18px;border-radius:7px;border:none;font-weight:bold;}
+.modal-buttons button.cancel{background:#f44336;color:#fff;}
+.modal-buttons button.ok{background:#4caf50;color:#fff;}
 </style>
 </head>
 <body>
@@ -43,7 +60,6 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
   <div class="photo-block">
     <img src="foto/1.png" alt="Bambu Lab A1">
   </div>
-
   <div class="info-block">
     <div class="model-label">Модель</div>
     <div class="model-value">Bambu Lab A1</div>
@@ -52,8 +68,12 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 
 <div class="status-block">
   <div class="status-row">
+    <div class="status-label">Статус</div>
+    <div class="status-value" id="status-text">Простаивает</div>
+  </div>
+  <div class="status-row">
     <div class="status-label">Печать</div>
-    <div class="status-value" id="print-name">Корпус</div>
+    <div class="status-value" id="print-name">—</div>
   </div>
   <div class="status-row">
     <div class="status-label">Готово</div>
@@ -73,40 +93,113 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
   <div class="color-circle"></div>
 </div>
 
+<div class="control-block">
+  <button id="start">Поставить в печать</button>
+  <button id="stop" class="disabled">Остановить печать</button>
+</div>
+
+<!-- ===== МОДАЛЬНОЕ ОКНО ===== -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <label>Модель/Название печати:</label>
+    <input type="text" id="modal-model" placeholder="Корпус">
+    <label>Время печати (секунды):</label>
+    <input type="number" id="modal-time" placeholder="60">
+    <div class="modal-buttons">
+      <button class="cancel" onclick="closeModal()">Отмена</button>
+      <button class="ok" onclick="startPrint()">Готово</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ===== ДАННЫЕ ПРИНТЕРА =====
 let printer = {
-  totalSeconds: 135,
-  elapsed: parseInt(localStorage.getItem("printer1Elapsed")) || 0
+  status: localStorage.getItem("printerStatus") || "idle",
+  printName: localStorage.getItem("printerPrintName") || "",
+  totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
+  elapsed: parseInt(localStorage.getItem("printerElapsed")) || 0
 };
 
-// ===== ОБНОВЛЕНИЕ =====
-function updateProgress() {
-  let progressPercent = Math.floor((printer.elapsed / printer.totalSeconds) * 100);
-  document.getElementById("progress-bar").style.width = progressPercent + "%";
-  document.getElementById("progress-text").textContent = progressPercent + "%";
+const statusText = document.getElementById("status-text");
+const printNameText = document.getElementById("print-name");
+const progressText = document.getElementById("progress-text");
+const timeRemainingText = document.getElementById("time-remaining");
+const progressBar = document.getElementById("progress-bar");
+const startBtn = document.getElementById("start");
+const stopBtn = document.getElementById("stop");
+const modal = document.getElementById("modal");
+
+// ===== ОБНОВЛЕНИЕ UI =====
+function updateUI(){
+  statusText.textContent = printer.status === "idle" ? "Простаивает" : printer.status === "printing" ? "Печать" : "Печать остановлена";
+  printNameText.textContent = printer.printName || "—";
+
+  let percent = printer.totalSeconds ? Math.floor((printer.elapsed/printer.totalSeconds)*100) : 0;
+  progressText.textContent = percent + "%";
   let remaining = printer.totalSeconds - printer.elapsed;
-  document.getElementById("time-remaining").textContent = remaining + "с";
+  timeRemainingText.textContent = printer.status==="printing" ? remaining+"с" : "0с";
+  progressBar.style.width = percent + "%";
+
+  // кнопки
+  startBtn.classList.toggle("disabled", printer.status==="printing");
+  stopBtn.classList.toggle("disabled", printer.status!=="printing");
 }
+updateUI();
 
 // ===== ТАЙМЕР =====
-let timer = setInterval(() => {
-  if(printer.elapsed < printer.totalSeconds){
+let timer = setInterval(()=>{
+  if(printer.status==="printing" && printer.elapsed < printer.totalSeconds){
     printer.elapsed++;
-    localStorage.setItem("printer1Elapsed", printer.elapsed);
-    updateProgress();
-  } else {
-    clearInterval(timer);
+    saveData();
+    updateUI();
   }
 },1000);
 
-updateProgress();
+// ===== LOCAL STORAGE =====
+function saveData(){
+  localStorage.setItem("printerStatus", printer.status);
+  localStorage.setItem("printerPrintName", printer.printName);
+  localStorage.setItem("printerTotalSeconds", printer.totalSeconds);
+  localStorage.setItem("printerElapsed", printer.elapsed);
+}
+
+// ===== МОДАЛ =====
+startBtn.onclick = ()=>{
+  if(printer.status!=="printing") modal.style.display="flex";
+}
+
+function closeModal(){
+  modal.style.display="none";
+}
+
+// ===== НАЧАТЬ ПЕЧАТЬ =====
+function startPrint(){
+  let name = document.getElementById("modal-model").value || "Корпус";
+  let time = parseInt(document.getElementById("modal-time").value) || 60;
+
+  printer.printName = name;
+  printer.totalSeconds = time;
+  printer.elapsed = 0;
+  printer.status = "printing";
+  saveData();
+  updateUI();
+  modal.style.display="none";
+}
+
+// ===== ОСТАНОВИТЬ ПЕЧАТЬ =====
+stopBtn.onclick = ()=>{
+  if(printer.status==="printing"){
+    if(confirm("Точно остановить печать?")){
+      printer.status="stopped";
+      saveData();
+      updateUI();
+    }
+  }
+}
 
 // ===== НАЗАД =====
-function goBack() {
-  document.body.style.animation = "pageExit 0.2s forwards ease-in";
-  setTimeout(() => history.back(), 200);
-}
+function goBack(){ document.body.style.animation="pageExit 0.2s forwards ease-in"; setTimeout(()=>history.back(),200); }
 </script>
 
 </body>
