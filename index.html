@@ -20,7 +20,7 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 .card img { width:100%; border-radius:7px; object-fit:contain; }
 .card-title { font-size:20px; font-weight:bold; margin-top:8px; }
 .status-row { display:flex; justify-content: space-between; margin-top:8px; font-size:16px; }
-.progress { margin-top:8px; height:12px; background:#444; border-radius:6px; overflow:hidden; }
+.progress { margin-top:8px; height:18px; background:#444; border-radius:9px; overflow:hidden; }
 .progress-bar { height:100%; width:0%; background:#4caf50; transition: width 0.3s; }
 </style>
 </head>
@@ -30,6 +30,10 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
   <div class="card" onclick="openPrinter(1)">
     <img src="foto/1.png" alt="Bambu Lab A1">
     <div class="card-title">Принтер 1</div>
+    <div class="status-row">
+      <div>Статус:</div>
+      <div id="main-status-1">Простаивает</div>
+    </div>
     <div class="status-row">
       <div>Готово:</div>
       <div id="main-progress-1">0%</div>
@@ -45,30 +49,40 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 </div>
 
 <script>
-// ===== ОБЪЕКТ ПРИНТЕРА =====
+// ===== ОБЪЕКТ ПРИНТЕРА ИЗ localStorage =====
 let printer = {
-  id:1,
-  totalSeconds: 135,
-  elapsed: parseInt(localStorage.getItem("printer1Elapsed")) || 0
+  status: localStorage.getItem("printerStatus") || "idle",
+  printName: localStorage.getItem("printerPrintName") || "",
+  totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
+  elapsed: parseInt(localStorage.getItem("printerElapsed")) || 0
 };
 
 // ===== ОБНОВЛЕНИЕ КАРТОЧКИ =====
 function updateCard() {
-  let progressPercent = Math.floor((printer.elapsed / printer.totalSeconds) * 100);
+  document.getElementById("main-status-1").textContent = printer.status === "idle" ? "Простаивает" : printer.status === "printing" ? "Печать" : "Печать остановлена";
+  let progressPercent = printer.totalSeconds ? Math.floor((printer.elapsed / printer.totalSeconds) * 100) : 0;
   document.getElementById("main-progress-1").textContent = progressPercent + "%";
   let remaining = printer.totalSeconds - printer.elapsed;
-  document.getElementById("main-time-1").textContent = remaining + "с";
+  document.getElementById("main-time-1").textContent = printer.status==="printing" ? remaining + "с" : "0с";
   document.getElementById("main-bar-1").style.width = progressPercent + "%";
 }
 
 // ===== ТАЙМЕР =====
 setInterval(() => {
-  if(printer.elapsed < printer.totalSeconds){
+  if(printer.status === "printing" && printer.elapsed < printer.totalSeconds){
     printer.elapsed++;
-    localStorage.setItem("printer1Elapsed", printer.elapsed);
+    saveData();
     updateCard();
   }
 }, 1000);
+
+// ===== LOCAL STORAGE =====
+function saveData(){
+  localStorage.setItem("printerStatus", printer.status);
+  localStorage.setItem("printerPrintName", printer.printName);
+  localStorage.setItem("printerTotalSeconds", printer.totalSeconds);
+  localStorage.setItem("printerElapsed", printer.elapsed);
+}
 
 // ===== Переход к странице принтера =====
 function openPrinter(id){
