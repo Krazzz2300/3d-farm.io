@@ -1,60 +1,148 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Принтер</title>
-  <link rel="stylesheet" href="style.css?v=9">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Принтер</title>
+
+<style>
+body {
+  margin: 0;
+  background: #1e1e1e;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+}
+
+/* ===== КНОПКА НАЗАД ===== */
+.back-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  background: #2e2e2e;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 18px;
+  font-weight: bold;
+  z-index: 100;
+}
+
+.back-btn:active {
+  transform: scale(0.95);
+}
+
+/* ===== ЗАГОЛОВОК ===== */
+.title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: bold;
+  margin: 80px 16px 24px;
+}
+
+/* ===== ВЕРХНИЙ БЛОК ===== */
+.top-block {
+  display: flex;
+  gap: 16px;
+  padding: 0 16px;
+}
+
+/* Фото */
+.photo-block {
+  width: 50%;
+}
+
+.photo-block img {
+  width: 100%;
+  height: auto;
+  border-radius: 7px;
+  object-fit: contain;
+}
+
+/* Инфо */
+.info-block {
+  width: 50%;
+  background: #2a2a2a;
+  border-radius: 7px;
+  padding: 16px;
+  font-size: 22px;
+  line-height: 1.4;
+}
+
+/* ===== СТАТУС ПЕЧАТИ ===== */
+.status-block {
+  margin: 24px 16px;
+  background: #2a2a2a;
+  border-radius: 7px;
+  padding: 20px;
+  font-size: 24px;
+}
+
+.progress {
+  margin-top: 12px;
+  height: 18px;
+  background: #444;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 65%;
+  background: #4caf50;
+}
+
+/* ===== ЦВЕТ ===== */
+.color-block {
+  margin: 0 16px 24px;
+  background: #2a2a2a;
+  border-radius: 7px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 24px;
+}
+
+.color-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: red;
+}
+</style>
 </head>
-<body class="page-enter">
 
-<!-- Кнопка назад -->
-<div class="back-button" onclick="goBack()">← Назад</div>
+<body>
 
-<div class="detail">
+<button class="back-btn" onclick="history.back()">← Назад</button>
 
-  <div class="detail-top">
+<div class="title">Принтер 1</div>
 
-    <div class="detail-left">
-      <div class="number">Принтер №1</div>
-      <img src="foto/1.png">
-    </div>
-
-    <div class="detail-right">
-      <div class="info-block">
-        <div class="info-title">Модель</div>
-        <div class="info-value">Bambu Lab A1</div>
-      </div>
-
-      <div class="info-block">
-        <div class="info-title">Статус</div>
-        <div class="info-value green-text">Печать</div>
-      </div>
-    </div>
-
+<div class="top-block">
+  <div class="photo-block">
+    <img src="foto/printer1.jpg" alt="Принтер">
   </div>
 
-  <div class="detail-section">
-    <div class="section-title">Текущая печать</div>
-    <div class="section-text">Корпус редуктора</div>
-    <div class="section-text">42% • осталось 3ч 20м</div>
+  <div class="info-block">
+    <div><b>Модель:</b><br>Ender 3 V2</div>
   </div>
-
-  <div class="detail-section">
-    <div class="section-title">Цвет печати</div>
-    <div class="color-row">
-      <div class="color-circle" style="background:#ff6a00"></div>
-      <div class="section-text">Оранжевый</div>
-    </div>
-  </div>
-
 </div>
 
-<script>
-function goBack() {
-  document.body.classList.add('page-exit');
-  setTimeout(() => history.back(), 200);
-}
-</script>
+<div class="status-block">
+  <div><b>Печать:</b> Корпус редуктора</div>
+  <div>Готово: 65%</div>
+  <div>Осталось: 2ч 15м</div>
+
+  <div class="progress">
+    <div class="progress-bar"></div>
+  </div>
+</div>
+
+<div class="color-block">
+  <div>Цвет печати:</div>
+  <div class="color-circle"></div>
+</div>
 
 </body>
 </html>
