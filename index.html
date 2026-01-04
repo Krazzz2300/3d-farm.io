@@ -43,8 +43,8 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
       <div id="main-progress-1">0%</div>
     </div>
     <div class="status-row">
-      <div>Осталось:</div>
-      <div id="main-time-1">0с</div>
+      <div>Модель:</div>
+      <div id="main-model-1">—</div>
     </div>
     <div class="progress">
       <div id="main-bar-1" class="progress-bar"></div>
@@ -60,7 +60,6 @@ function getPrinterData() {
     printName: localStorage.getItem("printerPrintName") || "",
     totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
     startTime: parseInt(localStorage.getItem("printerStartTime")) || 0,
-    endTime: parseInt(localStorage.getItem("printerEndTime")) || 0,
     savedPercent: parseInt(localStorage.getItem("printerSavedPercent")) || 0,
     color: localStorage.getItem("printerColor") || "red"
   };
@@ -89,8 +88,7 @@ function updateCard() {
 
   document.getElementById("main-status-1").textContent = printer.status==="idle" ? "Простаивает" : printer.status==="printing" ? "Печать" : "Печать остановлена";
   document.getElementById("main-progress-1").textContent = percent + "%";
-  let remaining = printer.totalSeconds - elapsed;
-  document.getElementById("main-time-1").textContent = printer.status==="printing" ? remaining + "с" : "0с";
+  document.getElementById("main-model-1").textContent = printer.printName || "—";
 
   const bar = document.getElementById("main-bar-1");
   const statusText = document.getElementById("main-status-1");
