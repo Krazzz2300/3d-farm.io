@@ -2,33 +2,41 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Ферма принтеров</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
+/* Сброс стилей для мобильных */
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body { 
   margin: 0; 
   background: #1e1e1e; 
-  font-family: Arial, sans-serif; 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; 
   color: #fff; 
-  padding-bottom: 80px;
+  overflow-x: hidden;
+  touch-action: pan-y;
 }
 
+/* Шапка */
 .header {
   background: #2a2a2a;
   padding: 16px;
   text-align: center;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: bold;
   border-bottom: 1px solid #444;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 60px;
 }
 
 .notification-badge {
@@ -41,54 +49,60 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  position: relative;
-  top: -8px;
-  right: -8px;
+  position: absolute;
+  top: 8px;
+  right: 8px;
 }
 
+/* Контейнер для принтеров */
 .container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  padding: 20px;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 16px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
+/* Карточка принтера */
 .card {
   position: relative;
   background: #2a2a2a;
-  border-radius: 12px;
-  width: calc(50% - 10px);
-  min-width: 280px;
-  max-width: 400px;
+  border-radius: 16px;
   padding: 16px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 280px;
 }
 
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-  border-color: #444;
+.card:active {
+  transform: scale(0.98);
+  background: #333;
 }
 
 .card img {
   width: 100%;
-  height: 180px;
-  border-radius: 8px;
+  height: 140px;
+  border-radius: 12px;
   object-fit: contain;
   background: #1e1e1e;
   padding: 8px;
+  flex-shrink: 0;
 }
 
 .card-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
   margin-top: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .color-indicator {
@@ -96,24 +110,28 @@ body {
   height: 20px;
   border-radius: 50%;
   border: 2px solid #444;
+  flex-shrink: 0;
 }
 
 .model-text {
-  font-size: 14px;
+  font-size: 13px;
   opacity: 0.7;
   margin-top: 4px;
+  flex-shrink: 0;
 }
 
 .status-row {
   display: flex;
   justify-content: space-between;
-  margin-top: 12px;
-  font-size: 16px;
+  margin-top: 10px;
+  font-size: 15px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .status-text {
   font-weight: bold;
+  font-size: 15px;
 }
 
 .progress {
@@ -123,6 +141,7 @@ body {
   border-radius: 10px;
   overflow: hidden;
   position: relative;
+  flex-shrink: 0;
 }
 
 .progress-bar {
@@ -147,17 +166,18 @@ body {
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: red;
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
   display: none;
   align-items: center;
   justify-content: center;
   z-index: 2;
+  border: 2px solid #2a2a2a;
 }
 
 .problem-badge {
@@ -166,11 +186,12 @@ body {
   left: 12px;
   background: #f44336;
   color: white;
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 11px;
   display: none;
   z-index: 2;
+  border: 2px solid #2a2a2a;
 }
 
 @keyframes pulse {
@@ -179,92 +200,111 @@ body {
   100% { background-color: #4caf50; }
 }
 
+/* Кнопка добавления принтера */
 .add-printer-btn {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: #4caf50;
   color: white;
   border: none;
-  font-size: 28px;
+  font-size: 26px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
   transition: transform 0.2s, background 0.2s;
   z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.add-printer-btn:hover {
+.add-printer-btn:active {
   background: #45a049;
-  transform: scale(1.1);
+  transform: scale(0.95);
 }
 
 .empty-state {
   text-align: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
   color: #888;
+  grid-column: 1 / -1;
 }
 
 .empty-state i {
-  font-size: 48px;
-  margin-bottom: 16px;
+  font-size: 56px;
+  margin-bottom: 20px;
   opacity: 0.5;
 }
 
 .empty-state h3 {
-  margin: 0 0 8px 0;
-  font-size: 20px;
+  margin: 0 0 12px 0;
+  font-size: 22px;
 }
 
 .empty-state p {
   margin: 0;
-  font-size: 14px;
+  font-size: 16px;
   opacity: 0.7;
+  line-height: 1.5;
 }
 
-/* Модальное окно */
+/* Модальные окна */
 .modal-bg {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.85);
   display: none;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 16px;
+  backdrop-filter: blur(4px);
 }
 
 .modal {
   background: #2a2a2a;
   padding: 24px;
-  border-radius: 12px;
-  width: 90%;
+  border-radius: 20px;
+  width: 100%;
   max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
 .modal h2 {
   margin-top: 0;
   text-align: center;
+  font-size: 22px;
+  margin-bottom: 20px;
 }
 
 .modal label {
   display: block;
-  margin: 16px 0 6px;
+  margin: 18px 0 8px;
   font-weight: bold;
+  font-size: 16px;
 }
 
 .modal input {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   font-size: 16px;
-  border-radius: 8px;
-  border: none;
+  border-radius: 10px;
+  border: 2px solid #444;
   background: #1e1e1e;
   color: white;
+  outline: none;
+}
+
+.modal input:focus {
+  border-color: #4caf50;
 }
 
 .modal-buttons {
@@ -276,12 +316,17 @@ body {
 
 .modal-buttons button {
   flex: 1;
-  padding: 12px;
+  padding: 14px;
   font-size: 16px;
   font-weight: bold;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.modal-buttons button:active {
+  opacity: 0.8;
 }
 
 .cancel-btn {
@@ -299,17 +344,105 @@ body {
   color: white;
   margin-top: 16px;
   width: 100%;
+  padding: 14px;
 }
 
-@media (max-width: 600px) {
-  .card {
-    width: 100%;
+/* Адаптивность */
+@media (max-width: 480px) {
+  .container {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
   }
+  
+  .card {
+    min-height: 260px;
+  }
+  
+  .card img {
+    height: 120px;
+  }
+  
+  .header {
+    font-size: 20px;
+    padding: 14px;
+    height: 56px;
+  }
+  
+  .modal {
+    padding: 20px;
+    border-radius: 16px;
+  }
+  
+  .add-printer-btn {
+    bottom: 20px;
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    font-size: 24px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: 14px;
+  }
+}
+
+@media (min-width: 769px) {
+  .container {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1200px;
+  }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 360px) {
+  .card {
+    min-height: 240px;
+    padding: 12px;
+  }
+  
+  .card img {
+    height: 100px;
+  }
+  
+  .card-title {
+    font-size: 16px;
+  }
+  
+  .status-row {
+    font-size: 14px;
+  }
+  
+  .progress {
+    height: 18px;
+  }
+}
+
+/* Предотвращение выделения текста при долгом нажатии */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Анимация появления */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  animation: fadeIn 0.3s ease-out;
 }
 </style>
 </head>
 
-<body>
+<body class="no-select">
 
 <div class="header">
   <span>Ферма принтеров</span>
@@ -340,7 +473,7 @@ body {
     
     <label>Ссылка на изображение:</label>
     <input type="text" id="new-printer-image" placeholder="foto/3.png">
-    <small style="color: #888; font-size: 12px;">Можно оставить пустым для изображения по умолчанию</small>
+    <small style="color: #888; font-size: 13px; display: block; margin-top: 4px;">Можно оставить пустым</small>
     
     <div class="modal-buttons">
       <button class="cancel-btn" onclick="closeAddModal()">Отмена</button>
@@ -579,7 +712,12 @@ function loadPrinters() {
   container.innerHTML = '';
   let notificationCount = 0;
   
-  Object.values(printersData).forEach(printer => {
+  // Сортируем принтеры по имени
+  const sortedPrinters = Object.values(printersData).sort((a, b) => {
+    return a.name.localeCompare(b.name);
+  });
+  
+  sortedPrinters.forEach(printer => {
     // Проверяем завершенные печати для уведомлений
     if (printer.status === 'finished' && !printer.finishedNotified) {
       notificationCount++;
@@ -589,27 +727,37 @@ function loadPrinters() {
     card.className = 'card';
     card.onclick = () => openPrinter(printer.id);
     
-    // Долгое нажатие для удаления
+    // Долгое нажатие для удаления (только на мобильных)
     let pressTimer;
-    card.addEventListener('mousedown', (e) => {
-      if (e.button === 0) { // Левая кнопка мыши
-        pressTimer = setTimeout(() => {
-          showDeleteModal(printer);
-        }, 1000);
-      }
-    });
+    let isLongPress = false;
     
-    card.addEventListener('mouseup', () => clearTimeout(pressTimer));
-    card.addEventListener('mouseleave', () => clearTimeout(pressTimer));
-    card.addEventListener('touchstart', (e) => {
+    const startPress = (e) => {
+      isLongPress = false;
       pressTimer = setTimeout(() => {
+        isLongPress = true;
         showDeleteModal(printer);
-        e.preventDefault();
-      }, 1000);
-    });
+      }, 800); // 800 мс для долгого нажатия
+    };
     
-    card.addEventListener('touchend', () => clearTimeout(pressTimer));
-    card.addEventListener('touchcancel', () => clearTimeout(pressTimer));
+    const endPress = () => {
+      clearTimeout(pressTimer);
+      // Если было долгое нажатие, предотвращаем обычный клик
+      if (isLongPress) {
+        setTimeout(() => {
+          isLongPress = false;
+        }, 100);
+      }
+    };
+    
+    card.addEventListener('touchstart', startPress);
+    card.addEventListener('touchend', endPress);
+    card.addEventListener('touchcancel', endPress);
+    
+    // Для ПК - правый клик для удаления
+    card.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      showDeleteModal(printer);
+    });
     
     const statusText = getStatusText(printer.status);
     const statusColor = getStatusColor(printer.status);
@@ -624,10 +772,11 @@ function loadPrinters() {
         1
       </div>
       <div class="problem-badge" id="problem-${printer.id}" 
-           style="${printer.status === 'repair' ? 'display: block;' : 'display: none;'}">
+           style="${printer.status === 'repair' ? 'display: flex; align-items: center; gap: 4px;' : 'display: none;'}">
         <i class="fas fa-wrench"></i>
       </div>
-      <img src="${printer.image}" alt="${printer.model}" onerror="this.src='foto/default.png'">
+      <img src="${printer.image}" alt="${printer.model}" 
+           onerror="this.src='foto/default.png'; this.onerror=null;">
       <div class="card-title">
         <span>${printer.name}</span>
         <div class="color-indicator" style="background:${printer.color};"></div>
@@ -639,12 +788,14 @@ function loadPrinters() {
       </div>
       <div class="status-row">
         <div>Печатает:</div>
-        <div>${printer.printName || '—'}</div>
+        <div style="text-align: right; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          ${printer.printName || '—'}
+        </div>
       </div>
       <div class="progress">
         <div class="progress-bar" id="bar-${printer.id}" 
              style="width:${printer.progress}%; background:${progressColor}; 
-                    animation: ${pulseClass} 1s infinite;"></div>
+                    ${pulseClass ? 'animation: pulse 1s infinite;' : ''}"></div>
         <div class="progress-text">${printer.progress}%</div>
       </div>
     `;
@@ -653,8 +804,9 @@ function loadPrinters() {
   });
   
   // Обновляем глобальное уведомление
-  notificationBadge.textContent = notificationCount;
-  notificationBadge.style.display = notificationCount > 0 ? 'flex' : 'none';
+  const notificationCountTotal = getNotificationCount();
+  notificationBadge.textContent = notificationCountTotal;
+  notificationBadge.style.display = notificationCountTotal > 0 ? 'flex' : 'none';
 }
 
 // Открыть страницу принтера
@@ -706,8 +858,13 @@ function addNewPrinter() {
   closeAddModal();
   loadPrinters();
   
-  // Можно сразу открыть новый принтер
-  // openPrinter(newId);
+  // Прокручиваем к новому принтеру
+  setTimeout(() => {
+    const element = document.querySelector(`[onclick="openPrinter('${newId}')"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, 100);
 }
 
 // Показать модальное окно удаления
@@ -739,6 +896,18 @@ document.addEventListener('DOMContentLoaded', function() {
   // Кнопка добавления принтера
   document.getElementById('add-printer-btn').onclick = showAddModal;
   
+  // Закрытие модальных окон при клике на фон
+  document.querySelectorAll('.modal-bg').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.style.display = 'none';
+        if (this.id === 'delete-modal') {
+          printerToDelete = null;
+        }
+      }
+    });
+  });
+  
   // Обновляем каждую секунду
   setInterval(() => {
     const updated = updatePrintingProgress();
@@ -749,6 +918,17 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Обновляем каждые 5 секунд на всякий случай
   setInterval(loadPrinters, 5000);
+  
+  // Предотвращаем масштабирование при двойном тапе
+  let lastTap = 0;
+  document.addEventListener('touchend', function(e) {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTap;
+    if (tapLength < 500 && tapLength > 0) {
+      e.preventDefault();
+    }
+    lastTap = currentTime;
+  }, false);
 });
 
 // Глобальные функции для доступа из HTML
