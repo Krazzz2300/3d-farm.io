@@ -11,6 +11,21 @@ body {
   background: #1e1e1e;
   color: #ffffff;
   font-family: Arial, sans-serif;
+  /* Стартовая прозрачность для анимации */
+  opacity: 0;
+  transform: translateX(40px);
+  animation: pageEnter 0.25s forwards ease-out;
+}
+
+/* ===== Анимации ===== */
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pageExit {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(40px); }
 }
 
 /* ===== HEADER ===== */
@@ -29,6 +44,7 @@ body {
   padding: 14px 18px;
   font-size: 18px;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .back-btn:active {
@@ -148,7 +164,7 @@ body {
 <body>
 
 <div class="header">
-  <button class="back-btn" onclick="history.back()">←</button>
+  <button class="back-btn" onclick="goBack()">←</button>
   <div class="title">Принтер 1</div>
 </div>
 
@@ -188,6 +204,14 @@ body {
   <div>Цвет печати</div>
   <div class="color-circle"></div>
 </div>
+
+<script>
+function goBack() {
+  // Анимация выхода
+  document.body.style.animation = "pageExit 0.2s forwards ease-in";
+  setTimeout(() => history.back(), 200);
+}
+</script>
 
 </body>
 </html>
