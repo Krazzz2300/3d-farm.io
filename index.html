@@ -1,28 +1,28 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Ферма принтеров</title>
 <style>
 body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; }
-.container { display: flex; flex-wrap: wrap; gap:64px; padding:32px; justify-content: center; }
+.container { display: flex; flex-wrap: wrap; gap:32px; padding:32px; justify-content: center; }
 
 .card {
   position: relative;
   background:#2a2a2a;
   border-radius: 7px;
-  width:45%;
+  width:300px;
   min-width:140px;
   padding:12px;
   cursor:pointer;
   transition: transform 0.15s;
 }
 .card:active { transform: scale(0.97); }
-
 .card img { width:100%; border-radius:7px; object-fit:contain; }
+
 .card-title { font-size:20px; font-weight:bold; margin-top:8px; display:flex; align-items:center; gap:8px; }
-.color-indicator { width:16px; height:16px; border-radius:50%; }
+.color-indicator { width:16px; height:16px; border-radius:50%; background:red; }
 
 .status-row { display:flex; justify-content: space-between; margin-top:8px; font-size:16px; }
 .progress { margin-top:8px; height:18px; background:#444; border-radius:9px; overflow:hidden; }
@@ -39,8 +39,8 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
   position: absolute;
   top:8px;
   right:8px;
-  width:20px;
-  height:20px;
+  width:24px;
+  height:24px;
   border-radius:50%;
   background:red;
   display:flex;
@@ -56,6 +56,7 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 <body>
 
 <div class="container" id="printer-container">
+  <!-- Пример одного принтера -->
   <div class="card" data-id="1" onclick="openPrinter(1)">
     <img src="foto/1.png" alt="Bambu Lab A1">
     <div class="card-title">
@@ -70,6 +71,10 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
       <div>Модель:</div>
       <div id="main-print-1">—</div>
     </div>
+    <div class="status-row">
+      <div>Прогресс:</div>
+      <div id="main-progress-1">0%</div>
+    </div>
     <div class="progress">
       <div id="main-bar-1" class="progress-bar"></div>
     </div>
@@ -78,7 +83,8 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 </div>
 
 <script>
-function getPrinterData(id){
+// ===== ПОЛУЧЕНИЕ ДАННЫХ ПРИНТЕРА =====
+function getPrinterData(id) {
   return {
     status: localStorage.getItem(`printerStatus_${id}`) || "idle",
     printName: localStorage.getItem(`printerPrintName_${id}`) || "",
@@ -90,6 +96,17 @@ function getPrinterData(id){
   };
 }
 
+function savePrinterData(id, data){
+  localStorage.setItem(`printerStatus_${id}`, data.status);
+  localStorage.setItem(`printerPrintName_${id}`, data.printName);
+  localStorage.setItem(`printerTotalSeconds_${id}`, data.totalSeconds);
+  localStorage.setItem(`printerStartTime_${id}`, data.startTime);
+  localStorage.setItem(`printerSavedPercent_${id}`, data.savedPercent);
+  localStorage.setItem(`printerColor_${id}`, data.color);
+  localStorage.setItem(`printerCompletedNotified_${id}`, data.completedNotified);
+}
+
+// ===== ОБНОВЛЕНИЕ UI =====
 function updateCard(id){
   let printer = getPrinterData(id);
   const now = Date.now();
@@ -98,7 +115,7 @@ function updateCard(id){
   if(printer.status==="printing"){
     elapsed = Math.floor((now - printer.startTime)/1000);
     if(elapsed >= printer.totalSeconds){
-      printer.status="completed";
+      printer.status="completed"; // завершено
       elapsed = printer.totalSeconds;
       printer.savedPercent = 100;
       printer.completedNotified = false;
@@ -114,16 +131,15 @@ function updateCard(id){
   else printer.savedPercent = percent;
 
   document.getElementById(`main-status-${id}`).textContent = 
-    printer.status==="idle"?"Простаивает":
-    printer.status==="printing"?"Печать":
-    printer.status==="stopped"?"Печать остановлена":
+    printer.status==="idle" ? "Простаивает" : 
+    printer.status==="printing" ? "Печать" : 
+    printer.status==="stopped" ? "Печать остановлена" : 
     "Готово";
 
   document.getElementById(`main-print-${id}`).textContent = printer.printName || "—";
+  document.getElementById(`main-progress-${id}`).textContent = percent+"%";
 
   const bar = document.getElementById(`main-bar-${id}`);
-  bar.style.width = percent+"%";
-
   if(printer.status==="completed"){
     bar.classList.add("completed");
     document.getElementById(`main-status-${id}`).style.color="#7CFC00";
@@ -136,27 +152,32 @@ function updateCard(id){
     bar.style.background="#4caf50";
     document.getElementById(`main-status-${id}`).style.color="#fff";
   }
+  bar.style.width = percent+"%";
 
   document.getElementById(`main-color-${id}`).style.background = printer.color;
 
+  // уведомление
   const notif = document.getElementById(`notif-${id}`);
   notif.style.display = (printer.status==="completed" && !printer.completedNotified) ? "flex" : "none";
+
+  savePrinterData(id, printer);
 }
 
 function updateAllCards(){
-  document.querySelectorAll(".card").forEach(c=>{
-    updateCard(c.dataset.id);
+  const cards = document.querySelectorAll(".card");
+  cards.forEach(c=>{
+    const id = c.dataset.id;
+    updateCard(id);
   });
 }
 
-// Обновление каждые 500ms для синхронизации
-setInterval(updateAllCards,500);
+setInterval(updateAllCards, 1000);
 updateAllCards();
 
 function openPrinter(id){
   window.location.href = `printer.html?id=${id}`;
 }
 </script>
+
 </body>
 </html>
-
