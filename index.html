@@ -6,7 +6,7 @@
 <title>Ферма принтеров</title>
 <style>
 body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; }
-.container { display: flex; flex-wrap: wrap; gap:16px; padding:16px; justify-content: center; }
+.container { display: flex; flex-wrap: wrap; gap:32px; padding:16px; justify-content: center; }
 .card {
   background:#2a2a2a;
   border-radius: 7px;
@@ -50,15 +50,18 @@ body { margin:0; background:#1e1e1e; font-family: Arial,sans-serif; color:#fff; 
 
 <script>
 // ===== ОБЪЕКТ ПРИНТЕРА ИЗ localStorage =====
-let printer = {
-  status: localStorage.getItem("printerStatus") || "idle",
-  printName: localStorage.getItem("printerPrintName") || "",
-  totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
-  elapsed: parseInt(localStorage.getItem("printerElapsed")) || 0
-};
+function getPrinterData() {
+  return {
+    status: localStorage.getItem("printerStatus") || "idle",
+    printName: localStorage.getItem("printerPrintName") || "",
+    totalSeconds: parseInt(localStorage.getItem("printerTotalSeconds")) || 0,
+    elapsed: parseInt(localStorage.getItem("printerElapsed")) || 0
+  };
+}
 
 // ===== ОБНОВЛЕНИЕ КАРТОЧКИ =====
 function updateCard() {
+  let printer = getPrinterData();
   document.getElementById("main-status-1").textContent = printer.status === "idle" ? "Простаивает" : printer.status === "printing" ? "Печать" : "Печать остановлена";
   let progressPercent = printer.totalSeconds ? Math.floor((printer.elapsed / printer.totalSeconds) * 100) : 0;
   document.getElementById("main-progress-1").textContent = progressPercent + "%";
@@ -67,22 +70,8 @@ function updateCard() {
   document.getElementById("main-bar-1").style.width = progressPercent + "%";
 }
 
-// ===== ТАЙМЕР =====
-setInterval(() => {
-  if(printer.status === "printing" && printer.elapsed < printer.totalSeconds){
-    printer.elapsed++;
-    saveData();
-    updateCard();
-  }
-}, 1000);
-
-// ===== LOCAL STORAGE =====
-function saveData(){
-  localStorage.setItem("printerStatus", printer.status);
-  localStorage.setItem("printerPrintName", printer.printName);
-  localStorage.setItem("printerTotalSeconds", printer.totalSeconds);
-  localStorage.setItem("printerElapsed", printer.elapsed);
-}
+// ===== ТАЙМЕР ОБНОВЛЕНИЯ UI =====
+setInterval(updateCard, 1000);
 
 // ===== Переход к странице принтера =====
 function openPrinter(id){
