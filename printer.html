@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>Принтер</title>
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
-<body>
+<body class="page-enter">
+
+<!-- Кнопка назад -->
+<div class="back-button" onclick="goBack()">← Назад</div>
 
 <div class="detail">
 
@@ -45,6 +48,13 @@
   </div>
 
 </div>
+
+<script>
+function goBack() {
+  document.body.classList.add('page-exit');
+  setTimeout(() => history.back(), 200);
+}
+</script>
 
 </body>
 </html>
