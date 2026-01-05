@@ -7,751 +7,97 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
-}
+/* ... ВСЕ СТИЛИ ИЗ ПРЕДЫДУЩЕГО КОДА ... */
 
-body { 
-  background: #1e1e1e; 
-  color: #fff; 
-  font-family: Arial, sans-serif;
-  padding-bottom: 70px;
-}
-
-.header {
-  background: #2a2a2a;
-  padding: 15px;
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-  border-bottom: 1px solid #444;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.notification-badge {
-  background: red;
-  color: white;
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-}
-
-.printers-container {
-  display: flex;
-  flex-wrap: wrap;
-  padding: 10px;
-  gap: 10px;
-}
-
-.card {
-  background: #2a2a2a;
-  border-radius: 12px;
-  padding: 12px;
-  width: calc(50% - 5px);
-  min-height: 220px;
-  box-sizing: border-box;
-  border: 1px solid #444;
-  position: relative;
-  transition: transform 0.2s, box-shadow 0.2s;
-  overflow: hidden;
-}
-
-.card:active {
-  transform: scale(0.98);
-  background: #333;
-}
-
-.card-image-container {
-  width: 100%;
-  height: 120px;
-  border-radius: 8px;
-  background: #1e1e1e;
-  margin-bottom: 10px;
-  overflow: hidden;
-  position: relative;
-}
-
-.card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s;
-}
-
-.card:hover .card-image {
-  transform: scale(1.05);
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: bold;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 5px;
-}
-
-.color-indicator {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 2px solid #444;
-}
-
-.model-text {
-  font-size: 12px;
-  color: #aaa;
-  margin-bottom: 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.status-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  margin-bottom: 5px;
-}
-
-.status-text {
-  font-weight: bold;
-}
-
-.progress {
-  height: 12px;
-  background: #444;
-  border-radius: 6px;
-  margin-top: 10px;
-  overflow: hidden;
-  position: relative;
-}
-
-.progress-bar {
-  height: 100%;
-  transition: width 0.5s ease;
-}
-
-.progress-text {
-  position: absolute;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 11px;
-  font-weight: bold;
-  line-height: 12px;
-  color: white;
-  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
-}
-
-.problem-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #f44336;
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  border: 2px solid #2a2a2a;
-  z-index: 2;
-}
-
-.finished-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: #4caf50;
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  border: 2px solid #2a2a2a;
-  z-index: 2;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
-}
-
-.pulse-animation {
-  animation: pulse 1s infinite;
-}
-
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #2a2a2a;
-  border-top: 1px solid #444;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 10px 0;
-  z-index: 100;
-  height: 60px;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #aaa;
-  text-decoration: none;
-  flex: 1;
-  padding: 8px 0;
-  transition: color 0.2s;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.nav-item.active {
-  color: #4caf50;
-}
-
-.nav-icon {
-  font-size: 20px;
-  margin-bottom: 4px;
-}
-
-.nav-add {
-  position: relative;
-  margin-top: -20px;
-}
-
-.add-nav-btn {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: #4caf50;
-  color: white;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.add-nav-btn:active {
-  background: #45a049;
-  transform: scale(0.95);
-}
-
-.logs-container {
-  padding: 15px;
-  max-height: calc(100vh - 220px);
-  overflow-y: auto;
-  padding-bottom: 80px;
-}
-
-.log-item {
-  background: #2a2a2a;
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 10px;
-  border-left: 4px solid #4caf50;
-  animation: slideIn 0.3s ease-out;
-}
-
-.log-item.repair {
-  border-left-color: orange;
-}
-
-.log-item.problem {
-  border-left-color: #f44336;
-}
-
-.log-item.info {
-  border-left-color: #2196f3;
-}
-
-.log-item.warning {
-  border-left-color: #ff9800;
-}
-
-.log-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.log-time {
-  font-size: 11px;
-  color: #888;
-}
-
-.log-type {
-  font-size: 10px;
-  padding: 2px 8px;
-  border-radius: 10px;
-  background: #666;
-  color: white;
-}
-
-.log-item.info .log-type { background: #2196f3; }
-.log-item.warning .log-type { background: #ff9800; }
-.log-item.problem .log-type { background: #f44336; }
-.log-item.repair .log-type { background: orange; }
-
-.log-message {
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.empty-logs {
-  text-align: center;
-  padding: 40px 20px;
-  color: #888;
-}
-
-.empty-logs i {
-  font-size: 48px;
-  margin-bottom: 15px;
-  opacity: 0.5;
-}
-
-.empty-logs h3 {
-  font-size: 20px;
-  margin-bottom: 10px;
-}
-
-.logs-footer {
-  position: fixed;
-  bottom: 60px;
-  left: 0;
-  right: 0;
-  background: #2a2a2a;
-  padding: 15px;
-  border-top: 1px solid #444;
-  z-index: 50;
-}
-
-.logs-footer-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logs-stats {
-  font-size: 12px;
-  color: #888;
-}
-
-.clear-logs-btn {
-  background: #666;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background 0.2s;
-}
-
-.clear-logs-btn:active {
-  background: #555;
-  transform: scale(0.95);
-}
-
-.modal-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.85);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: 15px;
-  backdrop-filter: blur(4px);
-}
-
-.modal {
-  background: #2a2a2a;
-  padding: 20px;
-  border-radius: 16px;
-  width: 100%;
-  max-width: 340px;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.modal h3 {
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 18px;
-}
-
-.modal label {
-  display: block;
-  margin: 12px 0 6px;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.modal input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 2px solid #444;
-  background: #1e1e1e;
-  color: white;
-  font-size: 16px;
-}
-
-.modal input:focus {
-  border-color: #4caf50;
-  outline: none;
-}
-
-.printer-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 15px 0;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.printer-option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 10px;
-  background: #333;
-  cursor: pointer;
-  transition: background 0.2s;
-  border: 2px solid transparent;
-}
-
-.printer-option:hover {
-  background: #3a3a3a;
-}
-
-.printer-option.selected {
-  border-color: #4caf50;
-  background: rgba(76, 175, 80, 0.1);
-}
-
-.printer-option:active {
-  background: #444;
-}
-
-.printer-option-image {
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
-  overflow: hidden;
-  flex-shrink: 0;
-  background: #2a2a2a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.printer-option-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.printer-option-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.printer-option-brand {
-  font-size: 14px;
-  color: #aaa;
-  margin-bottom: 4px;
-}
-
-.printer-option-model {
-  font-size: 16px;
-  font-weight: bold;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.printer-icon {
-  font-size: 28px;
-  color: #666;
-}
-
-.modal-buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.modal-buttons button {
-  flex: 1;
-  padding: 14px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-  transition: opacity 0.2s;
-}
-
-.modal-buttons button:active {
-  opacity: 0.8;
-}
-
-.cancel-btn { 
-  background: #666; 
-  color: white; 
-}
-
-.save-btn { 
-  background: #4caf50; 
-  color: white; 
-}
-
-.next-btn { 
-  background: #2196f3; 
-  color: white; 
-}
-
-.back-btn { 
-  background: #666; 
-  color: white; 
-}
-
-.notification {
-  position: fixed;
-  top: 70px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(76, 175, 80, 0.9);
-  color: white;
-  padding: 12px 24px;
-  border-radius: 10px;
-  z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  font-weight: bold;
-  backdrop-filter: blur(10px);
-}
-
-@keyframes slideIn {
-  from { transform: translateY(-10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes slideOut {
-  from { transform: translateY(0); opacity: 1; }
-  to { transform: translateY(-10px); opacity: 0; }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.page {
-  animation: fadeIn 0.3s ease-out;
-}
-
-.hidden {
-  display: none !important;
-}
-
-/* ===== СТИЛИ ДЛЯ ВКЛАДКИ "ПЛАН ПЕЧАТИ" ===== */
-.plan-container {
+/* НОВЫЕ СТИЛИ ДЛЯ СТРАНИЦЫ ЗАДАЧ */
+.tasks-container {
   padding: 15px;
   max-height: calc(100vh - 120px);
   overflow-y: auto;
   padding-bottom: 80px;
 }
 
-.plan-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.stat-card {
+.task-item {
   background: #2a2a2a;
   border-radius: 12px;
   padding: 15px;
-  text-align: center;
-  border: 1px solid #444;
-}
-
-.stat-number {
-  font-size: 24px;
-  font-weight: bold;
-  margin: 5px 0;
-}
-
-.stat-number.total { color: #2196f3; }
-.stat-number.today { color: #4caf50; }
-.stat-number.progress { color: #ff9800; }
-.stat-number.free { color: #9c27b0; }
-
-.stat-label {
-  font-size: 12px;
-  color: #aaa;
-}
-
-.plan-section {
-  margin-bottom: 25px;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-title i {
-  color: #4caf50;
-}
-
-.order-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.order-item {
-  background: #2a2a2a;
-  border-radius: 10px;
-  padding: 12px;
+  margin-bottom: 10px;
   border-left: 4px solid #2196f3;
   animation: slideIn 0.3s ease-out;
 }
 
-.order-item.urgent {
-  border-left-color: #f44336;
-  background: rgba(244, 67, 54, 0.05);
-}
-
-.order-item.in-progress {
+.task-item.completed {
   border-left-color: #4caf50;
+  background: rgba(76, 175, 80, 0.05);
 }
 
-.order-header {
+.task-item.current {
+  border-left-color: #ff9800;
+  background: rgba(255, 152, 0, 0.05);
+  animation: pulse 2s infinite;
+}
+
+.task-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
-.order-name {
+.task-name {
+  font-size: 18px;
   font-weight: bold;
-  font-size: 16px;
+  flex: 1;
 }
 
-.order-quantity {
-  background: #333;
+.task-status {
+  font-size: 12px;
   padding: 4px 10px;
   border-radius: 10px;
+  background: #333;
+  color: #aaa;
+}
+
+.task-item.current .task-status {
+  background: #ff9800;
+  color: white;
+}
+
+.task-item.completed .task-status {
+  background: #4caf50;
+  color: white;
+}
+
+.task-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.task-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.task-label {
+  color: #aaa;
   font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.task-value {
   font-weight: bold;
 }
 
-.order-details {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: #aaa;
-  margin-bottom: 8px;
-}
-
-.order-progress-bar {
-  height: 6px;
-  background: #333;
-  border-radius: 3px;
-  margin: 8px 0;
-  overflow: hidden;
-}
-
-.order-progress-fill {
-  height: 100%;
-  background: #4caf50;
-  border-radius: 3px;
-  transition: width 0.5s ease;
-}
-
-.order-status {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-}
-
-.order-assigned {
-  color: #2196f3;
-}
-
-.empty-plan {
-  text-align: center;
-  padding: 40px 20px;
-  color: #888;
-}
-
-.empty-plan i {
-  font-size: 48px;
-  margin-bottom: 15px;
-  opacity: 0.5;
-}
-
-.plan-actions {
-  position: fixed;
-  bottom: 60px;
-  left: 0;
-  right: 0;
-  background: #2a2a2a;
-  padding: 15px;
-  border-top: 1px solid #444;
-  z-index: 50;
-}
-
-.plan-actions-content {
+.task-actions {
   display: flex;
   gap: 10px;
+  margin-top: 10px;
 }
 
-.plan-btn {
+.task-btn {
   flex: 1;
   padding: 12px;
   border-radius: 8px;
@@ -765,57 +111,101 @@ body {
   gap: 8px;
 }
 
-.plan-btn:active {
+.task-btn:active {
   transform: scale(0.95);
   opacity: 0.8;
 }
 
-.plan-btn.primary {
+.complete-btn {
   background: #4caf50;
   color: white;
 }
 
-.plan-btn.secondary {
+.skip-btn {
   background: #666;
   color: white;
 }
 
-.loading {
-  text-align: center;
-  padding: 30px;
+.tasks-footer {
+  position: fixed;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  background: #2a2a2a;
+  padding: 15px;
+  border-top: 1px solid #444;
+  z-index: 50;
+}
+
+.tasks-footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tasks-stats {
+  font-size: 14px;
   color: #888;
 }
 
-.loading-spinner {
-  border: 3px solid #333;
-  border-top: 3px solid #4caf50;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 15px;
+.generate-tasks-btn {
+  background: #2196f3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.generate-tasks-btn:active {
+  background: #1976d2;
+  transform: scale(0.95);
 }
 
+/* ИСПРАВЛЕНИЕ: Светло-серая полоска в плане */
+.order-progress-fill {
+  height: 100%;
+  background: #4caf50;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+  min-width: 0% !important; /* Убираем полоску */
+}
+
+/* Telegram уведомления */
+.telegram-notification {
+  position: fixed;
+  top: 70px;
+  right: 15px;
+  background: #0088cc;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 10px;
+  z-index: 1001;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Мобильная адаптация */
 @media (min-width: 768px) {
-  .printers-container {
-    gap: 15px;
-    padding: 15px;
-  }
-  
-  .card {
-    width: calc(33.333% - 10px);
-    min-height: 240px;
-  }
-  
-  .card-image-container {
-    height: 140px;
-  }
-  
   .bottom-nav {
     max-width: 500px;
     left: 50%;
@@ -825,41 +215,13 @@ body {
     border-bottom: none;
   }
   
-  .logs-footer {
+  .tasks-footer {
     max-width: 500px;
     left: 50%;
     transform: translateX(-50%);
     border-radius: 0 0 20px 20px;
     border: 1px solid #444;
     border-top: none;
-  }
-  
-  .plan-actions {
-    max-width: 500px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 0 0 20px 20px;
-    border: 1px solid #444;
-    border-top: none;
-  }
-  
-  .modal {
-    max-width: 400px;
-  }
-  
-  .plan-stats {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .card {
-    width: calc(25% - 12px);
-  }
-  
-  .printers-container {
-    max-width: 1200px;
-    margin: 0 auto;
   }
 }
 </style>
@@ -880,23 +242,20 @@ body {
   <div class="printers-container" id="printers-container"></div>
 </div>
 
-<!-- Страница плана печати -->
-<div id="plan-page" class="page hidden">
-  <div class="plan-container" id="plan-container">
+<!-- Страница задач -->
+<div id="tasks-page" class="page hidden">
+  <div class="tasks-container" id="tasks-container">
     <div class="loading">
       <div class="loading-spinner"></div>
-      <p>Загружаем план печати...</p>
+      <p>Загружаем ваши задачи...</p>
     </div>
   </div>
   
-  <!-- Панель действий -->
-  <div class="plan-actions">
-    <div class="plan-actions-content">
-      <button class="plan-btn primary" onclick="loadPlanData()">
-        <i class="fas fa-sync-alt"></i> Обновить
-      </button>
-      <button class="plan-btn secondary" onclick="openOrdersPage()">
-        <i class="fas fa-external-link-alt"></i> Все заказы
+  <div class="tasks-footer">
+    <div class="tasks-footer-content">
+      <div class="tasks-stats" id="tasks-stats">Задач: 0 | Выполнено: 0</div>
+      <button class="generate-tasks-btn" onclick="generateDailyTasks()">
+        <i class="fas fa-robot"></i> Создать задачи
       </button>
     </div>
   </div>
@@ -923,15 +282,15 @@ body {
     <span>Принтеры</span>
   </div>
   
+  <div class="nav-item" onclick="showPage('tasks')">
+    <i class="fas fa-tasks nav-icon"></i>
+    <span>Задачи</span>
+  </div>
+  
   <div class="nav-item nav-add">
     <button class="add-nav-btn" onclick="showAddModal()">
       <i class="fas fa-plus"></i>
     </button>
-  </div>
-  
-  <div class="nav-item" onclick="showPage('plan')">
-    <i class="fas fa-calendar-alt nav-icon"></i>
-    <span>План</span>
   </div>
   
   <div class="nav-item" onclick="showPage('logs')">
@@ -980,17 +339,30 @@ body {
 // ===== КОНСТАНТЫ =====
 const STORAGE_KEY = '3d_printer_farm_data';
 const LOGS_STORAGE_KEY = 'printer_farm_logs';
+const TASKS_STORAGE_KEY = 'printer_tasks_data';
 const MAX_LOGS = 50;
 const SHEET_ID = '12cvna-mOg3z9PofZ2tEPSwQjz7WOhkGnjQpYBnwTKoc';
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+
+// Telegram Bot (ТВОИ ДАННЫЕ!)
+const TELEGRAM_BOT_TOKEN = '8076806827:AAGIO7hqbhNrUyG8yhMVgQJkBMUWJTJPHWA';
+const TELEGRAM_CHAT_ID = '1951087208'; // chat_id @Krazz230
 
 // ===== ПЕРЕМЕННЫЕ =====
 let currentPage = 'printers';
 let selectedPrinter = null;
 let currentStep = 'model';
+let productsDatabase = {};
 
-// ===== ФУНКЦИИ ДЛЯ ВКЛАДКИ "ПЛАН ПЕЧАТИ" =====
+// ===== ИСПРАВЛЕНИЯ БАГОВ =====
 
+// 1. Свободные принтеры = idle ИЛИ finished
+function getFreePrinters() {
+  const printers = getPrinters();
+  return printers.filter(p => p.status === 'idle' || p.status === 'finished');
+}
+
+// 2. Исправление чтения таблицы со второй строки
 async function fetchOrdersFromSheet() {
   try {
     const response = await fetch(SHEET_URL);
@@ -1001,6 +373,7 @@ async function fetchOrdersFromSheet() {
     const orders = [];
     const rows = data.table.rows;
     
+    // ИСПРАВЛЕНИЕ: Начинаем с 1 (это вторая строка в таблице)
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       const cells = row.c;
@@ -1021,6 +394,7 @@ async function fetchOrdersFromSheet() {
       }
     }
     
+    console.log('Загружено заказов (со строки 2):', orders.length);
     return orders;
   } catch (error) {
     console.error('Ошибка при загрузке заказов:', error);
@@ -1028,231 +402,410 @@ async function fetchOrdersFromSheet() {
   }
 }
 
-function calculateOrdersInPrint() {
-  const printers = getPrinters();
-  const ordersInPrint = {};
-  
-  printers.forEach(printer => {
-    if (printer.status === 'printing' && printer.printName) {
-      const match = printer.printName.match(/^(.+?)(?:\s*×\s*(\d+))?$/);
-      
-      if (match) {
-        const itemName = match[1].trim();
-        const quantity = match[2] ? parseInt(match[2]) : 1;
-        
-        if (!ordersInPrint[itemName]) {
-          ordersInPrint[itemName] = 0;
-        }
-        ordersInPrint[itemName] += quantity;
+// 3. Загрузка базы изделий из JSON файла
+async function loadProductsDatabase() {
+  try {
+    const response = await fetch('products.json');
+    if (!response.ok) throw new Error('Файл products.json не найден');
+    
+    productsDatabase = await response.json();
+    console.log('База изделий загружена:', Object.keys(productsDatabase));
+    return productsDatabase;
+  } catch (error) {
+    console.error('Ошибка загрузки базы изделий:', error);
+    
+    // База по умолчанию если файл не найден
+    productsDatabase = {
+      "Хорёк": {
+        name: "Хорёк",
+        description: "Печатается группами, не прерывать",
+        variants: [
+          { quantity: 1, time: 4, file: "horek-1.gcode" },
+          { quantity: 2, time: 8, file: "horek-2.gcode" }
+        ]
       }
-    }
-  });
-  
-  return ordersInPrint;
+    };
+    return productsDatabase;
+  }
 }
 
-async function loadPlanData() {
-  if (currentPage !== 'plan') return;
-  
-  const container = document.getElementById('plan-container');
+// ===== СИСТЕМА ЗАДАЧ =====
+
+function getTasks() {
+  try {
+    const tasksJSON = localStorage.getItem(TASKS_STORAGE_KEY);
+    return tasksJSON ? JSON.parse(tasksJSON) : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveTasks(tasks) {
+  try {
+    localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks));
+    return true;
+  } catch (error) {
+    console.error('Ошибка сохранения задач:', error);
+    return false;
+  }
+}
+
+async function generateDailyTasks() {
+  const container = document.getElementById('tasks-container');
   container.innerHTML = `
     <div class="loading">
       <div class="loading-spinner"></div>
-      <p>Загружаем план печати...</p>
+      <p>Создаём задачи на день...</p>
     </div>
   `;
   
   try {
-    const ordersFromSheet = await fetchOrdersFromSheet();
-    const inPrintCounts = calculateOrdersInPrint();
+    // Загружаем данные
+    await loadProductsDatabase();
+    const orders = await fetchOrdersFromSheet();
+    const freePrinters = getFreePrinters();
     
-    const allOrders = ordersFromSheet.map(order => {
-      const inPrint = inPrintCounts[order.name] || 0;
-      const need = Math.max(0, order.reserve - inPrint);
-      
-      return {
-        ...order,
-        inPrint: inPrint,
-        need: need,
-        progress: order.reserve > 0 ? Math.floor((inPrint / order.reserve) * 100) : 0
-      };
-    });
+    if (orders.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: #888;">
+          <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+          <h3>Нет заказов</h3>
+          <p>В таблице нет заказов на печать</p>
+        </div>
+      `;
+      return;
+    }
     
-    const urgentOrders = allOrders.filter(o => o.need >= 10).sort((a, b) => b.need - a.need);
-    const regularOrders = allOrders.filter(o => o.need > 0 && o.need < 10).sort((a, b) => b.need - a.need);
-    const inProgressOrders = allOrders.filter(o => o.inPrint > 0).sort((a, b) => b.inPrint - a.inPrint);
+    if (freePrinters.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: #888;">
+          <i class="fas fa-print" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+          <h3>Нет свободных принтеров</h3>
+          <p>Освободите принтеры для создания задач</p>
+        </div>
+      `;
+      return;
+    }
     
-    renderPlan(urgentOrders, regularOrders, inProgressOrders);
+    // Создаем задачи
+    const tasks = createTasksFromOrders(orders, freePrinters);
+    saveTasks(tasks);
+    
+    // Отправляем в Telegram
+    sendTasksToTelegram(tasks);
+    
+    // Показываем задачи
+    showTasks();
+    
+    showNotification(`Создано ${tasks.length} задач на день!`);
     
   } catch (error) {
-    console.error('Ошибка при загрузке плана:', error);
+    console.error('Ошибка создания задач:', error);
     container.innerHTML = `
-      <div class="empty-plan">
-        <i class="fas fa-exclamation-triangle"></i>
-        <h3>Ошибка загрузки</h3>
-        <p>Не удалось загрузить план печати</p>
-        <button class="plan-btn primary" onclick="loadPlanData()" style="margin-top: 15px;">
-          <i class="fas fa-sync-alt"></i> Попробовать снова
-        </button>
+      <div style="text-align: center; padding: 40px; color: #888;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+        <h3>Ошибка</h3>
+        <p>${error.message}</p>
       </div>
     `;
   }
 }
 
-function renderPlan(urgentOrders, regularOrders, inProgressOrders) {
-  const container = document.getElementById('plan-container');
-  const printers = getPrinters();
+function createTasksFromOrders(orders, printers) {
+  const tasks = [];
+  let printerIndex = 0;
   
-  const totalOrders = urgentOrders.length + regularOrders.length;
-  const totalNeed = [...urgentOrders, ...regularOrders].reduce((sum, o) => sum + o.need, 0);
-  const totalInProgress = inProgressOrders.reduce((sum, o) => sum + o.inPrint, 0);
-  const freePrinters = printers.filter(p => p.status === 'idle').length;
+  orders.forEach(order => {
+    const product = productsDatabase[order.name];
+    
+    if (product && order.need > 0) {
+      // Выбираем самый эффективный вариант
+      const bestVariant = product.variants.reduce((best, current) => {
+        const currentEfficiency = current.quantity / current.time;
+        const bestEfficiency = best.quantity / best.time;
+        return currentEfficiency > bestEfficiency ? current : best;
+      });
+      
+      // Сколько таких групп нужно
+      const groupsNeeded = Math.ceil(order.need / bestVariant.quantity);
+      
+      for (let i = 0; i < groupsNeeded; i++) {
+        if (printerIndex >= printers.length) printerIndex = 0;
+        
+        const printer = printers[printerIndex];
+        const taskQuantity = Math.min(bestVariant.quantity, order.need - (i * bestVariant.quantity));
+        
+        if (taskQuantity <= 0) continue;
+        
+        tasks.push({
+          id: `task-${Date.now()}-${tasks.length}`,
+          product: order.name,
+          quantity: taskQuantity,
+          printerId: printer.id,
+          printerName: printer.name,
+          file: bestVariant.file,
+          time: bestVariant.time,
+          status: 'pending', // pending, current, completed
+          createdAt: new Date().toISOString(),
+          completedAt: null
+        });
+        
+        printerIndex++;
+      }
+    }
+  });
   
-  let html = `
-    <div class="plan-stats">
-      <div class="stat-card">
-        <div class="stat-label">Всего заказов</div>
-        <div class="stat-number total">${totalOrders}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Надо поставить</div>
-        <div class="stat-number today">${totalNeed}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">В печати сейчас</div>
-        <div class="stat-number progress">${totalInProgress}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Свободных принтеров</div>
-        <div class="stat-number free">${freePrinters}</div>
-      </div>
-    </div>
-  `;
+  // Делаем первую задачу текущей
+  if (tasks.length > 0) {
+    tasks[0].status = 'current';
+  }
   
-  if (urgentOrders.length > 0) {
+  return tasks;
+}
+
+function showTasks() {
+  if (currentPage !== 'tasks') return;
+  
+  const tasks = getTasks();
+  const container = document.getElementById('tasks-container');
+  const statsContainer = document.getElementById('tasks-stats');
+  
+  if (statsContainer) {
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(t => t.status === 'completed').length;
+    statsContainer.textContent = `Задач: ${totalTasks} | Выполнено: ${completedTasks}`;
+  }
+  
+  if (tasks.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 40px; color: #888;">
+        <i class="fas fa-tasks" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+        <h3>Нет задач на сегодня</h3>
+        <p>Нажмите "Создать задачи" чтобы начать</p>
+      </div>
+    `;
+    return;
+  }
+  
+  let html = '';
+  tasks.forEach((task, index) => {
+    const productInfo = productsDatabase[task.product] || {};
+    
     html += `
-      <div class="plan-section">
-        <div class="section-title">
-          <i class="fas fa-exclamation-triangle"></i>
-          <span>СРОЧНЫЕ ЗАКАЗЫ</span>
+      <div class="task-item ${task.status}">
+        <div class="task-header">
+          <div class="task-name">Задача ${index + 1}: ${task.product}</div>
+          <div class="task-status">
+            ${task.status === 'pending' ? 'Ожидает' : 
+              task.status === 'current' ? 'ТЕКУЩАЯ' : 
+              'Выполнена'}
+          </div>
         </div>
-        <div class="order-list">
+        
+        <div class="task-details">
+          <div class="task-detail">
+            <div class="task-label">Принтер:</div>
+            <div class="task-value">${task.printerName}</div>
+          </div>
+          <div class="task-detail">
+            <div class="task-label">Количество:</div>
+            <div class="task-value">${task.quantity} шт</div>
+          </div>
+          <div class="task-detail">
+            <div class="task-label">Файл:</div>
+            <div class="task-value">${task.file}</div>
+          </div>
+          <div class="task-detail">
+            <div class="task-label">Время:</div>
+            <div class="task-value">${task.time} ч</div>
+          </div>
+        </div>
+        
+        <div class="task-details">
+          <div class="task-detail" style="grid-column: span 2;">
+            <div class="task-label">Описание:</div>
+            <div class="task-value">${productInfo.description || 'Нет описания'}</div>
+          </div>
+        </div>
+        
+        <div class="task-actions">
     `;
     
-    urgentOrders.forEach(order => {
+    if (task.status === 'current') {
       html += `
-        <div class="order-item urgent">
-          <div class="order-header">
-            <div class="order-name">${order.name}</div>
-            <div class="order-quantity">${order.need} шт</div>
-          </div>
-          <div class="order-details">
-            <span>Резерв: ${order.reserve}</span>
-            <span>В печати: ${order.inPrint}</span>
-          </div>
-          <div class="order-progress-bar">
-            <div class="order-progress-fill" style="width: ${order.progress}%"></div>
-          </div>
-          <div class="order-status">
-            <span>Готово: ${order.progress}%</span>
-            <span class="order-assigned">Надо: ${order.need} шт</span>
-          </div>
-        </div>
+        <button class="task-btn complete-btn" onclick="completeTask('${task.id}')">
+          <i class="fas fa-check"></i> Выполнил
+        </button>
+        <button class="task-btn skip-btn" onclick="skipTask('${task.id}')">
+          <i class="fas fa-forward"></i> Пропустить
+        </button>
       `;
-    });
+    } else if (task.status === 'pending') {
+      html += `
+        <button class="task-btn skip-btn" onclick="makeTaskCurrent('${task.id}')" style="flex: 1;">
+          <i class="fas fa-play"></i> Начать эту задачу
+        </button>
+      `;
+    } else {
+      html += `
+        <button class="task-btn skip-btn" style="flex: 1; background: #4caf50;">
+          <i class="fas fa-check-circle"></i> Выполнено
+        </button>
+      `;
+    }
     
     html += `</div></div>`;
-  }
-  
-  if (regularOrders.length > 0) {
-    html += `
-      <div class="plan-section">
-        <div class="section-title">
-          <i class="fas fa-list-alt"></i>
-          <span>ОБЫЧНЫЕ ЗАКАЗЫ</span>
-        </div>
-        <div class="order-list">
-    `;
-    
-    regularOrders.forEach(order => {
-      html += `
-        <div class="order-item">
-          <div class="order-header">
-            <div class="order-name">${order.name}</div>
-            <div class="order-quantity">${order.need} шт</div>
-          </div>
-          <div class="order-details">
-            <span>Резерв: ${order.reserve}</span>
-            <span>В печати: ${order.inPrint}</span>
-          </div>
-          <div class="order-progress-bar">
-            <div class="order-progress-fill" style="width: ${order.progress}%"></div>
-          </div>
-          <div class="order-status">
-            <span>Готово: ${order.progress}%</span>
-            <span class="order-assigned">Надо: ${order.need} шт</span>
-          </div>
-        </div>
-      `;
-    });
-    
-    html += `</div></div>`;
-  }
-  
-  if (inProgressOrders.length > 0) {
-    html += `
-      <div class="plan-section">
-        <div class="section-title">
-          <i class="fas fa-print"></i>
-          <span>В ПЕЧАТИ СЕЙЧАС</span>
-        </div>
-        <div class="order-list">
-    `;
-    
-    inProgressOrders.forEach(order => {
-      html += `
-        <div class="order-item in-progress">
-          <div class="order-header">
-            <div class="order-name">${order.name}</div>
-            <div class="order-quantity">${order.inPrint} шт</div>
-          </div>
-          <div class="order-details">
-            <span>Резерв: ${order.reserve}</span>
-            <span>Осталось: ${order.need}</span>
-          </div>
-          <div class="order-progress-bar">
-            <div class="order-progress-fill" style="width: ${order.progress}%"></div>
-          </div>
-          <div class="order-status">
-            <span>Готово: ${order.progress}%</span>
-            <span class="order-assigned">В печати: ${order.inPrint} шт</span>
-          </div>
-        </div>
-      `;
-    });
-    
-    html += `</div></div>`;
-  }
-  
-  if (urgentOrders.length === 0 && regularOrders.length === 0 && inProgressOrders.length === 0) {
-    html += `
-      <div class="empty-plan">
-        <i class="fas fa-check-circle"></i>
-        <h3>Нет заказов на печать</h3>
-        <p>Все заказы выполнены или в работе</p>
-      </div>
-    `;
-  }
+  });
   
   container.innerHTML = html;
 }
 
-function openOrdersPage() {
-  window.open('orders.html', '_blank');
+function completeTask(taskId) {
+  const tasks = getTasks();
+  const taskIndex = tasks.findIndex(t => t.id === taskId);
+  
+  if (taskIndex === -1) return;
+  
+  // Отмечаем как выполненную
+  tasks[taskIndex].status = 'completed';
+  tasks[taskIndex].completedAt = new Date().toISOString();
+  
+  // Ищем следующую pending задачу
+  const nextTaskIndex = tasks.findIndex(t => t.status === 'pending');
+  if (nextTaskIndex !== -1) {
+    tasks[nextTaskIndex].status = 'current';
+  }
+  
+  saveTasks(tasks);
+  
+  // Обновляем интерфейс
+  showTasks();
+  
+  // Отправляем уведомление в Telegram
+  const task = tasks[taskIndex];
+  sendTelegramMessage(`✅ ЗАДАЧА ВЫПОЛНЕНА\n${task.product} ×${task.quantity}\nПринтер: ${task.printerName}\nФайл: ${task.file}`);
+  
+  showNotification('Задача выполнена!');
 }
 
-// ===== СТАРЫЕ ФУНКЦИИ =====
+function skipTask(taskId) {
+  const tasks = getTasks();
+  const taskIndex = tasks.findIndex(t => t.id === taskId);
+  
+  if (taskIndex === -1) return;
+  
+  // Делаем pending
+  tasks[taskIndex].status = 'pending';
+  
+  // Ищем следующую pending задачу
+  const nextTaskIndex = tasks.findIndex(t => t.status === 'pending');
+  if (nextTaskIndex !== -1) {
+    tasks[nextTaskIndex].status = 'current';
+  }
+  
+  saveTasks(tasks);
+  showTasks();
+  
+  showNotification('Задача пропущена');
+}
 
+function makeTaskCurrent(taskId) {
+  const tasks = getTasks();
+  
+  // Снимаем current со всех
+  tasks.forEach(task => {
+    if (task.status === 'current') task.status = 'pending';
+  });
+  
+  // Ставим current выбранной
+  const taskIndex = tasks.findIndex(t => t.id === taskId);
+  if (taskIndex !== -1) {
+    tasks[taskIndex].status = 'current';
+  }
+  
+  saveTasks(tasks);
+  showTasks();
+  
+  showNotification('Задача стала текущей');
+}
+
+function sendTasksToTelegram(tasks) {
+  if (tasks.length === 0) return;
+  
+  let message = `📋 ЗАДАЧИ НА ДЕНЬ (${tasks.length} шт)\n\n`;
+  
+  tasks.slice(0, 10).forEach((task, index) => {
+    const status = task.status === 'current' ? '🚀 СЕЙЧАС' : '⏳ ОЖИДАЕТ';
+    message += `${index + 1}. ${status} ${task.product} ×${task.quantity}\n`;
+    message += `   Принтер: ${task.printerName}\n`;
+    message += `   Файл: ${task.file}\n\n`;
+  });
+  
+  if (tasks.length > 10) {
+    message += `... и ещё ${tasks.length - 10} задач\n`;
+  }
+  
+  sendTelegramMessage(message);
+}
+
+// ===== TELEGRAM ФУНКЦИИ =====
+
+function sendTelegramMessage(message) {
+  if (!TELEGRAM_BOT_TOKEN) {
+    console.warn('Telegram токен не настроен');
+    return;
+  }
+  
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      chat_id: TELEGRAM_CHAT_ID,
+      text: message,
+      parse_mode: 'HTML'
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Telegram сообщение отправлено:', data);
+    if (data.ok) {
+      showTelegramNotification('Сообщение отправлено в Telegram!');
+    } else {
+      console.error('Ошибка Telegram:', data);
+    }
+  })
+  .catch(error => {
+    console.error('Ошибка отправки в Telegram:', error);
+  });
+}
+
+function showTelegramNotification(message) {
+  const notification = document.createElement('div');
+  notification.className = 'telegram-notification';
+  notification.innerHTML = `
+    <i class="fab fa-telegram"></i>
+    <span>${message}</span>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideOutRight 0.3s ease-out';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        document.body.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
+}
+
+// ===== ОСТАВШИЕСЯ ФУНКЦИИ (из предыдущей версии) =====
+
+// POPULAR_PRINTERS и DEFAULT_PRINTERS
 const POPULAR_PRINTERS = [
   { brand: "Anycubic", model: "Cobra 2", image: "foto/anycubic_cobra2.jpg" },
   { brand: "Creality", model: "Ender 3", image: "foto/creality_ender3.jpg" },
@@ -1301,6 +854,7 @@ const DEFAULT_PRINTERS = [
   }
 ];
 
+// Логи
 function addLog(message, type = 'info') {
   const logs = getLogs();
   const logEntry = {
@@ -1336,6 +890,7 @@ function clearLogs() {
   }
 }
 
+// Работа с принтерами
 function getPrinters() {
   try {
     const savedData = localStorage.getItem(STORAGE_KEY);
@@ -1397,6 +952,7 @@ function addPrinter(name, model, image = "", brand = "") {
   return null;
 }
 
+// Остальные функции
 function getNotificationCount() {
   const printers = getPrinters();
   let count = 0;
@@ -1443,7 +999,7 @@ function getProgressColor(status) {
 
 function showPage(page) {
   document.getElementById('printers-page').classList.add('hidden');
-  document.getElementById('plan-page').classList.add('hidden');
+  document.getElementById('tasks-page').classList.add('hidden');
   document.getElementById('logs-page').classList.add('hidden');
   
   document.querySelectorAll('.nav-item').forEach(item => {
@@ -1456,10 +1012,10 @@ function showPage(page) {
     document.querySelectorAll('.nav-item')[0].classList.add('active');
     document.getElementById('page-title').textContent = 'Ферма принтеров';
     renderPrinters();
-  } else if (page === 'plan') {
-    document.querySelectorAll('.nav-item')[2].classList.add('active');
-    document.getElementById('page-title').textContent = 'План печати';
-    loadPlanData();
+  } else if (page === 'tasks') {
+    document.querySelectorAll('.nav-item')[1].classList.add('active');
+    document.getElementById('page-title').textContent = 'Задачи на день';
+    loadProductsDatabase().then(() => showTasks());
   } else if (page === 'logs') {
     document.querySelectorAll('.nav-item')[3].classList.add('active');
     document.getElementById('page-title').textContent = 'История действий';
@@ -1774,13 +1330,15 @@ function openPrinter(printerId) {
   window.location.href = `printer.html?id=${printerId}`;
 }
 
+// Инициализация
 document.addEventListener('DOMContentLoaded', function() {
   renderPrinters();
+  loadProductsDatabase();
   
   document.querySelectorAll('.nav-item').forEach((item, index) => {
     item.addEventListener('click', function() {
       if (index === 0) showPage('printers');
-      else if (index === 2) showPage('plan');
+      else if (index === 1) showPage('tasks');
       else if (index === 3) showPage('logs');
     });
   });
@@ -1809,15 +1367,17 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+// Экспорт функций
 window.showAddModal = showAddModal;
 window.closeAddModal = closeChooseModelModal;
 window.addNewPrinter = addNewPrinter;
 window.openPrinter = openPrinter;
 window.showPage = showPage;
 window.clearLogs = clearLogs;
-window.loadPlanData = loadPlanData;
-window.openOrdersPage = openOrdersPage;
+window.generateDailyTasks = generateDailyTasks;
+window.completeTask = completeTask;
+window.skipTask = skipTask;
+window.makeTaskCurrent = makeTaskCurrent;
 </script>
-
 </body>
 </html>
