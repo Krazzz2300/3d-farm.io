@@ -1,16 +1,16 @@
 {
   "Хорёк": {
     "name": "Хорёк",
-    "description": "Печатается группами, не прерывать",
+    "description": "Печатается группами",
     "variants": [
-      { "quantity": 1, "time": 4, "file": "horek-1.gcode" },
-      { "quantity": 2, "time": 8, "file": "horek-2.gcode" },
-      { "quantity": 3, "time": 13, "file": "horek-3.gcode" }
+      { "quantity": 1, "time": 3, "file": "horek-1.gcode" },
+      { "quantity": 2, "time": 5, "file": "horek-2.gcode" },
+      { "quantity": 3, "time": 7, "file": "horek-3.gcode" }
     ]
   },
   "Доберман": {
     "name": "Доберман",
-    "description": "Можно прерывать, гибкий",
+    "description": "Можно прерывать",
     "variants": [
       { "quantity": 1, "time": 3, "file": "doberman-1.gcode" },
       { "quantity": 2, "time": 7, "file": "doberman-2.gcode" },
@@ -21,8 +21,8 @@
     "name": "Акула",
     "description": "Только по 1 или 2",
     "variants": [
-      { "quantity": 1, "time": 5, "file": "shark-1.gcode" },
-      { "quantity": 2, "time": 9, "file": "shark-2.gcode" }
+      { "quantity": 1, "time": 4, "file": "shark-1.gcode" },
+      { "quantity": 2, "time": 6, "file": "shark-2.gcode" }
     ]
   }
 }
