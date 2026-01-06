@@ -1,6 +1,6 @@
 {
   "Хорёк": {
-    "name": "Хорёк",
+    "name": "Хорек серый",
     "description": "Печатается группами",
     "variants": [
       { "quantity": 1, "time": 3, "file": "horek-1.gcode" },
