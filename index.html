@@ -64,7 +64,7 @@ body {
   to { opacity: 1; }
 }
 
-/* КАРТОЧКИ ПРИНТЕРОВ (готово) */
+/* КАРТОЧКИ ПРИНТЕРОВ */
 .printers-container {
   display: flex;
   flex-wrap: wrap;
@@ -81,13 +81,7 @@ body {
   box-sizing: border-box;
   border: 1px solid #444;
   position: relative;
-  transition: transform 0.2s, box-shadow 0.2s;
   overflow: hidden;
-}
-
-.card:active {
-  transform: scale(0.98);
-  background: #333;
 }
 
 .card-image-container {
@@ -104,11 +98,6 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
-}
-
-.card:hover .card-image {
-  transform: scale(1.05);
 }
 
 .card-title {
@@ -207,7 +196,7 @@ body {
   z-index: 2;
 }
 
-/* СТРАНИЦА ЗАДАЧ (ПОЛНОСТЬЮ ПЕРЕДЕЛАНА) */
+/* СТРАНИЦА ЗАДАЧ */
 .tasks-container {
   padding: 15px;
   max-height: calc(100vh - 120px);
@@ -221,7 +210,8 @@ body {
   padding: 15px;
   margin-bottom: 10px;
   border-left: 4px solid #2196f3;
-  animation: slideIn 0.3s ease-out;
+  position: relative;
+  overflow: hidden;
 }
 
 .task-item.completed {
@@ -317,20 +307,16 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  transition: opacity 0.2s;
 }
 
 .task-btn:active {
-  transform: scale(0.95);
   opacity: 0.8;
 }
 
 .task-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.task-btn:disabled:active {
-  transform: none;
 }
 
 .complete-btn {
@@ -376,14 +362,14 @@ body {
   align-items: center;
   gap: 8px;
   font-weight: bold;
+  transition: opacity 0.2s;
 }
 
 .generate-tasks-btn:active {
-  background: #1976d2;
-  transform: scale(0.95);
+  opacity: 0.8;
 }
 
-/* СТРАНИЦА ЗАКАЗОВ (НОВАЯ) */
+/* СТРАНИЦА ЗАКАЗОВ */
 .orders-container {
   padding: 15px;
   max-height: calc(100vh - 120px);
@@ -397,7 +383,6 @@ body {
   padding: 15px;
   margin-bottom: 10px;
   border-left: 4px solid #4caf50;
-  animation: slideIn 0.3s ease-out;
 }
 
 .order-card.urgent {
@@ -501,14 +486,14 @@ body {
   align-items: center;
   gap: 8px;
   font-weight: bold;
+  transition: opacity 0.2s;
 }
 
 .refresh-btn:active {
-  background: #1976d2;
-  transform: scale(0.95);
+  opacity: 0.8;
 }
 
-/* СТРАНИЦА ЛОГОВ (готово) */
+/* СТРАНИЦА ЛОГОВ */
 .logs-container {
   padding: 15px;
   max-height: calc(100vh - 220px);
@@ -522,7 +507,6 @@ body {
   padding: 12px;
   margin-bottom: 10px;
   border-left: 4px solid #4caf50;
-  animation: slideIn 0.3s ease-out;
 }
 
 .log-item.repair {
@@ -621,15 +605,14 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: background 0.2s;
+  transition: opacity 0.2s;
 }
 
 .clear-logs-btn:active {
-  background: #555;
-  transform: scale(0.95);
+  opacity: 0.8;
 }
 
-/* НАВИГАЦИЯ ВНИЗУ (5 ИКОНОК) */
+/* НАВИГАЦИЯ ВНИЗУ */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -654,7 +637,6 @@ body {
   text-decoration: none;
   flex: 1;
   padding: 8px 0;
-  transition: color 0.2s;
   font-size: 12px;
   cursor: pointer;
 }
@@ -682,15 +664,14 @@ body {
   border: none;
   font-size: 24px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: opacity 0.2s;
 }
 
 .add-nav-btn:active {
-  background: #45a049;
-  transform: scale(0.95);
+  opacity: 0.8;
 }
 
 /* МОДАЛЬНЫЕ ОКНА */
@@ -706,7 +687,6 @@ body {
   align-items: center;
   z-index: 1000;
   padding: 15px;
-  backdrop-filter: blur(4px);
 }
 
 .modal {
@@ -764,21 +744,12 @@ body {
   border-radius: 10px;
   background: #333;
   cursor: pointer;
-  transition: background 0.2s;
   border: 2px solid transparent;
-}
-
-.printer-option:hover {
-  background: #3a3a3a;
 }
 
 .printer-option.selected {
   border-color: #4caf50;
   background: rgba(76, 175, 80, 0.1);
-}
-
-.printer-option:active {
-  background: #444;
 }
 
 .printer-option-image {
@@ -864,7 +835,7 @@ body {
   color: white; 
 }
 
-/* УВЕДОМЛЕНИЯ */
+/* УВЕДОМЛЕНИЯ (только для важных действий) */
 .notification {
   position: fixed;
   top: 70px;
@@ -877,18 +848,6 @@ body {
   z-index: 1000;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   font-weight: bold;
-  backdrop-filter: blur(10px);
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
-  to { transform: translateX(-50%) translateY(0); opacity: 1; }
-}
-
-@keyframes slideOut {
-  from { transform: translateX(-50%) translateY(0); opacity: 1; }
-  to { transform: translateX(-50%) translateY(-20px); opacity: 0; }
 }
 
 /* ЗАГРУЗКА */
@@ -922,29 +881,6 @@ body {
 
 .pulse-animation {
   animation: pulse 1s infinite;
-}
-
-/* ТЕЛЕГРАМ УВЕДОМЛЕНИЯ */
-.telegram-notification {
-  position: fixed;
-  top: 70px;
-  right: 15px;
-  background: #0088cc;
-  color: white;
-  padding: 10px 15px;
-  border-radius: 10px;
-  z-index: 1001;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  animation: slideInRight 0.3s ease-out;
-}
-
-@keyframes slideInRight {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
 }
 
 /* АДАПТИВНОСТЬ */
@@ -1066,34 +1002,29 @@ body {
   </div>
 </div>
 
-<!-- Нижняя навигация (5 ИКОНОК) -->
+<!-- Нижняя навигация -->
 <div class="bottom-nav">
-  <!-- 1. Принтеры -->
   <div class="nav-item active" onclick="showPage('printers')">
     <i class="fas fa-home nav-icon"></i>
     <span>Принтеры</span>
   </div>
   
-  <!-- 2. Задачи -->
   <div class="nav-item" onclick="showPage('tasks')">
     <i class="fas fa-tasks nav-icon"></i>
     <span>Задачи</span>
   </div>
   
-  <!-- 3. Добавить принтер -->
   <div class="nav-item nav-add">
     <button class="add-nav-btn" onclick="showAddModal()">
       <i class="fas fa-plus"></i>
     </button>
   </div>
   
-  <!-- 4. Заказы -->
   <div class="nav-item" onclick="showPage('orders')">
     <i class="fas fa-shopping-cart nav-icon"></i>
     <span>Заказы</span>
   </div>
   
-  <!-- 5. Логи -->
   <div class="nav-item" onclick="showPage('logs')">
     <i class="fas fa-history nav-icon"></i>
     <span>Логи</span>
@@ -1144,11 +1075,11 @@ const TASKS_STORAGE_KEY = 'printer_tasks_data';
 const SHEET_ID = '12cvna-mOg3z9PofZ2tEPSwQjz7WOhkGnjQpYBnwTKoc';
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
 
-// Telegram Bot
+// Telegram Bot (оставляем только для критических уведомлений)
 const TELEGRAM_BOT_TOKEN = '8076806827:AAGIO7hqbhNrUyG8yhMVgQJkBMUWJTJPHWA';
 const TELEGRAM_CHAT_ID = '1951087208';
 
-// База изделий по умолчанию (загружается из products.json)
+// База изделий
 let productsDatabase = {};
 
 // ===== ИНИЦИАЛИЗАЦИЯ =====
@@ -1221,7 +1152,9 @@ const DEFAULT_PRINTERS = [
     printDuration: null,
     finishedNotified: false,
     problem: "",
-    currentTaskId: null
+    currentTaskId: null,
+    taskStartTime: null,
+    taskDuration: null
   },
   {
     id: "printer2", 
@@ -1236,7 +1169,9 @@ const DEFAULT_PRINTERS = [
     printDuration: null,
     finishedNotified: false,
     problem: "",
-    currentTaskId: null
+    currentTaskId: null,
+    taskStartTime: null,
+    taskDuration: null
   }
 ];
 
@@ -1299,6 +1234,8 @@ function updatePrintersStatus() {
         
         // Освобождаем задачу принтера
         printer.currentTaskId = null;
+        printer.taskStartTime = null;
+        printer.taskDuration = null;
       }
     }
   });
@@ -1376,7 +1313,7 @@ async function loadProductsDatabase() {
     if (!response.ok) throw new Error('Файл products.json не найден');
     
     productsDatabase = await response.json();
-    console.log('База изделий загружена:', Object.keys(productsDatabase));
+    console.log('База изделий загружена');
     return productsDatabase;
   } catch (error) {
     console.error('Ошибка загрузки базы изделий:', error);
@@ -1391,18 +1328,50 @@ async function loadProductsDatabase() {
           { quantity: 2, time: 5, file: "horek-2.gcode" },
           { quantity: 3, time: 7, file: "horek-3.gcode" }
         ]
-      },
-      "Доберман": {
-        name: "Доберман",
-        description: "Можно прерывать",
-        variants: [
-          { quantity: 1, time: 3, file: "doberman-1.gcode" },
-          { quantity: 2, time: 7, file: "doberman-2.gcode" },
-          { quantity: 3, time: 10, file: "doberman-3.gcode" }
-        ]
       }
     };
     return productsDatabase;
+  }
+}
+
+// ===== GOOGLE SHEETS (ИСПРАВЛЕНО!) =====
+async function fetchOrdersFromSheet() {
+  try {
+    const response = await fetch(SHEET_URL);
+    const text = await response.text();
+    const jsonText = text.substring(47).slice(0, -2);
+    const data = JSON.parse(jsonText);
+    
+    const orders = [];
+    const rows = data.table.rows;
+    
+    // ИСПРАВЛЕНИЕ: Читаем со второй строки, столбцы B и C
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      const cells = row.c;
+      
+      // Столбец B (индекс 1) - название, столбец C (индекс 2) - количество
+      if (cells && cells[1] && cells[2]) {
+        const name = cells[1].v;
+        const quantity = parseFloat(cells[2].v);
+        
+        if (name && !isNaN(quantity) && quantity > 0) {
+          orders.push({
+            id: `order-${i}`,
+            name: name.trim(),
+            quantity: Math.floor(quantity),
+            printed: 0,
+            remaining: Math.floor(quantity)
+          });
+        }
+      }
+    }
+    
+    console.log('Загружено заказов из Google Sheets:', orders.length);
+    return orders;
+  } catch (error) {
+    console.error('Ошибка загрузки из Google Sheets:', error);
+    return [];
   }
 }
 
@@ -1417,6 +1386,9 @@ async function generateSmartTasks() {
   `;
   
   try {
+    // Очищаем старые задачи
+    localStorage.removeItem(TASKS_STORAGE_KEY);
+    
     // Загружаем заказы
     const orders = await fetchOrdersFromSheet();
     const availablePrinters = getAvailablePrinters();
@@ -1450,10 +1422,8 @@ async function generateSmartTasks() {
     // Показываем задачи
     showTasks();
     
-    showNotification(`Создано ${tasks.length} умных задач!`);
-    
-    // Отправляем в Telegram
-    sendTelegramMessage(`📋 СОЗДАНЫ УМНЫЕ ЗАДАЧИ\n${tasks.length} задач\nПринтеров: ${availablePrinters.length}`);
+    // БЕЗ УВЕДОМЛЕНИЯ - только логи
+    addLog(`Создано ${tasks.length} умных задач`, 'info');
     
   } catch (error) {
     console.error('Ошибка:', error);
@@ -1469,80 +1439,74 @@ async function generateSmartTasks() {
 
 function createSmartTasks(orders, printers) {
   const tasks = [];
-  const printerTasks = {}; // Храним задачи для каждого принтера
+  const printerQueues = {}; // Очереди задач для каждого принтера
   
-  // Инициализируем для каждого принтера
+  // Инициализируем очереди
   printers.forEach(printer => {
-    printerTasks[printer.id] = [];
+    printerQueues[printer.id] = [];
   });
   
+  // Распределяем заказы по принтерам
   orders.forEach(order => {
     const product = productsDatabase[order.name];
     
-    if (product && order.need > 0) {
-      let remaining = order.need;
+    if (product && order.quantity > 0) {
+      let remaining = order.quantity;
       
-      // Распределяем по принтерам
+      // Распределяем по принтерам с наименьшей загрузкой
       while (remaining > 0) {
-        // Выбираем принтер с наименьшим количеством задач
-        const printerId = getPrinterWithLeastTasks(printerTasks, printers);
+        const printerId = getLeastLoadedPrinter(printerQueues, printers);
         if (!printerId) break;
         
-        // Выбираем оптимальный вариант печати
         const variant = getOptimalVariant(product, remaining);
+        if (!variant) break;
         
-        if (variant) {
-          tasks.push({
-            id: `task-${Date.now()}-${tasks.length}`,
-            product: order.name,
-            quantity: variant.quantity,
-            printerId: printerId,
-            printerName: printers.find(p => p.id === printerId)?.name || printerId,
-            file: variant.file,
-            time: variant.time,
-            status: 'pending',
-            createdAt: new Date().toISOString(),
-            completedAt: null,
-            orderId: order.id,
-            dependsOn: null,
-            unlockTime: null
-          });
-          
-          printerTasks[printerId].push(tasks[tasks.length - 1]);
-          remaining -= variant.quantity;
+        // Создаем задачу
+        const task = {
+          id: `task-${Date.now()}-${tasks.length}`,
+          orderId: order.id,
+          product: order.name,
+          quantity: variant.quantity,
+          printerId: printerId,
+          printerName: printers.find(p => p.id === printerId)?.name || printerId,
+          file: variant.file,
+          time: variant.time, // часы
+          status: 'pending',
+          createdAt: new Date().toISOString(),
+          completedAt: null,
+          dependsOn: null, // ID предыдущей задачи на этом принтере
+          expectedUnlockTime: null // Когда станет доступна
+        };
+        
+        // Устанавливаем зависимости
+        const printerQueue = printerQueues[printerId];
+        if (printerQueue.length > 0) {
+          const lastTask = printerQueue[printerQueue.length - 1];
+          task.dependsOn = lastTask.id;
+          task.expectedUnlockTime = new Date(Date.now() + lastTask.time * 3600000).toISOString();
         } else {
-          break;
+          // Первая задача на принтере - текущая
+          task.status = 'current';
         }
+        
+        tasks.push(task);
+        printerQueues[printerId].push(task);
+        remaining -= variant.quantity;
       }
     }
   });
   
-  // Устанавливаем зависимости между задачами на одном принтере
-  Object.keys(printerTasks).forEach(printerId => {
-    const printerTaskList = printerTasks[printerId];
-    
-    for (let i = 1; i < printerTaskList.length; i++) {
-      printerTaskList[i].dependsOn = printerTaskList[i-1].id;
-      // Время разблокировки = время выполнения предыдущей задачи
-      printerTaskList[i].unlockTime = new Date(Date.now() + printerTaskList[i-1].time * 3600000).toISOString();
-    }
-    
-    // Первая задача на каждом принтере - текущая
-    if (printerTaskList.length > 0) {
-      printerTaskList[0].status = 'current';
-    }
-  });
-  
+  console.log('Создано задач:', tasks.length);
   return tasks;
 }
 
-function getPrinterWithLeastTasks(printerTasks, printers) {
+function getLeastLoadedPrinter(printerQueues, printers) {
   let minTasks = Infinity;
   let selectedPrinter = null;
   
   printers.forEach(printer => {
     if (printer.status !== 'repair') {
-      const taskCount = printerTasks[printer.id]?.length || 0;
+      const taskCount = printerQueues[printer.id]?.length || 0;
       if (taskCount < minTasks) {
         minTasks = taskCount;
         selectedPrinter = printer.id;
@@ -1558,21 +1522,14 @@ function getOptimalVariant(product, remaining) {
     return null;
   }
   
-  // Сортируем варианты по эффективности (количество/время)
-  const sortedVariants = [...product.variants].sort((a, b) => {
-    const efficiencyA = a.quantity / a.time;
-    const efficiencyB = b.quantity / b.time;
-    return efficiencyB - efficiencyA; // По убыванию эффективности
-  });
-  
-  // Ищем подходящий вариант
-  for (const variant of sortedVariants) {
+  // Сначала ищем вариант, который точно помещается
+  for (const variant of product.variants) {
     if (variant.quantity <= remaining) {
       return variant;
     }
   }
   
-  // Если ничего не подошло, берем самый маленький вариант
+  // Если не нашли, берем самый маленький вариант
   return product.variants.reduce((min, current) => 
     current.quantity < min.quantity ? current : min
   );
@@ -1590,34 +1547,41 @@ function updateTasksStatus() {
       const dependentTask = tasks.find(t => t.id === task.dependsOn);
       
       if (dependentTask && dependentTask.status === 'completed') {
-        // Проверяем время разблокировки
-        if (!task.unlockTime || new Date() >= new Date(task.unlockTime)) {
+        // Зависимая задача завершена, но нужно проверить время
+        const printer = printers.find(p => p.id === task.printerId);
+        
+        if (printer && printer.status === 'idle') {
+          // Принтер свободен - задача доступна
           task.status = 'current';
+          updated = true;
+        } else if (printer && printer.status === 'printing') {
+          // Принтер занят - задача заблокирована
+          task.status = 'locked';
           updated = true;
         }
       }
     }
     
-    // Проверяем, свободен ли принтер
-    if (task.status === 'current') {
+    // Если принтер в ремонте - пропускаем задачу
+    if (task.status === 'current' || task.status === 'pending') {
       const printer = printers.find(p => p.id === task.printerId);
-      if (printer && printer.status === 'printing') {
-        // Если принтер уже печатает, задача не доступна
-        task.status = 'locked';
-        updated = true;
-      } else if (printer && printer.status === 'repair') {
-        // Если принтер в ремонте, пропускаем задачу
+      if (printer && printer.status === 'repair') {
         task.status = 'skipped';
         updated = true;
       }
     }
   });
   
-  // Если нет текущих задач, ищем следующую
+  // Если нет текущих задач, делаем первую доступную текущей
   if (!tasks.some(t => t.status === 'current')) {
-    const nextTask = tasks.find(t => t.status === 'pending' && (!t.dependsOn || t.dependsOn === ''));
-    if (nextTask) {
-      nextTask.status = 'current';
+    const availableTask = tasks.find(t => 
+      t.status === 'pending' && 
+      !t.dependsOn && 
+      !printers.find(p => p.id === t.printerId && p.status === 'repair')
+    );
+    
+    if (availableTask) {
+      availableTask.status = 'current';
       updated = true;
     }
   }
@@ -1625,12 +1589,15 @@ function updateTasksStatus() {
   if (updated) {
     saveTasks(tasks);
   }
+  
+  return updated;
 }
 
 function showTasks() {
   if (currentPage !== 'tasks') return;
   
   const tasks = getTasks();
+  const printers = getPrinters();
   const container = document.getElementById('tasks-container');
   const statsContainer = document.getElementById('tasks-stats');
   
@@ -1655,7 +1622,7 @@ function showTasks() {
   let html = '';
   tasks.forEach((task, index) => {
     const productInfo = productsDatabase[task.product] || {};
-    const printer = getPrinters().find(p => p.id === task.printerId);
+    const printer = printers.find(p => p.id === task.printerId);
     const isPrinterAvailable = printer && printer.status !== 'repair';
     const isPrinterBusy = printer && printer.status === 'printing';
     
@@ -1682,7 +1649,7 @@ function showTasks() {
           <div class="task-detail">
             <div class="task-label">Принтер:</div>
             <div class="task-value" style="color: ${isPrinterAvailable ? '#4caf50' : '#f44336'}">
-              ${task.printerName} ${!isPrinterAvailable ? '(в ремонте)' : isPrinterBusy ? '(занят)' : ''}
+              ${task.printerName} ${!isPrinterAvailable ? '(в ремонте)' : ''}
             </div>
           </div>
           <div class="task-detail">
@@ -1700,7 +1667,7 @@ function showTasks() {
         </div>
         
         ${task.dependsOn ? `
-        <div style="font-size: 12px; color: #ff9800; margin: 8px 0;">
+        <div style="font-size: 12px; color: #ff9800; margin: 8px 0; padding: 8px; background: rgba(255,152,0,0.1); border-radius: 6px;">
           ⚠️ Доступна после завершения предыдущей задачи на этом принтере
         </div>
         ` : ''}
@@ -1717,7 +1684,7 @@ function showTasks() {
           <i class="fas fa-forward"></i> Пропустить
         </button>
       `;
-    } else if (task.status === 'locked' || (task.status === 'pending' && task.dependsOn)) {
+    } else if (task.status === 'locked') {
       const dependentTask = tasks.find(t => t.id === task.dependsOn);
       html += `
         <button class="task-btn skip-btn" style="flex: 1;" disabled>
@@ -1756,6 +1723,25 @@ function showTasks() {
   container.innerHTML = html;
 }
 
+function getTasks() {
+  try {
+    const tasksJSON = localStorage.getItem(TASKS_STORAGE_KEY);
+    return tasksJSON ? JSON.parse(tasksJSON) : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveTasks(tasks) {
+  try {
+    localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks));
+    return true;
+  } catch (error) {
+    console.error('Ошибка сохранения задач:', error);
+    return false;
+  }
+}
+
 function completeTask(taskId) {
   const tasks = getTasks();
   const printers = getPrinters();
@@ -1767,7 +1753,7 @@ function completeTask(taskId) {
   const printerIndex = printers.findIndex(p => p.id === task.printerId);
   
   if (printerIndex === -1) {
-    showNotification('Принтер не найден!');
+    addLog('Принтер не найден для задачи', 'error');
     return;
   }
   
@@ -1775,9 +1761,11 @@ function completeTask(taskId) {
   printers[printerIndex].status = 'printing';
   printers[printerIndex].printName = `${task.quantity} ${task.product}`;
   printers[printerIndex].startTime = Date.now();
-  printers[printerIndex].printDuration = task.time * 3600000; // часы в миллисекунды
+  printers[printerIndex].printDuration = task.time * 3600000;
   printers[printerIndex].progress = 0;
   printers[printerIndex].currentTaskId = taskId;
+  printers[printerIndex].taskStartTime = Date.now();
+  printers[printerIndex].taskDuration = task.time * 3600000;
   
   // Отмечаем задачу как выполненную
   task.status = 'completed';
@@ -1790,10 +1778,8 @@ function completeTask(taskId) {
   // Обновляем интерфейс
   showTasks();
   
-  // Отправляем уведомление
-  sendTelegramMessage(`✅ ЗАПУЩЕНА ПЕЧАТЬ\n${task.product} ×${task.quantity}\nПринтер: ${task.printerName}\nФайл: ${task.file}\nВремя: ${task.time}ч`);
-  
-  showNotification(`Печать запущена на ${task.printerName}!`);
+  // Логируем, но не уведомляем
+  addLog(`Запущена печать: ${task.product} ×${task.quantity} на ${printers[printerIndex].name}`, 'info');
 }
 
 function skipTask(taskId) {
@@ -1805,7 +1791,7 @@ function skipTask(taskId) {
   tasks[taskIndex].status = 'skipped';
   
   // Ищем следующую задачу
-  const nextTask = tasks.find(t => t.status === 'pending' && (!t.dependsOn || t.dependsOn === ''));
+  const nextTask = tasks.find(t => t.status === 'pending' && !t.dependsOn);
   if (nextTask) {
     nextTask.status = 'current';
   }
@@ -1813,7 +1799,7 @@ function skipTask(taskId) {
   saveTasks(tasks);
   showTasks();
   
-  showNotification('Задача пропущена');
+  addLog(`Задача пропущена: ${tasks[taskIndex].product}`, 'warning');
 }
 
 function makeTaskCurrent(taskId) {
@@ -1833,26 +1819,7 @@ function makeTaskCurrent(taskId) {
   saveTasks(tasks);
   showTasks();
   
-  showNotification('Задача стала текущей');
-}
-
-function getTasks() {
-  try {
-    const tasksJSON = localStorage.getItem(TASKS_STORAGE_KEY);
-    return tasksJSON ? JSON.parse(tasksJSON) : [];
-  } catch (error) {
-    return [];
-  }
-}
-
-function saveTasks(tasks) {
-  try {
-    localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks));
-    return true;
-  } catch (error) {
-    console.error('Ошибка сохранения задач:', error);
-    return false;
-  }
+  addLog(`Задача стала текущей: ${tasks[taskIndex].product}`, 'info');
 }
 
 // ===== СТРАНИЦА ЗАКАЗОВ =====
@@ -1890,8 +1857,8 @@ async function loadOrders() {
     let html = '';
     orders.forEach(order => {
       const inPrint = inPrintCounts[order.name] || 0;
-      const remaining = Math.max(0, order.need - inPrint);
-      const progress = order.need > 0 ? Math.floor((inPrint / order.need) * 100) : 0;
+      const remaining = Math.max(0, order.quantity - inPrint);
+      const progress = order.quantity > 0 ? Math.floor((inPrint / order.quantity) * 100) : 0;
       
       totalInPrint += inPrint;
       totalRemaining += remaining;
@@ -1905,7 +1872,7 @@ async function loadOrders() {
           <div class="order-stats">
             <div class="stat-item">
               <div class="stat-label">Всего</div>
-              <div class="stat-value reserve">${order.need}</div>
+              <div class="stat-value reserve">${order.quantity}</div>
             </div>
             <div class="stat-item">
               <div class="stat-label">В печати</div>
@@ -1954,69 +1921,6 @@ async function loadOrders() {
   }
 }
 
-async function fetchOrdersFromSheet() {
-  try {
-    const response = await fetch(SHEET_URL);
-    const text = await response.text();
-    const jsonText = text.substring(47).slice(0, -2);
-    const data = JSON.parse(jsonText);
-    
-    const orders = [];
-    const rows = data.table.rows;
-    
-    // Читаем со второй строки
-    for (let i = 1; i < rows.length; i++) {
-      const row = rows[i];
-      const cells = row.c;
-      
-      if (cells && cells[1] && cells[5]) {
-        const name = cells[1].v;
-        const reserve = parseFloat(cells[5].v);
-        
-        if (name && !isNaN(reserve) && reserve > 0) {
-          orders.push({
-            id: `order-${i}`,
-            name: name.trim(),
-            reserve: Math.floor(reserve),
-            need: Math.floor(reserve)
-          });
-        }
-      }
-    }
-    
-    return orders;
-  } catch (error) {
-    console.error('Ошибка загрузки:', error);
-    return [];
-  }
-}
-
-// ===== TELEGRAM =====
-function sendTelegramMessage(message) {
-  if (!TELEGRAM_BOT_TOKEN) return;
-  
-  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-  
-  fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      chat_id: TELEGRAM_CHAT_ID,
-      text: message,
-      parse_mode: 'HTML'
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    console.log('Telegram:', data);
-  })
-  .catch(error => {
-    console.error('Telegram error:', error);
-  });
-}
-
 // ===== ОСТАЛЬНЫЕ ФУНКЦИИ =====
 function addLog(message, type = 'info') {
   const logs = getLogs();
@@ -2060,18 +1964,7 @@ function loadLogs() {
   
   if (statsContainer) {
     const totalLogs = logs.length;
-    const infoLogs = logs.filter(log => log.type === 'info').length;
-    const warningLogs = logs.filter(log => log.type === 'warning').length;
-    const problemLogs = logs.filter(log => log.type === 'problem').length;
-    const repairLogs = logs.filter(log => log.type === 'repair').length;
-    
-    statsContainer.innerHTML = `
-      Всего: ${totalLogs} | 
-      Инфо: ${infoLogs} | 
-      Внимание: ${warningLogs} | 
-      Проблемы: ${problemLogs} | 
-      Ремонт: ${repairLogs}
-    `;
+    statsContainer.innerHTML = `Всего записей: ${totalLogs}`;
   }
   
   if (logs.length === 0) {
@@ -2088,30 +1981,18 @@ function loadLogs() {
   let html = '';
   logs.forEach(log => {
     const typeClass = log.type || 'info';
-    const typeIcon = getLogIcon(log.type);
     const typeText = getLogTypeText(log.type);
     
     html += `<div class="log-item ${typeClass}">
       <div class="log-header">
         <span class="log-time">${log.date} ${log.timestamp}</span>
-        <span class="log-type">${typeIcon} ${typeText}</span>
+        <span class="log-type">${typeText}</span>
       </div>
       <div class="log-message">${log.message}</div>
     </div>`;
   });
   
   container.innerHTML = html;
-}
-
-function getLogIcon(type) {
-  const iconMap = {
-    'info': 'ℹ️',
-    'warning': '⚠️',
-    'problem': '🔧',
-    'repair': '🔧',
-    'error': '❌'
-  };
-  return iconMap[type] || '📝';
 }
 
 function getLogTypeText(type) {
@@ -2323,7 +2204,9 @@ function addNewPrinter() {
     printDuration: null,
     finishedNotified: false,
     problem: "",
-    currentTaskId: null
+    currentTaskId: null,
+    taskStartTime: null,
+    taskDuration: null
   };
   
   printers.push(newPrinter);
@@ -2343,17 +2226,13 @@ function showNotification(message) {
   const notification = document.createElement('div');
   notification.className = 'notification';
   notification.textContent = message;
-  notification.style.animation = 'slideIn 0.3s ease-out';
   
   document.body.appendChild(notification);
   
   setTimeout(() => {
-    notification.style.animation = 'slideOut 0.3s ease-out';
-    setTimeout(() => {
-      if (notification.parentNode) {
-        document.body.removeChild(notification);
-      }
-    }, 300);
+    if (notification.parentNode) {
+      document.body.removeChild(notification);
+    }
   }, 3000);
 }
 
