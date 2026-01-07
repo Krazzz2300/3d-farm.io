@@ -236,7 +236,7 @@ body {
 .task-item.locked {
   border-left-color: #666;
   background: rgba(100, 100, 100, 0.1);
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .task-item.skipped {
@@ -348,9 +348,26 @@ body {
   color: white;
 }
 
-.skip-btn {
+.change-printer-btn {
+  background: #2196f3;
+  color: white;
+}
+
+.confirm-complete-btn {
+  background: #4caf50;
+  color: white;
+  animation: pulse 1s infinite;
+}
+
+.cancel-complete-btn {
   background: #666;
   color: white;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
 .tasks-footer {
@@ -740,7 +757,7 @@ body {
   font-size: 14px;
 }
 
-.modal input {
+.modal input, .modal select {
   width: 100%;
   padding: 12px;
   border-radius: 10px;
@@ -750,7 +767,7 @@ body {
   font-size: 16px;
 }
 
-.modal input:focus {
+.modal input:focus, .modal select:focus {
   border-color: #4caf50;
   outline: none;
 }
@@ -932,6 +949,91 @@ body {
   animation: pulse 1s infinite;
 }
 
+/* НАСТРОЙКИ */
+.settings-container {
+  padding: 15px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-bottom: 80px;
+}
+
+.settings-group {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.settings-group h3 {
+  margin-bottom: 15px;
+  color: #4caf50;
+  font-size: 18px;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #333;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.setting-label {
+  font-size: 14px;
+  color: #ccc;
+}
+
+.setting-value {
+  font-size: 14px;
+  color: #fff;
+}
+
+.time-input {
+  width: 60px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #1e1e1e;
+  color: white;
+  text-align: center;
+}
+
+.time-separator {
+  margin: 0 5px;
+}
+
+.delete-all-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  opacity: 0.3;
+}
+
+.delete-all-btn:hover {
+  opacity: 1;
+}
+
+.delete-all-btn:active {
+  transform: scale(0.95);
+}
+
 /* АДАПТИВНОСТЬ */
 @media (min-width: 768px) {
   .printers-container {
@@ -1037,6 +1139,71 @@ body {
   </div>
 </div>
 
+<!-- Страница настроек -->
+<div id="settings-page" class="page hidden">
+  <div class="settings-container" id="settings-container">
+    <div class="settings-group">
+      <h3><i class="fas fa-clock"></i> Время работы оператора</h3>
+      <div class="setting-item">
+        <div class="setting-label">Начало работы:</div>
+        <div>
+          <input type="number" id="start-hour" class="time-input" min="0" max="23" value="9">
+          <span class="time-separator">:</span>
+          <input type="number" id="start-minute" class="time-input" min="0" max="59" value="0">
+        </div>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">Окончание работы:</div>
+        <div>
+          <input type="number" id="end-hour" class="time-input" min="0" max="23" value="16">
+          <span class="time-separator">:</span>
+          <input type="number" id="end-minute" class="time-input" min="0" max="59" value="0">
+        </div>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">Дедлайн (к утру):</div>
+        <div>
+          <input type="number" id="deadline-hour" class="time-input" min="0" max="23" value="8">
+          <span class="time-separator">:</span>
+          <input type="number" id="deadline-minute" class="time-input" min="0" max="59" value="0">
+        </div>
+      </div>
+    </div>
+    
+    <div class="settings-group">
+      <h3><i class="fas fa-cogs"></i> Настройки алгоритма</h3>
+      <div class="setting-item">
+        <div class="setting-label">Минимизировать принтеры:</div>
+        <div>
+          <input type="checkbox" id="minimize-printers" checked>
+        </div>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">Использовать ночь максимально:</div>
+        <div>
+          <input type="checkbox" id="use-night" checked>
+        </div>
+      </div>
+    </div>
+    
+    <div class="settings-group">
+      <h3><i class="fas fa-database"></i> Данные</h3>
+      <div class="setting-item">
+        <div class="setting-label">Загрузить базу изделий:</div>
+        <button onclick="loadProductsDatabase()" style="padding: 8px 12px; background: #2196f3; color: white; border: none; border-radius: 6px; cursor: pointer;">
+          <i class="fas fa-sync"></i> Обновить
+        </button>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">Очистить все задачи:</div>
+        <button onclick="deleteAllTasks()" class="delete-all-btn">
+          <i class="fas fa-trash"></i> Удалить все задачи
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Страница логов -->
 <div id="logs-page" class="page hidden">
   <div class="logs-container" id="logs-container"></div>
@@ -1051,7 +1218,7 @@ body {
   </div>
 </div>
 
-<!-- Нижняя навигация (5 ИКОНОК) -->
+<!-- Нижняя навигация (6 ИКОНОК) -->
 <div class="bottom-nav">
   <!-- 1. Принтеры -->
   <div class="nav-item active" onclick="showPage('printers')">
@@ -1065,20 +1232,26 @@ body {
     <span>Задачи</span>
   </div>
   
-  <!-- 3. Добавить принтер -->
+  <!-- 3. Настройки -->
+  <div class="nav-item" onclick="showPage('settings')">
+    <i class="fas fa-cog nav-icon"></i>
+    <span>Настройки</span>
+  </div>
+  
+  <!-- 4. Добавить принтер -->
   <div class="nav-item nav-add">
     <button class="add-nav-btn" onclick="showAddModal()">
       <i class="fas fa-plus"></i>
     </button>
   </div>
   
-  <!-- 4. Заказы -->
+  <!-- 5. Заказы -->
   <div class="nav-item" onclick="showPage('orders')">
     <i class="fas fa-shopping-cart nav-icon"></i>
     <span>Заказы</span>
   </div>
   
-  <!-- 5. Логи -->
+  <!-- 6. Логи -->
   <div class="nav-item" onclick="showPage('logs')">
     <i class="fas fa-history nav-icon"></i>
     <span>Логи</span>
@@ -1121,11 +1294,36 @@ body {
   </div>
 </div>
 
+<!-- Модальное окно смены принтера -->
+<div class="modal-bg" id="change-printer-modal">
+  <div class="modal">
+    <h3>Выберите принтер для задачи</h3>
+    <div class="printer-list" id="change-printer-list"></div>
+    <div class="modal-buttons">
+      <button class="cancel-btn" onclick="closeChangePrinterModal()">Отмена</button>
+      <button class="save-btn" onclick="confirmChangePrinter()">Сменить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно подтверждения выполнения -->
+<div class="modal-bg" id="confirm-complete-modal">
+  <div class="modal">
+    <h3>Подтверждение</h3>
+    <p id="confirm-complete-text">Вы уверены, что хотите отметить задачу как выполненную и запустить печать?</p>
+    <div class="modal-buttons">
+      <button class="cancel-btn" onclick="closeConfirmCompleteModal()">Отмена</button>
+      <button class="save-btn" onclick="executeCompleteTask()">Да, запустить печать</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ===== КОНСТАНТЫ =====
 const STORAGE_KEY = '3d_printer_farm_data';
 const LOGS_STORAGE_KEY = 'printer_farm_logs';
 const TASKS_STORAGE_KEY = 'printer_tasks_data';
+const SETTINGS_STORAGE_KEY = 'printer_farm_settings';
 const SHEET_ID = '12cvna-mOg3z9PofZ2tEPSwQjz7WOhkGnjQpYBnwTKoc';
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
 
@@ -1140,20 +1338,87 @@ let productsDatabase = {};
 let currentPage = 'printers';
 let selectedPrinter = null;
 let currentStep = 'model';
-let isRendering = false; // Флаг для предотвращения одновременных отрисовок
+let isRendering = false;
+let currentTaskForChange = null;
+let currentTaskForComplete = null;
+
+// Настройки по умолчанию
+const DEFAULT_SETTINGS = {
+  operatorStart: { hour: 9, minute: 0 },
+  operatorEnd: { hour: 16, minute: 0 },
+  deadline: { hour: 8, minute: 0 },
+  minimizePrinters: true,
+  useNight: true
+};
+
+// ===== НАСТРОЙКИ =====
+function loadSettings() {
+  try {
+    const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
+function saveSettings(settings) {
+  try {
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function updateSettingsUI() {
+  const settings = loadSettings();
+  
+  document.getElementById('start-hour').value = settings.operatorStart.hour;
+  document.getElementById('start-minute').value = settings.operatorStart.minute;
+  document.getElementById('end-hour').value = settings.operatorEnd.hour;
+  document.getElementById('end-minute').value = settings.operatorEnd.minute;
+  document.getElementById('deadline-hour').value = settings.deadline.hour;
+  document.getElementById('deadline-minute').value = settings.deadline.minute;
+  document.getElementById('minimize-printers').checked = settings.minimizePrinters;
+  document.getElementById('use-night').checked = settings.useNight;
+}
+
+function saveSettingsFromUI() {
+  const settings = {
+    operatorStart: {
+      hour: parseInt(document.getElementById('start-hour').value) || 9,
+      minute: parseInt(document.getElementById('start-minute').value) || 0
+    },
+    operatorEnd: {
+      hour: parseInt(document.getElementById('end-hour').value) || 16,
+      minute: parseInt(document.getElementById('end-minute').value) || 0
+    },
+    deadline: {
+      hour: parseInt(document.getElementById('deadline-hour').value) || 8,
+      minute: parseInt(document.getElementById('deadline-minute').value) || 0
+    },
+    minimizePrinters: document.getElementById('minimize-printers').checked,
+    useNight: document.getElementById('use-night').checked
+  };
+  
+  saveSettings(settings);
+  showNotification('Настройки сохранены!');
+}
 
 // ===== ИНИЦИАЛИЗАЦИЯ =====
 document.addEventListener('DOMContentLoaded', function() {
   renderPrinters();
   loadProductsDatabase();
+  updateSettingsUI();
   
   // Навигация
   document.querySelectorAll('.nav-item').forEach((item, index) => {
     item.addEventListener('click', function() {
       if (index === 0) showPage('printers');
       else if (index === 1) showPage('tasks');
-      else if (index === 3) showPage('orders');
-      else if (index === 4) showPage('logs');
+      else if (index === 2) showPage('settings');
+      else if (index === 4) showPage('orders');
+      else if (index === 5) showPage('logs');
     });
   });
   
@@ -1169,9 +1434,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Обновление каждую секунду (только для текущей страницы)
+  document.getElementById('change-printer-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeChangePrinterModal();
+  });
+  
+  document.getElementById('confirm-complete-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeConfirmCompleteModal();
+  });
+  
+  // Автосохранение настроек при изменении
+  document.querySelectorAll('#settings-page input').forEach(input => {
+    input.addEventListener('change', saveSettingsFromUI);
+  });
+  
+  // Обновление каждую секунду
   setInterval(() => {
-    if (isRendering) return; // Не запускаем новую отрисовку, если предыдущая еще идет
+    if (isRendering) return;
     
     if (currentPage === 'printers') {
       updatePrintersStatus();
@@ -1179,10 +1457,10 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (currentPage === 'tasks') {
       updateTasksStatus();
       if (document.getElementById('tasks-page') && !document.getElementById('tasks-page').classList.contains('hidden')) {
-        renderTasks(); // Используем новую функцию renderTasks
+        renderTasks();
       }
     }
-  }, 2000); // Увеличил интервал до 2 секунд для стабильности
+  }, 2000);
   
   // Инициализируем текущую страницу
   showPage('printers');
@@ -1263,11 +1541,6 @@ function savePrinters(printers) {
   } catch (error) {
     return false;
   }
-}
-
-function getFreePrinters() {
-  const printers = getPrinters();
-  return printers.filter(p => p.status === 'idle' || p.status === 'finished');
 }
 
 function getAvailablePrinters() {
@@ -1380,27 +1653,24 @@ async function loadProductsDatabase() {
     if (!response.ok) throw new Error('Файл products.json не найден');
     
     const data = await response.json();
-    // Исправляем структуру JSON
     productsDatabase = {};
     
-    // Парсим строку как JSON объект
     try {
       const parsedData = JSON.parse(data);
       if (typeof parsedData === 'object') {
         productsDatabase = parsedData;
       }
     } catch (e) {
-      // Если это строка с объектом, пробуем исправить
       const fixedJson = data.replace(/(\w+):/g, '"$1":').replace(/'/g, '"');
       productsDatabase = JSON.parse(fixedJson);
     }
     
     console.log('База изделий загружена:', Object.keys(productsDatabase));
+    showNotification('База изделий обновлена!');
     return productsDatabase;
   } catch (error) {
     console.error('Ошибка загрузки базы изделий:', error);
     
-    // База по умолчанию
     productsDatabase = {
       "Хорек серый": {
         name: "Хорек серый",
@@ -1423,13 +1693,13 @@ async function loadProductsDatabase() {
   }
 }
 
-// ===== УМНЫЕ ЗАДАЧИ =====
+// ===== УМНЫЕ ЗАДАЧИ (НОВЫЙ АЛГОРИТМ) =====
 async function generateSmartTasks() {
   const container = document.getElementById('tasks-container');
   container.innerHTML = `
     <div class="loading">
       <div class="loading-spinner"></div>
-      <p>Создаём умные задачи...</p>
+      <p>Создаём умные задачи по новому алгоритму...</p>
     </div>
   `;
   
@@ -1437,6 +1707,7 @@ async function generateSmartTasks() {
     // Загружаем заказы
     const orders = await fetchOrdersFromSheet();
     const availablePrinters = getAvailablePrinters();
+    const settings = loadSettings();
     
     if (orders.length === 0) {
       container.innerHTML = `
@@ -1460,8 +1731,8 @@ async function generateSmartTasks() {
       return;
     }
     
-    // Создаем умные задачи
-    const tasks = createSmartTasks(orders, availablePrinters);
+    // Создаем умные задачи по новому алгоритму
+    const tasks = createSmartTasksNewAlgorithm(orders, availablePrinters, settings);
     saveTasks(tasks);
     
     // Показываем задачи
@@ -1481,18 +1752,25 @@ async function generateSmartTasks() {
   }
 }
 
-function createSmartTasks(orders, printers) {
+// Новый алгоритм создания задач
+function createSmartTasksNewAlgorithm(orders, printers, settings) {
   const tasks = [];
   const printerQueues = {};
+  const printerAssignments = {};
   
   // Инициализируем очереди для каждого принтера
   printers.forEach(printer => {
     if (printer.status !== 'repair') {
       printerQueues[printer.id] = [];
+      printerAssignments[printer.id] = [];
     }
   });
   
-  // Обрабатываем каждый заказ
+  // Рассчитываем время работы
+  const workDayHours = calculateWorkDayHours(settings);
+  const nightHours = calculateNightHours(settings);
+  
+  // Для каждого заказа
   orders.forEach(order => {
     const product = productsDatabase[order.name];
     if (!product || !product.variants || product.variants.length === 0) {
@@ -1501,56 +1779,115 @@ function createSmartTasks(orders, printers) {
     }
     
     let remaining = order.need;
+    let printerIndex = 0;
+    const printerIds = Object.keys(printerQueues);
     
-    while (remaining > 0) {
-      // Выбираем принтер с наименьшим количеством задач
-      const printerId = getPrinterWithLeastTasks(printerQueues);
-      if (!printerId) break; // Нет доступных принтеров
+    while (remaining > 0 && printerIndex < printerIds.length) {
+      const printerId = printerIds[printerIndex];
+      const printerTasks = printerQueues[printerId];
       
-      // Выбираем оптимальный вариант для оставшегося количества
-      const variant = getOptimalVariantForRemaining(product, remaining);
+      // Что уже запланировано на этот принтер
+      const existingDayTime = calculateTotalTime(printerTasks.filter(t => t.timeOfDay === 'day'));
+      const existingNightTime = calculateTotalTime(printerTasks.filter(t => t.timeOfDay === 'night'));
       
-      if (variant) {
-        const taskId = `task-${Date.now()}-${tasks.length}`;
-        const task = {
-          id: taskId,
-          product: order.name,
-          productDisplayName: product.name || order.name,
-          quantity: variant.quantity,
-          printerId: printerId,
-          printerName: printers.find(p => p.id === printerId)?.name || printerId,
-          file: variant.file,
-          time: variant.time, // в часах
-          status: 'pending',
-          createdAt: new Date().toISOString(),
-          completedAt: null,
-          orderId: order.id,
-          dependsOn: null,
-          unlockTime: null,
-          startTime: null // когда начали выполнять
-        };
-        
-        // Добавляем задачу в очередь принтера
-        printerQueues[printerId].push(task);
-        tasks.push(task);
-        
-        remaining -= variant.quantity;
-      } else {
-        break; // Не можем создать задачу
+      // Сколько места осталось
+      const remainingDayTime = Math.max(0, workDayHours - existingDayTime);
+      const remainingNightTime = Math.max(0, nightHours - existingNightTime);
+      
+      // Пытаемся разместить остаток
+      const placement = placeOrderOnPrinter(
+        product, 
+        remaining, 
+        remainingDayTime, 
+        remainingNightTime,
+        settings
+      );
+      
+      if (placement.tasks.length > 0) {
+        // Добавляем задачи на принтер
+        placement.tasks.forEach(task => {
+          const taskId = `task-${Date.now()}-${tasks.length}`;
+          const fullTask = {
+            id: taskId,
+            product: order.name,
+            productDisplayName: product.name || order.name,
+            quantity: task.quantity,
+            printerId: printerId,
+            printerName: printers.find(p => p.id === printerId)?.name || printerId,
+            file: task.file,
+            time: task.time,
+            timeOfDay: task.timeOfDay,
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+            completedAt: null,
+            orderId: order.id,
+            dependsOn: null,
+            unlockTime: null,
+            startTime: null,
+            sequenceNumber: printerTasks.length + 1
+          };
+          
+          printerQueues[printerId].push(fullTask);
+          tasks.push(fullTask);
+          remaining -= task.quantity;
+        });
+      }
+      
+      // Если осталось еще, переходим к следующему принтеру
+      if (remaining > 0) {
+        printerIndex++;
+      }
+    }
+    
+    // Если после всех принтеров остался остаток - загружаем последний принтер полностью
+    if (remaining > 0 && printerIds.length > 0) {
+      const lastPrinterId = printerIds[printerIds.length - 1];
+      const lastPrinterTasks = printerQueues[lastPrinterId];
+      
+      // Считаем что можно добавить на ночь
+      const existingNightTime = calculateTotalTime(lastPrinterTasks.filter(t => t.timeOfDay === 'night'));
+      const remainingNightTime = Math.max(0, nightHours - existingNightTime);
+      
+      if (remainingNightTime > 0) {
+        // Берем максимальный вариант для ночи
+        const nightVariant = getBestVariantForTime(product, remainingNightTime);
+        if (nightVariant && nightVariant.quantity > 0) {
+          const taskId = `task-${Date.now()}-${tasks.length}`;
+          const fullTask = {
+            id: taskId,
+            product: order.name,
+            productDisplayName: product.name || order.name,
+            quantity: nightVariant.quantity,
+            printerId: lastPrinterId,
+            printerName: printers.find(p => p.id === lastPrinterId)?.name || lastPrinterId,
+            file: nightVariant.file,
+            time: nightVariant.time,
+            timeOfDay: 'night',
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+            completedAt: null,
+            orderId: order.id,
+            dependsOn: null,
+            unlockTime: null,
+            startTime: null,
+            sequenceNumber: lastPrinterTasks.length + 1
+          };
+          
+          printerQueues[lastPrinterId].push(fullTask);
+          tasks.push(fullTask);
+        }
       }
     }
   });
   
-  // Устанавливаем зависимости между задачами на одном принтере
+  // Устанавливаем зависимости и статусы
   Object.keys(printerQueues).forEach(printerId => {
-    const queue = printerQueues[printerId];
+    const queue = printerQueues[printerId].sort((a, b) => a.sequenceNumber - b.sequenceNumber);
     
     for (let i = 0; i < queue.length; i++) {
       if (i === 0) {
-        // Первая задача на принтере - текущая
         queue[i].status = 'current';
       } else {
-        // Зависимость от предыдущей задачи
         queue[i].dependsOn = queue[i-1].id;
         queue[i].status = 'locked';
       }
@@ -1560,38 +1897,67 @@ function createSmartTasks(orders, printers) {
   return tasks;
 }
 
-function getPrinterWithLeastTasks(printerQueues) {
-  let minTasks = Infinity;
-  let selectedPrinter = null;
-  
-  Object.keys(printerQueues).forEach(printerId => {
-    const taskCount = printerQueues[printerId].length;
-    if (taskCount < minTasks) {
-      minTasks = taskCount;
-      selectedPrinter = printerId;
-    }
-  });
-  
-  return selectedPrinter;
+function calculateWorkDayHours(settings) {
+  const start = settings.operatorStart.hour + settings.operatorStart.minute / 60;
+  const end = settings.operatorEnd.hour + settings.operatorEnd.minute / 60;
+  return Math.max(0, end - start);
 }
 
-function getOptimalVariantForRemaining(product, remaining) {
-  if (!product.variants || product.variants.length === 0) {
-    return null;
+function calculateNightHours(settings) {
+  const end = settings.operatorEnd.hour + settings.operatorEnd.minute / 60;
+  const deadline = settings.deadline.hour + settings.deadline.minute / 60;
+  
+  if (end <= deadline) {
+    return deadline - end;
+  } else {
+    return (24 - end) + deadline;
   }
+}
+
+function calculateTotalTime(tasks) {
+  return tasks.reduce((sum, task) => sum + task.time, 0);
+}
+
+function placeOrderOnPrinter(product, remaining, dayTimeAvailable, nightTimeAvailable, settings) {
+  const tasks = [];
+  let remainingAfterPlacement = remaining;
   
-  // Варианты отсортированные по количеству (от большего к меньшему)
-  const sortedVariants = [...product.variants].sort((a, b) => b.quantity - a.quantity);
-  
-  // Ищем вариант, который идеально подходит или максимально близок
-  for (const variant of sortedVariants) {
-    if (variant.quantity <= remaining) {
-      return variant;
+  // Сначала пытаемся разместить днем
+  if (dayTimeAvailable > 0 && remainingAfterPlacement > 0) {
+    const dayVariant = getBestVariantForTime(product, dayTimeAvailable);
+    if (dayVariant && dayVariant.quantity > 0 && dayVariant.quantity <= remainingAfterPlacement) {
+      tasks.push({
+        ...dayVariant,
+        timeOfDay: 'day'
+      });
+      remainingAfterPlacement -= dayVariant.quantity;
     }
   }
   
-  // Если ничего не подходит, берем самый маленький вариант
-  return sortedVariants[sortedVariants.length - 1];
+  // Потом ночью
+  if (nightTimeAvailable > 0 && remainingAfterPlacement > 0 && settings.useNight) {
+    const nightVariant = getBestVariantForTime(product, nightTimeAvailable);
+    if (nightVariant && nightVariant.quantity > 0 && nightVariant.quantity <= remainingAfterPlacement) {
+      tasks.push({
+        ...nightVariant,
+        timeOfDay: 'night'
+      });
+      remainingAfterPlacement -= nightVariant.quantity;
+    }
+  }
+  
+  return { tasks, remaining: remainingAfterPlacement };
+}
+
+function getBestVariantForTime(product, availableTime) {
+  if (!product.variants || product.variants.length === 0) return null;
+  
+  // Сортируем по эффективности (количество/время)
+  const sortedVariants = [...product.variants]
+    .filter(v => v.time <= availableTime)
+    .sort((a, b) => (b.quantity / b.time) - (a.quantity / a.time));
+  
+  return sortedVariants[0] || null;
 }
 
 // ===== ОТОБРАЖЕНИЕ ЗАДАЧ =====
@@ -1674,22 +2040,59 @@ function renderTasks() {
     return;
   }
   
-  let html = '';
-  tasks.forEach((task, index) => {
-    const productInfo = productsDatabase[task.product] || {};
-    const printer = getPrinters().find(p => p.id === task.printerId);
-    const isPrinterAvailable = printer && printer.status !== 'repair';
-    const isPrinterBusy = printer && printer.status === 'printing';
-    
-    let statusClass = task.status;
-    if (task.status === 'pending' && task.dependsOn) {
-      statusClass = 'locked';
+  // Группируем задачи по принтерам
+  const tasksByPrinter = {};
+  tasks.forEach(task => {
+    if (!tasksByPrinter[task.printerId]) {
+      tasksByPrinter[task.printerId] = [];
     }
+    tasksByPrinter[task.printerId].push(task);
+  });
+  
+  // Сортируем задачи по последовательности
+  Object.keys(tasksByPrinter).forEach(printerId => {
+    tasksByPrinter[printerId].sort((a, b) => {
+      if (a.sequenceNumber && b.sequenceNumber) {
+        return a.sequenceNumber - b.sequenceNumber;
+      }
+      return 0;
+    });
+  });
+  
+  let html = '';
+  Object.keys(tasksByPrinter).forEach(printerId => {
+    const printerTasks = tasksByPrinter[printerId];
+    const printer = getPrinters().find(p => p.id === printerId);
     
-    html += `
-      <div class="task-item ${statusClass}">
+    html += `<div style="margin-bottom: 20px; padding: 10px; background: #333; border-radius: 8px;">
+      <div style="font-weight: bold; margin-bottom: 10px; color: #4caf50;">
+        <i class="fas fa-print"></i> ${printer ? printer.name : printerId}
+        ${printer && printer.status === 'repair' ? ' <span style="color: red;">(в ремонте)</span>' : ''}
+      </div>`;
+    
+    printerTasks.forEach((task, index) => {
+      const productInfo = productsDatabase[task.product] || {};
+      const isPrinterAvailable = printer && printer.status !== 'repair';
+      const isPrinterBusy = printer && printer.status === 'printing';
+      
+      let statusClass = task.status;
+      if (task.status === 'pending' && task.dependsOn) {
+        statusClass = 'locked';
+      }
+      
+      // Для заблокированных задач показываем время разблокировки
+      let unlockInfo = '';
+      if (task.status === 'locked' && task.dependsOn) {
+        const dependentTask = tasks.find(t => t.id === task.dependsOn);
+        if (dependentTask) {
+          unlockInfo = `⏰ Доступна через ${dependentTask.time}ч после запуска задачи ${dependentTask.sequenceNumber || ''}`;
+        }
+      }
+      
+      html += `
+      <div class="task-item ${statusClass}" style="margin-bottom: 10px;">
         <div class="task-header">
-          <div class="task-name">Задача: ${task.productDisplayName || task.product} ×${task.quantity}</div>
+          <div class="task-name">${task.sequenceNumber ? `Задача ${task.sequenceNumber}: ` : ''}${task.productDisplayName || task.product} ×${task.quantity}</div>
           <div class="task-status">
             ${task.status === 'pending' && task.dependsOn ? '🔒 Заблокирована' : 
               task.status === 'pending' ? '⏳ Ожидает' : 
@@ -1708,92 +2111,109 @@ function renderTasks() {
             </div>
           </div>
           <div class="task-detail">
+            <div class="task-label">Время:</div>
+            <div class="task-value">${task.time} часа (${task.timeOfDay === 'night' ? 'ночь' : 'день'})</div>
+          </div>
+          <div class="task-detail">
             <div class="task-label">Файл:</div>
             <div class="task-value">${task.file}</div>
           </div>
           <div class="task-detail">
-            <div class="task-label">Время печати:</div>
-            <div class="task-value">${task.time} часа</div>
-          </div>
-          <div class="task-detail">
             <div class="task-label">Статус:</div>
             <div class="task-value">${task.status === 'current' ? 'Готова к запуску' : 
-              task.status === 'locked' ? 'Ожидает предыдущую задачу' : 
+              task.status === 'locked' ? 'Ожидает предыдущую' : 
               task.status === 'completed' ? 'Выполнена' : 'Ожидание'}</div>
           </div>
         </div>
         
-        ${task.dependsOn ? `
+        ${unlockInfo ? `
         <div style="font-size: 12px; color: #ff9800; margin: 8px 0;">
-          ⚠️ Доступна после завершения предыдущей задачи на этом принтере
+          ${unlockInfo}
         </div>
         ` : ''}
         
         <div class="task-actions">
-    `;
+      `;
+      
+      if (task.status === 'current' && isPrinterAvailable && !isPrinterBusy) {
+        html += `
+          <button class="task-btn complete-btn" onclick="confirmCompleteTask('${task.id}')">
+            <i class="fas fa-check"></i> Выполнить
+          </button>
+          <button class="task-btn change-printer-btn" onclick="showChangePrinterModal('${task.id}')">
+            <i class="fas fa-exchange-alt"></i> Сменить принтер
+          </button>
+        `;
+      } else if (task.status === 'locked') {
+        html += `
+          <button class="task-btn" style="flex: 1; background: #666;" disabled>
+            <i class="fas fa-lock"></i> Заблокирована
+          </button>
+        `;
+      } else if (task.status === 'completed') {
+        html += `
+          <button class="task-btn" style="flex: 1; background: #4caf50;" disabled>
+            <i class="fas fa-check-circle"></i> Выполнено
+          </button>
+        `;
+      } else if (!isPrinterAvailable) {
+        html += `
+          <button class="task-btn change-printer-btn" style="flex: 1;" onclick="showChangePrinterModal('${task.id}')">
+            <i class="fas fa-exchange-alt"></i> Сменить принтер (ремонт)
+          </button>
+        `;
+      } else if (isPrinterBusy) {
+        html += `
+          <button class="task-btn change-printer-btn" style="flex: 1;" onclick="showChangePrinterModal('${task.id}')">
+            <i class="fas fa-exchange-alt"></i> Сменить принтер (занят)
+          </button>
+        `;
+      }
+      
+      html += `</div></div>`;
+    });
     
-    if (task.status === 'current' && isPrinterAvailable && !isPrinterBusy) {
-      html += `
-        <button class="task-btn complete-btn" onclick="completeTask('${task.id}')">
-          <i class="fas fa-play"></i> Запустить печать
-        </button>
-        <button class="task-btn skip-btn" onclick="skipTask('${task.id}')">
-          <i class="fas fa-forward"></i> Пропустить
-        </button>
-      `;
-    } else if (task.status === 'locked' || (task.status === 'pending' && task.dependsOn)) {
-      const dependentTask = tasks.find(t => t.id === task.dependsOn);
-      const dependentTaskTime = dependentTask ? dependentTask.time : 0;
-      html += `
-        <button class="task-btn skip-btn" style="flex: 1;" disabled>
-          <i class="fas fa-lock"></i> Разблокируется через ${dependentTaskTime}ч после запуска предыдущей
-        </button>
-      `;
-    } else if (task.status === 'pending' && !task.dependsOn) {
-      html += `
-        <button class="task-btn skip-btn" onclick="makeTaskCurrent('${task.id}')" style="flex: 1;">
-          <i class="fas fa-play"></i> Сделать текущей
-        </button>
-      `;
-    } else if (task.status === 'completed') {
-      html += `
-        <button class="task-btn skip-btn" style="flex: 1; background: #4caf50;" disabled>
-          <i class="fas fa-check-circle"></i> Выполнено
-        </button>
-      `;
-    } else if (!isPrinterAvailable) {
-      html += `
-        <button class="task-btn skip-btn" style="flex: 1; background: #f44336;" disabled>
-          <i class="fas fa-wrench"></i> Принтер в ремонте
-        </button>
-      `;
-    } else if (isPrinterBusy) {
-      html += `
-        <button class="task-btn skip-btn" style="flex: 1; background: #ff9800;" disabled>
-          <i class="fas fa-print"></i> Принтер занят
-        </button>
-      `;
-    }
-    
-    html += `</div></div>`;
+    html += `</div>`;
   });
   
   container.innerHTML = html;
   isRendering = false;
 }
 
-function completeTask(taskId) {
+function confirmCompleteTask(taskId) {
+  const task = getTasks().find(t => t.id === taskId);
+  if (!task) return;
+  
+  currentTaskForComplete = taskId;
+  document.getElementById('confirm-complete-text').textContent = 
+    `Вы уверены, что хотите отметить задачу как выполненную и запустить печать "${task.productDisplayName || task.product} ×${task.quantity}" на принтере "${task.printerName}"?`;
+  document.getElementById('confirm-complete-modal').style.display = 'flex';
+}
+
+function closeConfirmCompleteModal() {
+  document.getElementById('confirm-complete-modal').style.display = 'none';
+  currentTaskForComplete = null;
+}
+
+function executeCompleteTask() {
+  if (!currentTaskForComplete) return;
+  
+  const taskId = currentTaskForComplete;
   const tasks = getTasks();
   const printers = getPrinters();
   const taskIndex = tasks.findIndex(t => t.id === taskId);
   
-  if (taskIndex === -1) return;
+  if (taskIndex === -1) {
+    closeConfirmCompleteModal();
+    return;
+  }
   
   const task = tasks[taskIndex];
   const printerIndex = printers.findIndex(p => p.id === task.printerId);
   
   if (printerIndex === -1) {
     showNotification('Принтер не найден!');
+    closeConfirmCompleteModal();
     return;
   }
   
@@ -1801,83 +2221,120 @@ function completeTask(taskId) {
   printers[printerIndex].status = 'printing';
   printers[printerIndex].printName = `${task.productDisplayName || task.product} ×${task.quantity}`;
   printers[printerIndex].startTime = Date.now();
-  printers[printerIndex].printDuration = task.time * 3600000; // часы в миллисекунды
+  printers[printerIndex].printDuration = task.time * 3600000;
   printers[printerIndex].progress = 0;
   printers[printerIndex].currentTaskId = taskId;
   
   // Отмечаем задачу как выполненную
   task.status = 'completed';
   task.completedAt = new Date().toISOString();
-  task.startTime = new Date().toISOString(); // Запоминаем время запуска
-  
-  // Ищем следующую задачу для этого принтера
-  const nextTask = tasks.find(t => 
-    t.printerId === task.printerId && 
-    t.status === 'locked' && 
-    t.dependsOn === taskId
-  );
-  
-  if (nextTask) {
-    // Следующая задача станет доступной через время печати текущей
-    nextTask.unlockTime = new Date(Date.now() + task.time * 3600000).toISOString();
-  }
+  task.startTime = new Date().toISOString();
   
   // Сохраняем изменения
   savePrinters(printers);
   saveTasks(tasks);
   
   // Обновляем интерфейс
+  closeConfirmCompleteModal();
   renderTasks();
   
   showNotification(`Печать запущена на ${task.printerName}!`);
 }
 
-function skipTask(taskId) {
-  const tasks = getTasks();
-  const taskIndex = tasks.findIndex(t => t.id === taskId);
+function showChangePrinterModal(taskId) {
+  const task = getTasks().find(t => t.id === taskId);
+  if (!task) return;
   
-  if (taskIndex === -1) return;
+  currentTaskForChange = taskId;
+  const availablePrinters = getAvailablePrinters().filter(p => p.id !== task.printerId);
+  const list = document.getElementById('change-printer-list');
+  list.innerHTML = '';
   
-  tasks[taskIndex].status = 'skipped';
-  
-  // Ищем следующую задачу для этого же принтера
-  const task = tasks[taskIndex];
-  const nextTask = tasks.find(t => 
-    t.printerId === task.printerId && 
-    t.status === 'locked' && 
-    t.dependsOn === taskId
-  );
-  
-  if (nextTask) {
-    nextTask.status = 'current';
+  if (availablePrinters.length === 0) {
+    list.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Нет доступных принтеров</div>';
+  } else {
+    availablePrinters.forEach(printer => {
+      const option = document.createElement('div');
+      option.className = 'printer-option';
+      option.dataset.printerId = printer.id;
+      option.dataset.printerName = printer.name;
+      
+      option.innerHTML = `
+        <div class="printer-option-image">
+          <img src="${printer.image}" alt="${printer.name}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-print printer-icon\\'></i>'">
+        </div>
+        <div class="printer-option-info">
+          <div class="printer-option-brand">${printer.model}</div>
+          <div class="printer-option-model">${printer.name}</div>
+          <div style="font-size: 12px; color: ${printer.status === 'idle' ? '#4caf50' : printer.status === 'printing' ? '#ff9800' : '#f44336'}">
+            ${getStatusText(printer.status)}
+          </div>
+        </div>
+      `;
+      
+      option.onclick = function() {
+        document.querySelectorAll('#change-printer-list .printer-option').forEach(el => {
+          el.classList.remove('selected');
+        });
+        this.classList.add('selected');
+      };
+      
+      list.appendChild(option);
+    });
   }
   
-  saveTasks(tasks);
-  renderTasks();
-  
-  showNotification('Задача пропущена');
+  document.getElementById('change-printer-modal').style.display = 'flex';
 }
 
-function makeTaskCurrent(taskId) {
-  const tasks = getTasks();
+function closeChangePrinterModal() {
+  document.getElementById('change-printer-modal').style.display = 'none';
+  currentTaskForChange = null;
+}
+
+function confirmChangePrinter() {
+  if (!currentTaskForChange) return;
   
-  // Снимаем current со всех задач на этом же принтере
-  const task = tasks.find(t => t.id === taskId);
-  if (task) {
-    tasks.forEach(t => {
-      if (t.printerId === task.printerId && t.status === 'current') {
-        t.status = 'pending';
-      }
-    });
-    
-    // Ставим current выбранной задаче
-    tasks.find(t => t.id === taskId).status = 'current';
+  const selectedOption = document.querySelector('#change-printer-list .printer-option.selected');
+  if (!selectedOption) {
+    showNotification('Выберите принтер!');
+    return;
   }
   
+  const newPrinterId = selectedOption.dataset.printerId;
+  const newPrinterName = selectedOption.dataset.printerName;
+  
+  const tasks = getTasks();
+  const taskIndex = tasks.findIndex(t => t.id === currentTaskForChange);
+  
+  if (taskIndex === -1) {
+    closeChangePrinterModal();
+    return;
+  }
+  
+  // Меняем принтер у задачи
+  tasks[taskIndex].printerId = newPrinterId;
+  tasks[taskIndex].printerName = newPrinterName;
+  
+  // Если есть зависимые задачи, меняем и у них
+  const dependentTasks = tasks.filter(t => t.dependsOn === currentTaskForChange);
+  dependentTasks.forEach(dependentTask => {
+    dependentTask.printerId = newPrinterId;
+    dependentTask.printerName = newPrinterName;
+  });
+  
   saveTasks(tasks);
+  closeChangePrinterModal();
   renderTasks();
   
-  showNotification('Задача стала текущей');
+  showNotification('Принтер изменен!');
+}
+
+function deleteAllTasks() {
+  if (confirm('ВНИМАНИЕ: Это удалит ВСЕ задачи! Действие нельзя отменить. Продолжить?')) {
+    localStorage.removeItem(TASKS_STORAGE_KEY);
+    renderTasks();
+    showNotification('Все задачи удалены!');
+  }
 }
 
 function getTasks() {
@@ -2206,6 +2663,7 @@ function getProgressColor(status) {
 function showPage(page) {
   document.getElementById('printers-page').classList.add('hidden');
   document.getElementById('tasks-page').classList.add('hidden');
+  document.getElementById('settings-page').classList.add('hidden');
   document.getElementById('orders-page').classList.add('hidden');
   document.getElementById('logs-page').classList.add('hidden');
   
@@ -2223,12 +2681,16 @@ function showPage(page) {
     document.querySelectorAll('.nav-item')[1].classList.add('active');
     document.getElementById('page-title').textContent = 'Задачи на день';
     renderTasks();
+  } else if (page === 'settings') {
+    document.querySelectorAll('.nav-item')[2].classList.add('active');
+    document.getElementById('page-title').textContent = 'Настройки';
+    updateSettingsUI();
   } else if (page === 'orders') {
-    document.querySelectorAll('.nav-item')[3].classList.add('active');
+    document.querySelectorAll('.nav-item')[4].classList.add('active');
     document.getElementById('page-title').textContent = 'Заказы';
     loadOrders();
   } else if (page === 'logs') {
-    document.querySelectorAll('.nav-item')[4].classList.add('active');
+    document.querySelectorAll('.nav-item')[5].classList.add('active');
     document.getElementById('page-title').textContent = 'История действий';
     loadLogs();
   }
@@ -2406,10 +2868,9 @@ window.addNewPrinter = addNewPrinter;
 window.openPrinter = openPrinter;
 window.clearLogs = clearLogs;
 window.generateSmartTasks = generateSmartTasks;
-window.completeTask = completeTask;
-window.skipTask = skipTask;
-window.makeTaskCurrent = makeTaskCurrent;
 window.loadOrders = loadOrders;
+window.deleteAllTasks = deleteAllTasks;
+window.loadProductsDatabase = loadProductsDatabase;
 </script>
 </body>
 </html>
