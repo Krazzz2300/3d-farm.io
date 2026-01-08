@@ -654,7 +654,7 @@ body {
   transform: scale(0.95);
 }
 
-/* НАВИГАЦИЯ ВНИЗУ (5 ИКОНОК) */
+/* НАВИГАЦИЯ ВНИЗУ (6 ИКОНОК) */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -1186,6 +1186,63 @@ body {
       </div>
     </div>
     
+    <!-- НОВЫЙ БЛОК: Настройки таблицы заказов -->
+    <div class="settings-group">
+      <h3><i class="fas fa-table"></i> Настройки таблицы заказов</h3>
+      
+      <div class="setting-item">
+        <div class="setting-label">ID таблицы Google Sheets:</div>
+        <div>
+          <input type="text" id="sheet-id" placeholder="ID таблицы" style="width: 200px; padding: 8px; border-radius: 6px; border: 1px solid #444; background: #1e1e1e; color: white;">
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-label">Имя листа:</div>
+        <div>
+          <input type="text" id="sheet-name" placeholder="Sheet1" value="Sheet1" style="width: 120px; padding: 8px; border-radius: 6px; border: 1px solid #444; background: #1e1e1e; color: white;">
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-label">Столбец с названием:</div>
+        <div>
+          <select id="name-column" style="padding: 8px; border-radius: 6px; border: 1px solid #444; background: #1e1e1e; color: white;">
+            <option value="B">B</option>
+            <option value="A">A</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-label">Столбец с количеством:</div>
+        <div>
+          <select id="quantity-column" style="padding: 8px; border-radius: 6px; border: 1px solid #444; background: #1e1e1e; color: white;">
+            <option value="C">C</option>
+            <option value="B">B</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+          </select>
+        </div>
+      </div>
+      
+      <div style="margin-top: 15px; padding: 10px; background: #333; border-radius: 6px; font-size: 12px; color: #aaa;">
+        <div><strong>Инструкция:</strong></div>
+        <div>1. Откройте таблицу Google Sheets</div>
+        <div>2. Скопируйте ID из URL: <code style="background: #444; padding: 2px 4px; border-radius: 3px;">/d/<strong>12cvna-mOg3z9PofZ2tEPSwQjz7WOhkGnjQpYBnwTKoc</strong>/edit</code></div>
+        <div>3. Введите ID в поле выше</div>
+        <div>4. Укажите правильные столбцы:</div>
+        <div>   • <strong>Столбец B</strong> - названия товаров</div>
+        <div>   • <strong>Столбец C</strong> - количество</div>
+      </div>
+      
+      <button onclick="saveSheetSettings()" style="margin-top: 15px; padding: 12px; background: #2196f3; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold;">
+        <i class="fas fa-save"></i> Сохранить настройки
+      </button>
+    </div>
+    
     <div class="settings-group">
       <h3><i class="fas fa-database"></i> Данные</h3>
       <div class="setting-item">
@@ -1324,8 +1381,7 @@ const STORAGE_KEY = '3d_printer_farm_data';
 const LOGS_STORAGE_KEY = 'printer_farm_logs';
 const TASKS_STORAGE_KEY = 'printer_tasks_data';
 const SETTINGS_STORAGE_KEY = 'printer_farm_settings';
-const SHEET_ID = '12cvna-mOg3z9PofZ2tEPSwQjz7WOhkGnjQpYBnwTKoc';
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+const SHEET_SETTINGS_KEY = 'sheet_settings';
 
 // Telegram Bot (убрал уведомления по твоей просьбе)
 const TELEGRAM_BOT_TOKEN = '';
@@ -1350,6 +1406,59 @@ const DEFAULT_SETTINGS = {
   minimizePrinters: true,
   useNight: true
 };
+
+// Настройки таблицы по умолчанию
+const DEFAULT_SHEET_SETTINGS = {
+  sheetId: '12cvna-mOg3z9PofZ2tEPSwQjz7WOhkGnjQpYBnwTKoc',
+  sheetName: 'Sheet1',
+  nameColumn: 'B',
+  quantityColumn: 'C'
+};
+
+// ===== НАСТРОЙКИ ТАБЛИЦЫ =====
+function loadSheetSettings() {
+  try {
+    const saved = localStorage.getItem(SHEET_SETTINGS_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch {
+    // Ignore error
+  }
+  
+  return DEFAULT_SHEET_SETTINGS;
+}
+
+function saveSheetSettings() {
+  const settings = {
+    sheetId: document.getElementById('sheet-id').value.trim(),
+    sheetName: document.getElementById('sheet-name').value.trim() || 'Sheet1',
+    nameColumn: document.getElementById('name-column').value,
+    quantityColumn: document.getElementById('quantity-column').value
+  };
+  
+  if (!settings.sheetId) {
+    showNotification('Введите ID таблицы!');
+    return;
+  }
+  
+  localStorage.setItem(SHEET_SETTINGS_KEY, JSON.stringify(settings));
+  showNotification('Настройки таблицы сохранены!');
+}
+
+function updateSheetSettingsUI() {
+  const settings = loadSheetSettings();
+  
+  document.getElementById('sheet-id').value = settings.sheetId;
+  document.getElementById('sheet-name').value = settings.sheetName;
+  document.getElementById('name-column').value = settings.nameColumn;
+  document.getElementById('quantity-column').value = settings.quantityColumn;
+}
+
+function getSheetUrl() {
+  const settings = loadSheetSettings();
+  return `https://docs.google.com/spreadsheets/d/${settings.sheetId}/gviz/tq?tqx=out:json&sheet=${settings.sheetName}`;
+}
 
 // ===== НАСТРОЙКИ =====
 function loadSettings() {
@@ -1381,6 +1490,9 @@ function updateSettingsUI() {
   document.getElementById('deadline-minute').value = settings.deadline.minute;
   document.getElementById('minimize-printers').checked = settings.minimizePrinters;
   document.getElementById('use-night').checked = settings.useNight;
+  
+  // Обновляем настройки таблицы
+  updateSheetSettingsUI();
 }
 
 function saveSettingsFromUI() {
@@ -2246,7 +2358,10 @@ function showChangePrinterModal(taskId) {
   if (!task) return;
   
   currentTaskForChange = taskId;
-  const availablePrinters = getAvailablePrinters().filter(p => p.id !== task.printerId);
+  const allPrinters = getPrinters();
+  const availablePrinters = allPrinters.filter(p => p.id !== task.printerId);
+  const tasks = getTasks();
+  
   const list = document.getElementById('change-printer-list');
   list.innerHTML = '';
   
@@ -2254,14 +2369,25 @@ function showChangePrinterModal(taskId) {
     list.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Нет доступных принтеров</div>';
   } else {
     availablePrinters.forEach(printer => {
+      // Считаем задачи на этом принтере
+      const tasksOnPrinter = tasks.filter(t => t.printerId === printer.id);
+      const hasTasks = tasksOnPrinter.length > 0;
+      
       const option = document.createElement('div');
       option.className = 'printer-option';
       option.dataset.printerId = printer.id;
       option.dataset.printerName = printer.name;
       
+      let taskInfo = '';
+      if (hasTasks) {
+        taskInfo = `<div style="font-size: 11px; color: #ff9800; margin-top: 4px;">
+          <i class="fas fa-exclamation-circle"></i> На этом принтере ${tasksOnPrinter.length} задач(а)
+        </div>`;
+      }
+      
       option.innerHTML = `
         <div class="printer-option-image">
-          <img src="${printer.image}" alt="${printer.name}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-print printer-icon\\'></i>'">
+          <img src="${printer.image}" alt="${printer.name}" onerror="this.parentElement.innerHTML='<i class=\"fas fa-print printer-icon\"></i>'">
         </div>
         <div class="printer-option-info">
           <div class="printer-option-brand">${printer.model}</div>
@@ -2269,6 +2395,7 @@ function showChangePrinterModal(taskId) {
           <div style="font-size: 12px; color: ${printer.status === 'idle' ? '#4caf50' : printer.status === 'printing' ? '#ff9800' : '#f44336'}">
             ${getStatusText(printer.status)}
           </div>
+          ${taskInfo}
         </div>
       `;
       
@@ -2311,15 +2438,51 @@ function confirmChangePrinter() {
     return;
   }
   
-  // Меняем принтер у задачи
+  const oldTask = tasks[taskIndex];
+  const oldPrinterId = oldTask.printerId;
+  
+  // Если меняем на принтер, у которого уже есть задачи
+  if (newPrinterId !== oldPrinterId) {
+    // Находим все задачи на новом принтере
+    const tasksOnNewPrinter = tasks.filter(t => t.printerId === newPrinterId && t.id !== currentTaskForChange);
+    
+    if (tasksOnNewPrinter.length > 0) {
+      // Сортируем задачи на новом принтере по последовательности
+      tasksOnNewPrinter.sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0));
+      
+      // Освобождаем первую задачу на новом принтере
+      const firstTaskOnNewPrinter = tasksOnNewPrinter[0];
+      const firstTaskIndex = tasks.findIndex(t => t.id === firstTaskOnNewPrinter.id);
+      
+      if (firstTaskIndex !== -1) {
+        tasks[firstTaskIndex].printerId = oldPrinterId;
+        tasks[firstTaskIndex].printerName = getPrinters().find(p => p.id === oldPrinterId)?.name || oldPrinterId;
+        
+        // Обновляем все зависимые задачи у освобожденной задачи
+        const dependentTasks = tasks.filter(t => t.dependsOn === firstTaskOnNewPrinter.id);
+        dependentTasks.forEach(dependentTask => {
+          const depIndex = tasks.findIndex(t => t.id === dependentTask.id);
+          if (depIndex !== -1) {
+            tasks[depIndex].printerId = oldPrinterId;
+            tasks[depIndex].printerName = getPrinters().find(p => p.id === oldPrinterId)?.name || oldPrinterId;
+          }
+        });
+      }
+    }
+  }
+  
+  // Меняем принтер у текущей задачи
   tasks[taskIndex].printerId = newPrinterId;
   tasks[taskIndex].printerName = newPrinterName;
   
   // Если есть зависимые задачи, меняем и у них
   const dependentTasks = tasks.filter(t => t.dependsOn === currentTaskForChange);
   dependentTasks.forEach(dependentTask => {
-    dependentTask.printerId = newPrinterId;
-    dependentTask.printerName = newPrinterName;
+    const depIndex = tasks.findIndex(t => t.id === dependentTask.id);
+    if (depIndex !== -1) {
+      tasks[depIndex].printerId = newPrinterId;
+      tasks[depIndex].printerName = newPrinterName;
+    }
   });
   
   saveTasks(tasks);
@@ -2462,6 +2625,9 @@ async function loadOrders() {
 
 async function fetchOrdersFromSheet() {
   try {
+    const settings = loadSheetSettings();
+    const SHEET_URL = getSheetUrl();
+    
     const response = await fetch(SHEET_URL);
     const text = await response.text();
     const jsonText = text.substring(47).slice(0, -2);
@@ -2470,14 +2636,22 @@ async function fetchOrdersFromSheet() {
     const orders = [];
     const rows = data.table.rows;
     
+    // Функция для преобразования буквы столбца в индекс (A=0, B=1, C=2, ...)
+    function columnLetterToIndex(letter) {
+      return letter.toUpperCase().charCodeAt(0) - 65;
+    }
+    
+    const nameColumnIndex = columnLetterToIndex(settings.nameColumn);
+    const quantityColumnIndex = columnLetterToIndex(settings.quantityColumn);
+    
     // Читаем со второй строки (первая - заголовки)
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       const cells = row.c;
       
-      if (cells && cells[1] && cells[2]) { // Столбец B (1) - название, C (2) - количество
-        const name = cells[1].v;
-        const quantity = parseFloat(cells[2].v);
+      if (cells && cells[nameColumnIndex] && cells[quantityColumnIndex]) {
+        const name = cells[nameColumnIndex].v;
+        const quantity = parseFloat(cells[quantityColumnIndex].v);
         
         if (name && !isNaN(quantity) && quantity > 0) {
           orders.push({
@@ -2871,6 +3045,7 @@ window.generateSmartTasks = generateSmartTasks;
 window.loadOrders = loadOrders;
 window.deleteAllTasks = deleteAllTasks;
 window.loadProductsDatabase = loadProductsDatabase;
+window.saveSheetSettings = saveSheetSettings;
 </script>
 </body>
 </html>

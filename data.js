@@ -1,5 +1,3 @@
-[file name]: data.js
-[file content begin]
 // ===== СИСТЕМА УПРАВЛЕНИЯ ПРИНТЕРАМИ =====
 
 // Инициализация данных
@@ -187,4 +185,3 @@ function getNotificationCount() {
   
   return count;
 }
-[file content end]
