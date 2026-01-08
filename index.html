@@ -3,34 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Farm Manager - Управление фермой 3D-печати</title>
+    <title>3D Farm - Вход</title>
     
-    <!-- Firebase SDK -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- Telegram WebApp SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
     <style>
-        /* Основные стили */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #1a1a1a;
             color: white;
-            min-height: 100vh;
+            font-family: Arial;
             padding: 20px;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
         
         .container {
@@ -45,97 +35,25 @@
             color: #4CAF50;
         }
         
-        .app-name {
+        .title {
             font-size: 28px;
             font-weight: bold;
-            margin-bottom: 10px;
-            color: white;
-        }
-        
-        .tagline {
-            color: #888;
-            margin-bottom: 40px;
-            font-size: 16px;
-        }
-        
-        /* Карточка авторизации */
-        .auth-card {
-            background: #2a2a2a;
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 20px;
-            border: 1px solid #444;
-        }
-        
-        .auth-title {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: white;
-        }
-        
-        .auth-subtitle {
-            color: #aaa;
             margin-bottom: 30px;
-            font-size: 14px;
         }
         
-        /* Кнопки */
-        .btn {
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            border: none;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 12px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .btn-primary {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-        }
-        
-        .btn-secondary {
-            background: #333;
-            color: white;
+        /* Формы */
+        .form {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 16px;
             border: 1px solid #444;
-        }
-        
-        .btn-secondary:hover {
-            background: #3a3a3a;
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        /* Форма */
-        .form-group {
             margin-bottom: 20px;
-            text-align: left;
         }
         
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            color: #aaa;
-            font-size: 14px;
-        }
-        
-        .form-input {
+        .input {
             width: 100%;
             padding: 14px;
+            margin-bottom: 15px;
             background: #1a1a1a;
             border: 1px solid #444;
             border-radius: 10px;
@@ -143,233 +61,87 @@
             font-size: 16px;
         }
         
-        .form-input:focus {
-            outline: none;
-            border-color: #4CAF50;
-        }
-        
-        /* Чекбокс соглашения */
-        .agreement {
-            background: #333;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: left;
-        }
-        
-        .checkbox-group {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
             margin-bottom: 10px;
         }
         
-        .checkbox {
-            margin-top: 3px;
-            accent-color: #4CAF50;
+        .btn:hover {
+            background: #45a049;
         }
         
-        .checkbox-label {
-            font-size: 14px;
-            color: #aaa;
-        }
-        
-        .agreement-link {
-            color: #4CAF50;
-            text-decoration: none;
-            font-size: 14px;
+        .switch {
+            color: #888;
+            margin-top: 15px;
             cursor: pointer;
         }
         
-        .agreement-link:hover {
-            text-decoration: underline;
+        .switch:hover {
+            color: #4CAF50;
         }
         
-        /* Ошибки */
-        .error-message {
+        .error {
             background: #ff4444;
             color: white;
             padding: 12px;
             border-radius: 10px;
-            margin: 20px 0;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
             font-size: 14px;
-            display: none;
-        }
-        
-        .success-message {
-            background: #4CAF50;
-            color: white;
-            padding: 12px;
-            border-radius: 10px;
-            margin: 20px 0;
-            font-size: 14px;
-            display: none;
-        }
-        
-        /* Загрузка */
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 20px 0;
-        }
-        
-        .loading-spinner {
-            border: 3px solid #333;
-            border-top: 3px solid #4CAF50;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Футер */
-        .footer {
-            color: #666;
-            font-size: 12px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #333;
-        }
-        
-        .footer-links {
-            margin-top: 10px;
-        }
-        
-        .footer-link {
-            color: #888;
-            text-decoration: none;
-            margin: 0 10px;
-            font-size: 12px;
-        }
-        
-        .footer-link:hover {
-            color: #4CAF50;
-        }
-        
-        /* Адаптивность */
-        @media (max-width: 480px) {
-            .auth-card {
-                padding: 20px;
-            }
-            
-            .btn {
-                padding: 14px;
-            }
+            color: #aaa;
+            text-align: left;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Логотип и название -->
         <div class="logo">🖨️</div>
-        <div class="app-name">3D Farm Manager</div>
-        <div class="tagline">Управление фермой 3D-печати в Telegram</div>
+        <div class="title">3D Farm Manager</div>
         
-        <!-- Карточка авторизации -->
-        <div class="auth-card" id="auth-card">
-            <div class="auth-title" id="auth-title">Добро пожаловать!</div>
-            <div class="auth-subtitle" id="auth-subtitle">Войдите или создайте аккаунт для управления вашей фермой</div>
-            
-            <!-- Сообщения -->
-            <div class="error-message" id="error-message"></div>
-            <div class="success-message" id="success-message"></div>
-            
-            <!-- Форма входа (по умолчанию) -->
-            <div id="login-form">
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" id="login-email" class="form-input" placeholder="ваш@email.com">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Пароль</label>
-                    <input type="password" id="login-password" class="form-input" placeholder="Ваш пароль">
-                </div>
-                
-                <button class="btn btn-primary" onclick="login()">
-                    <span>Войти</span>
-                </button>
-                
-                <button class="btn btn-secondary" onclick="showRegisterForm()">
-                    <span>Создать новый аккаунт</span>
-                </button>
-            </div>
-            
-            <!-- Форма регистрации (скрыта по умолчанию) -->
-            <div id="register-form" style="display: none;">
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" id="register-email" class="form-input" placeholder="ваш@email.com">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Пароль</label>
-                    <input type="password" id="register-password" class="form-input" placeholder="Не менее 6 символов">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Повторите пароль</label>
-                    <input type="password" id="register-password-confirm" class="form-input" placeholder="Повторите пароль">
-                </div>
-                
-                <!-- Соглашение -->
-                <div class="agreement">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="agreement-checkbox" class="checkbox">
-                        <label class="checkbox-label">
-                            Я принимаю 
-                            <a href="#" class="agreement-link" onclick="showAgreement()">Пользовательское соглашение</a>
-                            и 
-                            <a href="#" class="agreement-link" onclick="showPrivacyPolicy()">Политику конфиденциальности</a>
-                        </label>
-                    </div>
-                </div>
-                
-                <button class="btn btn-primary" onclick="register()">
-                    <span>Создать аккаунт</span>
-                </button>
-                
-                <button class="btn btn-secondary" onclick="showLoginForm()">
-                    <span>Уже есть аккаунт? Войти</span>
-                </button>
-            </div>
-            
-            <!-- Загрузка -->
-            <div class="loading" id="loading">
-                <div class="loading-spinner"></div>
-                <div>Загрузка...</div>
-            </div>
+        <!-- Ошибка -->
+        <div class="error" id="error"></div>
+        
+        <!-- Форма входа -->
+        <div class="form" id="login-form">
+            <input type="email" id="login-email" class="input" placeholder="Ваш email">
+            <input type="password" id="login-password" class="input" placeholder="Пароль">
+            <button class="btn" onclick="login()">ВОЙТИ</button>
+            <div class="switch" onclick="showRegister()">Нет аккаунта? Создать</div>
         </div>
         
-        <!-- Футер -->
-        <div class="footer">
-            <div>© 2024 3D Farm Manager. Все права защищены.</div>
-            <div class="footer-links">
-                <a href="#" class="footer-link" onclick="showAgreement()">Соглашение</a>
-                <a href="#" class="footer-link" onclick="showPrivacyPolicy()">Конфиденциальность</a>
-                <a href="#" class="footer-link" onclick="showSupport()">Поддержка</a>
+        <!-- Форма регистрации -->
+        <div class="form" id="register-form" style="display: none;">
+            <input type="email" id="register-email" class="input" placeholder="Ваш email">
+            <input type="password" id="register-password" class="input" placeholder="Пароль (минимум 6 символов)">
+            <input type="password" id="register-password2" class="input" placeholder="Повторите пароль">
+            
+            <div class="checkbox">
+                <input type="checkbox" id="agree-checkbox">
+                <label>Я принимаю условия использования</label>
             </div>
-        </div>
-    </div>
-
-    <!-- Модальное окно для соглашений -->
-    <div id="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; padding: 20px; overflow-y: auto;">
-        <div style="background: #2a2a2a; border-radius: 16px; padding: 30px; max-width: 600px; margin: 20px auto; position: relative;">
-            <div id="modal-content" style="color: white; text-align: left; max-height: 80vh; overflow-y: auto;">
-                <!-- Контент будет заполняться JavaScript -->
-            </div>
-            <button onclick="closeModal()" style="position: absolute; top: 15px; right: 15px; background: #444; color: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;">×</button>
+            
+            <button class="btn" onclick="register()">СОЗДАТЬ АККАУНТ</button>
+            <div class="switch" onclick="showLogin()">Уже есть аккаунт? Войти</div>
         </div>
     </div>
 
     <script>
-        // ===== FIREBASE КОНФИГУРАЦИЯ =====
+        // ===== FIREBASE =====
         const firebaseConfig = {
             apiKey: "AIzaSyDdA4kSxL-CYt3egpUeLLp0XMOB9GyN604",
             authDomain: "ferm-3d.firebaseapp.com",
@@ -379,60 +151,33 @@
             appId: "1:497797661146:web:58125a76c6b44fd91d40e3"
         };
         
-        // Инициализация Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
         
-        // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
-        let currentUser = null;
-        
-        // ===== ФУНКЦИИ ДЛЯ ФОРМ =====
-        function showLoginForm() {
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('register-form').style.display = 'none';
-            document.getElementById('auth-title').textContent = 'Вход в аккаунт';
-            document.getElementById('auth-subtitle').textContent = 'Войдите в свой аккаунт для управления фермой';
-            hideMessages();
+        // ===== ФУНКЦИИ =====
+        function showError(text) {
+            document.getElementById('error').innerText = text;
+            document.getElementById('error').style.display = 'block';
         }
         
-        function showRegisterForm() {
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+        
+        function showRegister() {
             document.getElementById('login-form').style.display = 'none';
             document.getElementById('register-form').style.display = 'block';
-            document.getElementById('auth-title').textContent = 'Создание аккаунта';
-            document.getElementById('auth-subtitle').textContent = 'Создайте новый аккаунт для вашей фермы';
-            hideMessages();
+            hideError();
         }
         
-        // ===== СООБЩЕНИЯ =====
-        function showError(message) {
-            const errorDiv = document.getElementById('error-message');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            document.getElementById('success-message').style.display = 'none';
+        function showLogin() {
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+            hideError();
         }
         
-        function showSuccess(message) {
-            const successDiv = document.getElementById('success-message');
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
-            document.getElementById('error-message').style.display = 'none';
-        }
-        
-        function hideMessages() {
-            document.getElementById('error-message').style.display = 'none';
-            document.getElementById('success-message').style.display = 'none';
-        }
-        
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-        }
-        
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-        }
-        
-        // ===== АВТОРИЗАЦИЯ =====
+        // ===== ВХОД =====
         async function login() {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value.trim();
@@ -443,97 +188,76 @@
             }
             
             try {
-                showLoading();
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                currentUser = userCredential.user;
-                
-                // Временно отключаем проверку соглашения для теста
-		window.location.href = 'main.html';
-                
+                const user = await auth.signInWithEmailAndPassword(email, password);
+                window.location.href = 'main.html';
             } catch (error) {
-                hideLoading();
                 if (error.code === 'auth/user-not-found') {
-                    showError('Пользователь не найден');
+                    showError('Аккаунт не найден');
                 } else if (error.code === 'auth/wrong-password') {
                     showError('Неверный пароль');
-                } else if (error.code === 'auth/invalid-email') {
-                    showError('Неверный формат email');
                 } else {
                     showError('Ошибка входа: ' + error.message);
                 }
             }
         }
         
+        // ===== РЕГИСТРАЦИЯ =====
         async function register() {
             const email = document.getElementById('register-email').value.trim();
             const password = document.getElementById('register-password').value.trim();
-            const passwordConfirm = document.getElementById('register-password-confirm').value.trim();
-            const agreed = document.getElementById('agreement-checkbox').checked;
+            const password2 = document.getElementById('register-password2').value.trim();
+            const agreed = document.getElementById('agree-checkbox').checked;
             
-            // Валидация
-            if (!email || !password || !passwordConfirm) {
+            // Проверки
+            if (!email || !password || !password2) {
                 showError('Заполните все поля');
                 return;
             }
             
-            if (password !== passwordConfirm) {
+            if (password !== password2) {
                 showError('Пароли не совпадают');
                 return;
             }
             
             if (password.length < 6) {
-                showError('Пароль должен быть не менее 6 символов');
+                showError('Пароль должен быть минимум 6 символов');
                 return;
             }
             
             if (!agreed) {
-                showError('Необходимо принять пользовательское соглашение');
+                showError('Примите условия использования');
                 return;
             }
             
             try {
-                showLoading();
-                
-                // 1. Создаём пользователя в Firebase Auth
+                // 1. Создаём пользователя
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                currentUser = userCredential.user;
+                const userId = userCredential.user.uid;
                 
-                // 2. Сохраняем данные пользователя в Firestore
-                await db.collection('users').doc(currentUser.uid).set({
+                // 2. Сохраняем данные пользователя
+                await db.collection('users').doc(userId).set({
                     email: email,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    acceptedAgreement: true,
-                    subscription: 'free',
-                    farms: [] // Пока пустой массив ферм
+                    subscription: 'free'
                 });
                 
-                // 3. Создаём первую ферму для пользователя
-                await createFirstFarm(currentUser.uid, email);
+                // 3. Создаём первую ферму
+                await createFirstFarm(userId, email);
                 
-                hideLoading();
-                showSuccess('Аккаунт успешно создан! Перенаправляем...');
-                
-                // Перенаправляем в приложение через 2 секунды
-                setTimeout(() => {
-                    window.location.href = 'main.html';
-                }, 2000);
+                // 4. Переходим в приложение
+                window.location.href = 'main.html';
                 
             } catch (error) {
-                hideLoading();
                 if (error.code === 'auth/email-already-in-use') {
                     showError('Email уже используется');
-                } else if (error.code === 'auth/invalid-email') {
-                    showError('Неверный формат email');
-                } else if (error.code === 'auth/weak-password') {
-                    showError('Пароль слишком простой');
                 } else {
-                    showError('Ошибка регистрации: ' + error.message);
+                    showError('Ошибка: ' + error.message);
                 }
             }
         }
         
-        // ===== СОЗДАНИЕ ПЕРВОЙ ФЕРМЫ =====
-        async function createFirstFarm(userId, userEmail) {
+        // ===== СОЗДАНИЕ ФЕРМЫ =====
+        async function createFirstFarm(userId, email) {
             try {
                 const farmId = 'farm_' + Date.now();
                 
@@ -541,190 +265,41 @@
                 await db.collection('users').doc(userId).collection('farms').doc(farmId).set({
                     id: farmId,
                     name: 'Моя ферма',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     ownerId: userId,
-                    subscription: 'free',
-                    settings: {
-                        theme: 'dark',
-                        notifications: true
-                    }
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    subscription: 'free'
                 });
                 
                 // Создаём демо-принтер
-                await db.collection('users').doc(userId).collection('farms').doc(farmId).collection('printers').add({
-                    id: 'printer1',
-                    name: 'Мой первый принтер',
-                    model: 'Creality Ender 3',
-                    status: 'idle',
-                    color: 'red',
-                    progress: 0,
-                    printName: '',
-                    image: 'foto/creality_ender3.jpg',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                await db.collection('users').doc(userId).collection('farms').doc(farmId)
+                    .collection('printers').doc('printer1').set({
+                        id: 'printer1',
+                        name: 'Мой первый принтер',
+                        model: 'Creality Ender 3',
+                        status: 'idle',
+                        color: 'red',
+                        progress: 0,
+                        printName: '',
+                        image: 'foto/creality_ender3.jpg',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
                 
-                // Обновляем массив ферм у пользователя
+                // Сохраняем ID фермы у пользователя
                 await db.collection('users').doc(userId).update({
-                    farms: firebase.firestore.FieldValue.arrayUnion(farmId),
                     currentFarmId: farmId
                 });
                 
-                console.log('Первая ферма создана успешно');
-                
             } catch (error) {
                 console.error('Ошибка создания фермы:', error);
-                throw error;
             }
         }
         
-        // ===== МОДАЛЬНЫЕ ОКНА ДЛЯ СОГЛАШЕНИЙ =====
-        function showAgreement() {
-            const modal = document.getElementById('modal');
-            const content = document.getElementById('modal-content');
-            
-            content.innerHTML = `
-                <h2 style="margin-bottom: 20px; color: #4CAF50;">Пользовательское соглашение</h2>
-                <div style="line-height: 1.6; font-size: 14px;">
-                    <p><strong>Последнее обновление:</strong> ${new Date().toLocaleDateString('ru-RU')}</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">1. Общие положения</h3>
-                    <p>1.1. Настоящее Пользовательское соглашение (далее — Соглашение) регулирует отношения между владельцем приложения "3D Farm Manager" (далее — Администрация) и пользователем (далее — Пользователь) по использованию сервиса управления фермами 3D-печати.</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">2. Условия использования</h3>
-                    <p>2.1. Пользователь обязуется использовать сервис только в законных целях.</p>
-                    <p>2.2. Запрещается использовать сервис для управления принтерами, печатающими запрещённые законом объекты.</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">3. Аккаунт и безопасность</h3>
-                    <p>3.1. Пользователь самостоятельно отвечает за сохранность своих учетных данных.</p>
-                    <p>3.2. Администрация не несёт ответственности за несанкционированный доступ к аккаунту Пользователя.</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">4. Подписка и оплата</h3>
-                    <p>4.1. Сервис предоставляется на условиях подписки.</p>
-                    <p>4.2. Оплата производится авансом за выбранный период.</p>
-                    <p>4.3. Возврат средств осуществляется в соответствии с законодательством РФ.</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">5. Ограничение ответственности</h3>
-                    <p>5.1. Администрация не несёт ответственности за:</p>
-                    <ul style="margin-left: 20px; margin-bottom: 15px;">
-                        <li>Поломки оборудования Пользователя</li>
-                        <li>Потерю данных вследствие технических сбоев</li>
-                        <li>Неправильные настройки печати</li>
-                    </ul>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">6. Изменения в Соглашении</h3>
-                    <p>6.1. Администрация оставляет право изменять условия Соглашения.</p>
-                    <p>6.2. Изменения вступают в силу с момента публикации новой версии.</p>
-                    
-                    <p style="margin-top: 20px; color: #888; font-size: 12px;">
-                        Нажимая кнопку "Принимаю", вы подтверждаете, что прочитали и согласны со всеми условиями настоящего Соглашения.
-                    </p>
-                </div>
-            `;
-            
-            modal.style.display = 'block';
-        }
-        
-        function showPrivacyPolicy() {
-            const modal = document.getElementById('modal');
-            const content = document.getElementById('modal-content');
-            
-            content.innerHTML = `
-                <h2 style="margin-bottom: 20px; color: #4CAF50;">Политика конфиденциальности</h2>
-                <div style="line-height: 1.6; font-size: 14px;">
-                    <p><strong>Последнее обновление:</strong> ${new Date().toLocaleDateString('ru-RU')}</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">1. Какие данные мы собираем</h3>
-                    <p>1.1. При регистрации: email адрес, хеш пароля.</p>
-                    <p>1.2. При использовании: данные о ваших принтерах, задачах печати, настройках фермы.</p>
-                    <p>1.3. Технические данные: IP-адрес, тип браузера, информация об устройстве.</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">2. Как мы используем данные</h3>
-                    <p>2.1. Для предоставления услуг управления фермой 3D-печати.</p>
-                    <p>2.2. Для улучшения работы сервиса и разработки новых функций.</p>
-                    <p>2.3. Для связи с пользователем по техническим вопросам.</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">3. Защита данных</h3>
-                    <p>3.1. Все данные хранятся на защищённых серверах Firebase (Google).</p>
-                    <p>3.2. Пароли хранятся в зашифрованном виде.</p>
-                    <p>3.3. Используется SSL-шифрование для передачи данных.</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">4. Передача данных третьим лицам</h3>
-                    <p>4.1. Мы не передаём ваши данные третьим лицам, кроме случаев, предусмотренных законодательством.</p>
-                    <p>4.2. Данные могут передаваться платежным системам для обработки транзакций.</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">5. Ваши права</h3>
-                    <p>5.1. Вы можете запросить удаление вашего аккаунта и всех данных.</p>
-                    <p>5.2. Вы можете отказаться от рассылки в любое время.</p>
-                    <p>5.3. Вы можете запросить копию ваших данных.</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">6. Контакты</h3>
-                    <p>По вопросам защиты данных обращайтесь: support@3dfarm.app</p>
-                    
-                    <p style="margin-top: 20px; color: #888; font-size: 12px;">
-                        Используя наш сервис, вы соглашаетесь с условиями настоящей Политики конфиденциальности.
-                    </p>
-                </div>
-            `;
-            
-            modal.style.display = 'block';
-        }
-        
-        function showSupport() {
-            const modal = document.getElementById('modal');
-            const content = document.getElementById('modal-content');
-            
-            content.innerHTML = `
-                <h2 style="margin-bottom: 20px; color: #4CAF50;">Поддержка</h2>
-                <div style="line-height: 1.6; font-size: 14px;">
-                    <h3 style="margin: 20px 0 10px 0;">Нужна помощь?</h3>
-                    <p>Мы готовы помочь вам с настройкой фермы и ответить на любые вопросы.</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">Способы связи:</h3>
-                    <ul style="margin-left: 20px; margin-bottom: 20px;">
-                        <li><strong>Telegram:</strong> @3dfarm_support</li>
-                        <li><strong>Email:</strong> support@3dfarm.app</li>
-                        <li><strong>Чат в приложении:</strong> Нажмите на кнопку "Помощь" в меню</li>
-                    </ul>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">Часы работы поддержки:</h3>
-                    <p>Понедельник - Пятница: 10:00 - 19:00 (МСК)</p>
-                    
-                    <h3 style="margin: 20px 0 10px 0;">Частые вопросы:</h3>
-                    <p><strong>Q:</strong> Как добавить принтер?</p>
-                    <p><strong>A:</strong> В меню "Принтеры" нажмите кнопку "+"</p>
-                    
-                    <p><strong>Q:</strong> Как подключить Google таблицу?</p>
-                    <p><strong>A:</strong> В настройках фермы введите ссылку на публичную Google таблицу</p>
-                    
-                    <p style="margin-top: 20px; color: #4CAF50; font-weight: bold;">
-                        Спасибо, что используете 3D Farm Manager! 🖨️
-                    </p>
-                </div>
-            `;
-            
-            modal.style.display = 'block';
-        }
-        
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-        
-        // ===== ПРОВЕРКА АВТОРИЗАЦИИ ПРИ ЗАГРУЗКЕ =====
-        document.addEventListener('DOMContentLoaded', function() {
-            // Проверяем, авторизован ли пользователь
-            auth.onAuthStateChanged(function(user) {
-                if (user) {
-                    // Пользователь уже авторизован - перенаправляем в приложение
-                    window.location.href = 'main.html';
-                }
-            });
-            
-            // Закрытие модального окна по клику на фон
-            document.getElementById('modal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeModal();
-                }
-            });
+        // ===== ПРОВЕРКА АВТОРИЗАЦИИ =====
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // Уже авторизован - сразу в приложение
+                window.location.href = 'main.html';
+            }
         });
     </script>
 </body>
