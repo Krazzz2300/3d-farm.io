@@ -447,16 +447,8 @@
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 currentUser = userCredential.user;
                 
-                // Проверяем принял ли пользователь соглашение
-                const userDoc = await db.collection('users').doc(currentUser.uid).get();
-                
-                if (!userDoc.exists || !userDoc.data().acceptedAgreement) {
-                    // Пользователь не принял соглашение - перенаправляем
-                    window.location.href = 'agreement.html';
-                } else {
-                    // Всё ок - идём в приложение
-                    window.location.href = 'main.html';
-                }
+                // Временно отключаем проверку соглашения для теста
+		window.location.href = 'main.html';
                 
             } catch (error) {
                 hideLoading();
