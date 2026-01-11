@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Заказы на печать</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #1e1e1e; color: #fff; font-family: Arial; }
+.header { background: #2a2a2a; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; border-bottom: 1px solid #444; display: flex; justify-content: space-between; align-items: center; }
+.orders-container { padding: 15px; max-height: calc(100vh - 100px); overflow-y: auto; padding-bottom: 80px; }
+.order-card { background: #2a2a2a; border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #4caf50; animation: slideIn 0.3s ease-out; }
+.order-card.urgent { border-left-color: #f44336; background: rgba(244, 67, 54, 0.05); }
+.order-card.in-progress { border-left-color: #2196f3; }
+.order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.order-name { font-size: 18px; font-weight: bold; flex: 1; }
+.order-id { font-size: 12px; color: #888; background: #333; padding: 2px 8px; border-radius: 10px; }
+.order-stats { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+.stat-item { text-align: center; flex: 1; }
+.stat-label { color: #aaa; font-size: 12px; margin-bottom: 4px; }
+.stat-value { font-size: 18px; font-weight: bold; }
+.stat-value.reserve { color: #ff9800; }
+.stat-value.in-print { color: #2196f3; }
+.stat-value.need { color: #4caf50; }
+.order-progress { height: 8px; background: #333; border-radius: 4px; margin: 10px 0; overflow: hidden; }
+.order-progress-bar { height: 100%; background: #4caf50; border-radius: 4px; transition: width 0.5s ease; }
+.order-actions { display: flex; gap: 10px; margin-top: 10px; }
+.action-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.action-btn:active { transform: scale(0.95); opacity: 0.8; }
+.assign-btn { background: #4caf50; color: white; }
+.details-btn { background: #666; color: white; }
+.controls-panel { background: #2a2a2a; padding: 15px; border-top: 1px solid #444; position: fixed; bottom: 0; left: 0; right: 0; }
+.controls-content { display: flex; justify-content: space-between; align-items: center; }
+.stats-summary { font-size: 14px; color: #888; }
+.refresh-btn { background: #2196f3; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold; }
+.refresh-btn:active { background: #1976d2; transform: scale(0.95); }
+.empty-orders { text-align: center; padding: 40px 20px; color: #888; }
+.empty-orders i { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
+.loading { text-align: center; padding: 30px; color: #888; }
+.loading-spinner { border: 3px solid #333; border-top: 3px solid #4caf50; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes slideIn { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.notification { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(76, 175, 80, 0.9); color: white; padding: 12px 24px; border-radius: 10px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-weight: bold; backdrop-filter: blur(10px); }
+</style>
+</head>
+<body>
+<div class="header">
+  <span id="page-title">Заказы на печать</span>
+  <button class="refresh-btn" onclick="loadOrders()"><i class="fas fa-sync-alt"></i> Обновить</button>
+</div>
+<div class="orders-container" id="orders-container">
+  <div class="loading"><div class="loading-spinner"></div><p>Загружаем заказы...</p></div>
+</div>
+<div class="controls-panel">
+  <div class="controls-content">
+    <div class="stats-summary" id="stats-summary">Заказов: 0 | Надо поставить: 0</div>
+    <button class="refresh-btn" onclick="loadOrders()"><i class="fas fa-sync-alt"></i></button>
+  </div>
+</div>
+<script>
+const SHEET_ID = '12cvna-mOg3z9PofZ2tEPSwQjz7WOhkGnjQpYBnwTKoc';
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+const STORAGE_KEY = '3d_printer_farm_data';
+let allOrders = [];
+
+async function fetchOrdersFromSheet() {
+  try {
+    const response = await fetch(SHEET_URL);
+    const text = await response.text();
+    const jsonText = text.substring(47).slice(0, -2);
+    const data = JSON.parse(jsonText);
+    const orders = [];
+    const rows = data.table.rows;
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      const cells = row.c;
+      if (cells && cells[1] && cells[5]) {
+        const name = cells[1].v;
+        const reserve = parseFloat(cells[5].v);
+        if (name && !isNaN(reserve) && reserve > 0) {
+          orders.push({ id: `order-${i}`, name: name.trim(), reserve: Math.floor(reserve), inPrint: 0, need: 0 });
+        }
+      }
+    }
+    return orders;
+  } catch (error) {
+    console.error('Ошибка при загрузке заказов:', error);
+    return [];
+  }
+}
+
+function getPrinters() {
+  try {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    return savedData ? JSON.parse(savedData) : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function calculateOrdersInPrint() {
+  const printers = getPrinters();
+  const ordersInPrint = {};
+  printers.forEach(printer => {
+    if (printer.status === 'printing' && printer.printName) {
+      const match = printer.printName.match(/^(.+?)(?:\s*×\s*(\d+))?$/);
+      if (match) {
+        const itemName = match[1].trim();
+        const quantity = match[2] ? parseInt(match[2]) : 1;
+        if (!ordersInPrint[itemName]) ordersInPrint[itemName] = 0;
+        ordersInPrint[itemName] += quantity;
+      }
+    }
+  });
+  return ordersInPrint;
+}
+
+async function loadOrders() {
+  const container = document.getElementById('orders-container');
+  container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загружаем заказы...</p></div>';
+  try {
+    const ordersFromSheet = await fetchOrdersFromSheet();
+    const inPrintCounts = calculateOrdersInPrint();
+    allOrders = ordersFromSheet.map(order => {
+      const inPrint = inPrintCounts[order.name] || 0;
+      const need = Math.max(0, order.reserve - inPrint);
+      return { ...order, inPrint: inPrint, need: need };
+    });
+    const ordersToShow = allOrders.filter(order => order.need > 0);
+    ordersToShow.sort((a, b) => b.need - a.need);
+    renderOrders(ordersToShow);
+    updateStats(ordersToShow);
+  } catch (error) {
+    console.error('Ошибка при загрузке:', error);
+    container.innerHTML = '<div class="empty-orders"><i class="fas fa-exclamation-triangle"></i><h3>Ошибка загрузки</h3><p>Не удалось загрузить заказы</p><button class="action-btn assign-btn" onclick="loadOrders()"><i class="fas fa-sync-alt"></i> Попробовать снова</button></div>';
+  }
+}
+
+function renderOrders(orders) {
+  const container = document.getElementById('orders-container');
+  if (orders.length === 0) {
+    container.innerHTML = '<div class="empty-orders"><i class="fas fa-check-circle"></i><h3>Нет заказов на печать</h3><p>Все заказы выполнены или в работе</p></div>';
+    return;
+  }
+  let html = '';
+  orders.forEach(order => {
+    const progress = order.reserve > 0 ? Math.floor((order.inPrint / order.reserve) * 100) : 0;
+    html += `<div class="order-card ${order.need >= 10 ? 'urgent' : ''}">
+      <div class="order-header"><div class="order-name">${order.name}</div><div class="order-id">${order.id}</div></div>
+      <div class="order-stats">
+        <div class="stat-item"><div class="stat-label">Резерв</div><div class="stat-value reserve">${order.reserve}</div></div>
+        <div class="stat-item"><div class="stat-label">В печати</div><div class="stat-value in-print">${order.inPrint}</div></div>
+        <div class="stat-item"><div class="stat-label">Надо поставить</div><div class="stat-value need">${order.need}</div></div>
+      </div>
+      <div class="order-progress"><div class="order-progress-bar" style="width: ${progress}%"></div></div>
+      <div style="text-align: center; font-size: 12px; color: #888; margin-top: 5px;">Готово: ${progress}%</div>
+      <div class="order-actions"><button class="action-btn assign-btn" onclick="assignOrder('${order.id}')"><i class="fas fa-print"></i> Поставить в печать</button></div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function updateStats(orders) {
+  const totalOrders = orders.length;
+  const totalNeed = orders.reduce((sum, order) => sum + order.need, 0);
+  document.getElementById('stats-summary').innerHTML = `Заказов: ${totalOrders} | Надо поставить: ${totalNeed}`;
+}
+
+function assignOrder(orderId) {
+  const order = allOrders.find(o => o.id === orderId);
+  if (order) {
+    alert(`Назначение заказа: ${order.name} ×${order.need}\n\nЭта функция будет доступна в следующем обновлении!`);
+  }
+}
+
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease-out';
+    setTimeout(() => { if (notification.parentNode) document.body.removeChild(notification); }, 300);
+  }, 3000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadOrders();
+  setInterval(loadOrders, 2 * 60 * 1000);
+});
+
+window.loadOrders = loadOrders;
+window.assignOrder = assignOrder;
+</script>
+</body>
+</html>

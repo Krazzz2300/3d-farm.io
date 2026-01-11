@@ -1,306 +1,3051 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Farm - Вход</title>
-    
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #1a1a1a;
-            color: white;
-            font-family: Arial;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-        
-        .logo {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: #4CAF50;
-        }
-        
-        .title {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 30px;
-        }
-        
-        /* Формы */
-        .form {
-            background: #2a2a2a;
-            padding: 30px;
-            border-radius: 16px;
-            border: 1px solid #444;
-            margin-bottom: 20px;
-        }
-        
-        .input {
-            width: 100%;
-            padding: 14px;
-            margin-bottom: 15px;
-            background: #1a1a1a;
-            border: 1px solid #444;
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 16px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-        
-        .btn:hover {
-            background: #45a049;
-        }
-        
-        .switch {
-            color: #888;
-            margin-top: 15px;
-            cursor: pointer;
-        }
-        
-        .switch:hover {
-            color: #4CAF50;
-        }
-        
-        .error {
-            background: #ff4444;
-            color: white;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            display: none;
-        }
-        
-        .checkbox {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 15px 0;
-            font-size: 14px;
-            color: #aaa;
-            text-align: left;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="logo">🖨️</div>
-        <div class="title">3D Farm Manager</div>
-        
-        <!-- Ошибка -->
-        <div class="error" id="error"></div>
-        
-        <!-- Форма входа -->
-        <div class="form" id="login-form">
-            <input type="email" id="login-email" class="input" placeholder="Ваш email">
-            <input type="password" id="login-password" class="input" placeholder="Пароль">
-            <button class="btn" onclick="login()">ВОЙТИ</button>
-            <div class="switch" onclick="showRegister()">Нет аккаунта? Создать</div>
-        </div>
-        
-        <!-- Форма регистрации -->
-        <div class="form" id="register-form" style="display: none;">
-            <input type="email" id="register-email" class="input" placeholder="Ваш email">
-            <input type="password" id="register-password" class="input" placeholder="Пароль (минимум 6 символов)">
-            <input type="password" id="register-password2" class="input" placeholder="Повторите пароль">
-            
-            <div class="checkbox">
-                <input type="checkbox" id="agree-checkbox">
-                <label>Я принимаю условия использования</label>
-            </div>
-            
-            <button class="btn" onclick="register()">СОЗДАТЬ АККАУНТ</button>
-            <div class="switch" onclick="showLogin()">Уже есть аккаунт? Войти</div>
-        </div>
-    </div>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ферма принтеров</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <script>
-        // ===== FIREBASE =====
-        const firebaseConfig = {
-            apiKey: "AIzaSyDdA4kSxL-CYt3egpUeLLp0XMOB9GyN604",
-            authDomain: "ferm-3d.firebaseapp.com",
-            projectId: "ferm-3d",
-            storageBucket: "ferm-3d.firebasestorage.app",
-            messagingSenderId: "497797661146",
-            appId: "1:497797661146:web:58125a76c6b44fd91d40e3"
-        };
+<style>
+/* ОСНОВНЫЕ СТИЛИ */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body { 
+  background: #1e1e1e; 
+  color: #fff; 
+  font-family: Arial, sans-serif;
+  padding-bottom: 70px;
+}
+
+/* ХЕДЕР */
+.header {
+  background: #2a2a2a;
+  padding: 15px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  border-bottom: 1px solid #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.notification-badge {
+  background: red;
+  color: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+/* СТРАНИЦЫ */
+.page {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* КАРТОЧКИ ПРИНТЕРОВ (готово) */
+.printers-container {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
+  gap: 10px;
+}
+
+.card {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 12px;
+  width: calc(50% - 5px);
+  min-height: 220px;
+  box-sizing: border-box;
+  border: 1px solid #444;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+}
+
+.card:active {
+  transform: scale(0.98);
+  background: #333;
+}
+
+.card-image-container {
+  width: 100%;
+  height: 120px;
+  border-radius: 8px;
+  background: #1e1e1e;
+  margin-bottom: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.card:hover .card-image {
+  transform: scale(1.05);
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.color-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #444;
+}
+
+.model-text {
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.status-text {
+  font-weight: bold;
+}
+
+.progress {
+  height: 12px;
+  background: #444;
+  border-radius: 6px;
+  margin-top: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 12px;
+  color: white;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+}
+
+.problem-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #f44336;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border: 2px solid #2a2a2a;
+  z-index: 2;
+}
+
+.finished-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #4caf50;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border: 2px solid #2a2a2a;
+  z-index: 2;
+}
+
+/* СТРАНИЦА ЗАДАЧ */
+.tasks-container {
+  padding: 15px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-bottom: 80px;
+}
+
+.task-item {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-left: 4px solid #2196f3;
+}
+
+.task-item.completed {
+  border-left-color: #4caf50;
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.task-item.current {
+  border-left-color: #ff9800;
+  background: rgba(255, 152, 0, 0.05);
+}
+
+.task-item.locked {
+  border-left-color: #666;
+  background: rgba(100, 100, 100, 0.1);
+  opacity: 0.6;
+}
+
+.task-item.skipped {
+  border-left-color: #888;
+  background: rgba(136, 136, 136, 0.1);
+  opacity: 0.5;
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.task-name {
+  font-size: 18px;
+  font-weight: bold;
+  flex: 1;
+}
+
+.task-status {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: #333;
+  color: #aaa;
+}
+
+.task-item.current .task-status {
+  background: #ff9800;
+  color: white;
+}
+
+.task-item.completed .task-status {
+  background: #4caf50;
+  color: white;
+}
+
+.task-item.locked .task-status {
+  background: #666;
+  color: #aaa;
+}
+
+.task-item.skipped .task-status {
+  background: #888;
+  color: #aaa;
+}
+
+.task-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.task-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.task-label {
+  color: #aaa;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.task-value {
+  font-weight: bold;
+}
+
+.task-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.task-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.task-btn:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.task-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.task-btn:disabled:active {
+  transform: none;
+}
+
+.complete-btn {
+  background: #4caf50;
+  color: white;
+}
+
+.change-printer-btn {
+  background: #2196f3;
+  color: white;
+}
+
+.confirm-complete-btn {
+  background: #4caf50;
+  color: white;
+  animation: pulse 1s infinite;
+}
+
+.cancel-complete-btn {
+  background: #666;
+  color: white;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.tasks-footer {
+  position: fixed;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  background: #2a2a2a;
+  padding: 15px;
+  border-top: 1px solid #444;
+  z-index: 50;
+}
+
+.tasks-footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tasks-stats {
+  font-size: 14px;
+  color: #888;
+}
+
+.generate-tasks-btn {
+  background: #2196f3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+}
+
+.generate-tasks-btn:active {
+  background: #1976d2;
+  transform: scale(0.95);
+}
+
+/* СТРАНИЦА ЗАКАЗОВ */
+.orders-container {
+  padding: 15px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-bottom: 80px;
+}
+
+.order-card {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-left: 4px solid #4caf50;
+}
+
+.order-card.urgent {
+  border-left-color: #f44336;
+  background: rgba(244, 67, 54, 0.05);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.order-name {
+  font-size: 18px;
+  font-weight: bold;
+  flex: 1;
+}
+
+.order-id {
+  font-size: 12px;
+  color: #888;
+  background: #333;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.order-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.stat-item {
+  text-align: center;
+  flex: 1;
+}
+
+.stat-label {
+  color: #aaa;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.stat-value.reserve { color: #ff9800; }
+.stat-value.in-print { color: #2196f3; }
+.stat-value.need { color: #4caf50; }
+
+.order-progress {
+  height: 8px;
+  background: #333;
+  border-radius: 4px;
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+.order-progress-bar {
+  height: 100%;
+  background: #4caf50;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.orders-footer {
+  position: fixed;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  background: #2a2a2a;
+  padding: 15px;
+  border-top: 1px solid #444;
+  z-index: 50;
+}
+
+.orders-footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orders-stats {
+  font-size: 14px;
+  color: #888;
+}
+
+.refresh-btn {
+  background: #2196f3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+}
+
+.refresh-btn:active {
+  background: #1976d2;
+  transform: scale(0.95);
+}
+
+/* СТРАНИЦА ЛОГОВ (готово) */
+.logs-container {
+  padding: 15px;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  padding-bottom: 80px;
+}
+
+.log-item {
+  background: #2a2a2a;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-left: 4px solid #4caf50;
+}
+
+.log-item.repair {
+  border-left-color: orange;
+}
+
+.log-item.problem {
+  border-left-color: #f44336;
+}
+
+.log-item.info {
+  border-left-color: #2196f3;
+}
+
+.log-item.warning {
+  border-left-color: #ff9800;
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.log-time {
+  font-size: 11px;
+  color: #888;
+}
+
+.log-type {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #666;
+  color: white;
+}
+
+.log-item.info .log-type { background: #2196f3; }
+.log-item.warning .log-type { background: #ff9800; }
+.log-item.problem .log-type { background: #f44336; }
+.log-item.repair .log-type { background: orange; }
+
+.log-message {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.empty-logs, .empty-tasks, .empty-orders {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+}
+
+.empty-logs i, .empty-tasks i, .empty-orders i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.empty-logs h3, .empty-tasks h3, .empty-orders h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.logs-footer {
+  position: fixed;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  background: #2a2a2a;
+  padding: 15px;
+  border-top: 1px solid #444;
+  z-index: 50;
+}
+
+.logs-footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logs-stats {
+  font-size: 12px;
+  color: #888;
+}
+
+.clear-logs-btn {
+  background: #666;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.clear-logs-btn:active {
+  background: #555;
+  transform: scale(0.95);
+}
+
+/* НАВИГАЦИЯ ВНИЗУ (6 ИКОНОК) */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #2a2a2a;
+  border-top: 1px solid #444;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 0;
+  z-index: 100;
+  height: 60px;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  text-decoration: none;
+  flex: 1;
+  padding: 8px 0;
+  transition: color 0.2s;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.nav-item.active {
+  color: #4caf50;
+}
+
+.nav-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.nav-add {
+  position: relative;
+  margin-top: -20px;
+}
+
+.add-nav-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #4caf50;
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-nav-btn:active {
+  background: #45a049;
+  transform: scale(0.95);
+}
+
+/* МОДАЛЬНЫЕ ОКНА */
+.modal-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 15px;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: #2a2a2a;
+  padding: 20px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 340px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.modal label {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.modal input, .modal select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #444;
+  background: #1e1e1e;
+  color: white;
+  font-size: 16px;
+}
+
+.modal input:focus, .modal select:focus {
+  border-color: #4caf50;
+  outline: none;
+}
+
+.printer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 15px 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.printer-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #333;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: 2px solid transparent;
+}
+
+.printer-option:hover {
+  background: #3a3a3a;
+}
+
+.printer-option.selected {
+  border-color: #4caf50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.printer-option:active {
+  background: #444;
+}
+
+.printer-option-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.printer-option-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.printer-option-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.printer-option-brand {
+  font-size: 14px;
+  color: #aaa;
+  margin-bottom: 4px;
+}
+
+.printer-option-model {
+  font-size: 16px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.printer-icon {
+  font-size: 28px;
+  color: #666;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: opacity 0.2s;
+}
+
+.modal-buttons button:active {
+  opacity: 0.8;
+}
+
+.cancel-btn { 
+  background: #666; 
+  color: white; 
+}
+
+.save-btn { 
+  background: #4caf50; 
+  color: white; 
+}
+
+.next-btn { 
+  background: #2196f3; 
+  color: white; 
+}
+
+.back-btn { 
+  background: #666; 
+  color: white; 
+}
+
+/* УВЕДОМЛЕНИЯ */
+.notification {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(76, 175, 80, 0.9);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 10px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  font-weight: bold;
+  backdrop-filter: blur(10px);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(-50%) translateY(0); opacity: 1; }
+  to { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+}
+
+/* ЗАГРУЗКА */
+.loading {
+  text-align: center;
+  padding: 30px;
+  color: #888;
+}
+
+.loading-spinner {
+  border: 3px solid #333;
+  border-top: 3px solid #4caf50;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ПУЛЬСАЦИЯ */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.pulse-animation {
+  animation: pulse 1s infinite;
+}
+
+/* НАСТРОЙКИ */
+.settings-container {
+  padding: 15px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-bottom: 80px;
+}
+
+.settings-group {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.settings-group h3 {
+  margin-bottom: 15px;
+  color: #4caf50;
+  font-size: 18px;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #333;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.setting-label {
+  font-size: 14px;
+  color: #ccc;
+}
+
+.setting-value {
+  font-size: 14px;
+  color: #fff;
+}
+
+.time-input {
+  width: 60px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #1e1e1e;
+  color: white;
+  text-align: center;
+}
+
+.time-separator {
+  margin: 0 5px;
+}
+
+.delete-all-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  opacity: 0.3;
+}
+
+.delete-all-btn:hover {
+  opacity: 1;
+}
+
+.delete-all-btn:active {
+  transform: scale(0.95);
+}
+
+/* АДАПТИВНОСТЬ */
+@media (min-width: 768px) {
+  .printers-container {
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .card {
+    width: calc(33.333% - 10px);
+    min-height: 240px;
+  }
+  
+  .card-image-container {
+    height: 140px;
+  }
+  
+  .bottom-nav {
+    max-width: 600px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 20px 20px 0 0;
+    border: 1px solid #444;
+    border-bottom: none;
+  }
+  
+  .tasks-footer, .orders-footer, .logs-footer {
+    max-width: 600px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 0 0 20px 20px;
+    border: 1px solid #444;
+    border-top: none;
+  }
+  
+  .modal {
+    max-width: 400px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card {
+    width: calc(25% - 12px);
+  }
+  
+  .printers-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <span id="page-title">Ферма принтеров</span>
+  <div style="position: relative;">
+    <i class="fas fa-bell" style="font-size: 18px;"></i>
+    <div class="notification-badge" id="global-notification">0</div>
+  </div>
+</div>
+
+<!-- Страница принтеров -->
+<div id="printers-page" class="page">
+  <div class="printers-container" id="printers-container"></div>
+</div>
+
+<!-- Страница задач -->
+<div id="tasks-page" class="page hidden">
+  <div class="tasks-container" id="tasks-container">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Загружаем ваши задачи...</p>
+    </div>
+  </div>
+  
+  <div class="tasks-footer">
+    <div class="tasks-footer-content">
+      <div class="tasks-stats" id="tasks-stats">Задач: 0 | Выполнено: 0 | Доступно: 0</div>
+      <button class="generate-tasks-btn" onclick="generateSmartTasks()">
+        <i class="fas fa-brain"></i> Создать умные задачи
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Страница заказов -->
+<div id="orders-page" class="page hidden">
+  <div class="orders-container" id="orders-container">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Загружаем заказы...</p>
+    </div>
+  </div>
+  
+  <div class="orders-footer">
+    <div class="orders-footer-content">
+      <div class="orders-stats" id="orders-stats">Заказов: 0 | В печати: 0 | Осталось: 0</div>
+      <button class="refresh-btn" onclick="loadOrders()">
+        <i class="fas fa-sync-alt"></i> Обновить
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Страница настроек -->
+<div id="settings-page" class="page hidden">
+  <div class="settings-container" id="settings-container">
+    <div class="settings-group">
+      <h3><i class="fas fa-clock"></i> Время работы оператора</h3>
+      <div class="setting-item">
+        <div class="setting-label">Начало работы:</div>
+        <div>
+          <input type="number" id="start-hour" class="time-input" min="0" max="23" value="9">
+          <span class="time-separator">:</span>
+          <input type="number" id="start-minute" class="time-input" min="0" max="59" value="0">
+        </div>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">Окончание работы:</div>
+        <div>
+          <input type="number" id="end-hour" class="time-input" min="0" max="23" value="16">
+          <span class="time-separator">:</span>
+          <input type="number" id="end-minute" class="time-input" min="0" max="59" value="0">
+        </div>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">Дедлайн (к утру):</div>
+        <div>
+          <input type="number" id="deadline-hour" class="time-input" min="0" max="23" value="8">
+          <span class="time-separator">:</span>
+          <input type="number" id="deadline-minute" class="time-input" min="0" max="59" value="0">
+        </div>
+      </div>
+    </div>
+    
+    <div class="settings-group">
+      <h3><i class="fas fa-cogs"></i> Настройки алгоритма</h3>
+      <div class="setting-item">
+        <div class="setting-label">Минимизировать принтеры:</div>
+        <div>
+          <input type="checkbox" id="minimize-printers" checked>
+        </div>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">Использовать ночь максимально:</div>
+        <div>
+          <input type="checkbox" id="use-night" checked>
+        </div>
+      </div>
+    </div>
+    
+    <!-- НОВЫЙ БЛОК: Настройки таблицы заказов -->
+    <div class="settings-group">
+      <h3><i class="fas fa-table"></i> Настройки таблицы заказов</h3>
+      
+      <div class="setting-item">
+        <div class="setting-label">ID таблицы Google Sheets:</div>
+        <div>
+          <input type="text" id="sheet-id" placeholder="ID таблицы" style="width: 200px; padding: 8px; border-radius: 6px; border: 1px solid #444; background: #1e1e1e; color: white;">
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-label">Имя листа:</div>
+        <div>
+          <input type="text" id="sheet-name" placeholder="Sheet1" value="Sheet1" style="width: 120px; padding: 8px; border-radius: 6px; border: 1px solid #444; background: #1e1e1e; color: white;">
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-label">Столбец с названием:</div>
+        <div>
+          <select id="name-column" style="padding: 8px; border-radius: 6px; border: 1px solid #444; background: #1e1e1e; color: white;">
+            <option value="B">B</option>
+            <option value="A">A</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-label">Столбец с количеством:</div>
+        <div>
+          <select id="quantity-column" style="padding: 8px; border-radius: 6px; border: 1px solid #444; background: #1e1e1e; color: white;">
+            <option value="C">C</option>
+            <option value="B">B</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+          </select>
+        </div>
+      </div>
+      
+      <div style="margin-top: 15px; padding: 10px; background: #333; border-radius: 6px; font-size: 12px; color: #aaa;">
+        <div><strong>Инструкция:</strong></div>
+        <div>1. Откройте таблицу Google Sheets</div>
+        <div>2. Скопируйте ID из URL: <code style="background: #444; padding: 2px 4px; border-radius: 3px;">/d/<strong>12cvna-mOg3z9PofZ2tEPSwQjz7WOhkGnjQpYBnwTKoc</strong>/edit</code></div>
+        <div>3. Введите ID в поле выше</div>
+        <div>4. Укажите правильные столбцы:</div>
+        <div>   • <strong>Столбец B</strong> - названия товаров</div>
+        <div>   • <strong>Столбец C</strong> - количество</div>
+      </div>
+      
+      <button onclick="saveSheetSettings()" style="margin-top: 15px; padding: 12px; background: #2196f3; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold;">
+        <i class="fas fa-save"></i> Сохранить настройки
+      </button>
+    </div>
+    
+    <div class="settings-group">
+      <h3><i class="fas fa-database"></i> Данные</h3>
+      <div class="setting-item">
+        <div class="setting-label">Загрузить базу изделий:</div>
+        <button onclick="loadProductsDatabase()" style="padding: 8px 12px; background: #2196f3; color: white; border: none; border-radius: 6px; cursor: pointer;">
+          <i class="fas fa-sync"></i> Обновить
+        </button>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">Очистить все задачи:</div>
+        <button onclick="deleteAllTasks()" class="delete-all-btn">
+          <i class="fas fa-trash"></i> Удалить все задачи
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Страница логов -->
+<div id="logs-page" class="page hidden">
+  <div class="logs-container" id="logs-container"></div>
+  
+  <div class="logs-footer">
+    <div class="logs-footer-content">
+      <div class="logs-stats" id="logs-stats">Всего записей: 0</div>
+      <button class="clear-logs-btn" onclick="clearLogs()">
+        <i class="fas fa-trash"></i> Очистить историю
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Нижняя навигация (6 ИКОНОК) -->
+<div class="bottom-nav">
+  <!-- 1. Принтеры -->
+  <div class="nav-item active" onclick="showPage('printers')">
+    <i class="fas fa-home nav-icon"></i>
+    <span>Принтеры</span>
+  </div>
+  
+  <!-- 2. Задачи -->
+  <div class="nav-item" onclick="showPage('tasks')">
+    <i class="fas fa-tasks nav-icon"></i>
+    <span>Задачи</span>
+  </div>
+  
+  <!-- 3. Настройки -->
+  <div class="nav-item" onclick="showPage('settings')">
+    <i class="fas fa-cog nav-icon"></i>
+    <span>Настройки</span>
+  </div>
+  
+  <!-- 4. Добавить принтер -->
+  <div class="nav-item nav-add">
+    <button class="add-nav-btn" onclick="showAddModal()">
+      <i class="fas fa-plus"></i>
+    </button>
+  </div>
+  
+  <!-- 5. Заказы -->
+  <div class="nav-item" onclick="showPage('orders')">
+    <i class="fas fa-shopping-cart nav-icon"></i>
+    <span>Заказы</span>
+  </div>
+  
+  <!-- 6. Логи -->
+  <div class="nav-item" onclick="showPage('logs')">
+    <i class="fas fa-history nav-icon"></i>
+    <span>Логи</span>
+  </div>
+</div>
+
+<!-- Модальные окна -->
+<div class="modal-bg" id="choose-model-modal">
+  <div class="modal">
+    <h3>Выберите модель принтера</h3>
+    <div class="printer-list" id="printer-list"></div>
+    <div class="modal-buttons">
+      <button class="cancel-btn" onclick="closeChooseModelModal()">Отмена</button>
+      <button class="next-btn" onclick="goToNameStep()">Далее</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="choose-name-modal">
+  <div class="modal">
+    <h3>Введите название принтера</h3>
+    <div id="selected-printer-info" style="background: #333; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+      <div class="printer-option-image" id="selected-printer-image">
+        <i class="fas fa-print printer-icon"></i>
+      </div>
+      <div>
+        <div id="selected-printer-brand" style="font-size: 14px; color: #aaa;">Бренд</div>
+        <div id="selected-printer-model" style="font-size: 16px; font-weight: bold;">Модель</div>
+      </div>
+    </div>
+    <label>Название принтера:</label>
+    <input type="text" id="new-printer-name" placeholder="Например: Принтер 3" required>
+    <small style="color: #888; font-size: 12px; display: block; margin-top: 4px;">
+      Это название будет отображаться на главном экране
+    </small>
+    <div class="modal-buttons">
+      <button class="back-btn" onclick="goBackToModelStep()">Назад</button>
+      <button class="save-btn" onclick="addNewPrinter()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно смены принтера -->
+<div class="modal-bg" id="change-printer-modal">
+  <div class="modal">
+    <h3>Выберите принтер для задачи</h3>
+    <div class="printer-list" id="change-printer-list"></div>
+    <div class="modal-buttons">
+      <button class="cancel-btn" onclick="closeChangePrinterModal()">Отмена</button>
+      <button class="save-btn" onclick="confirmChangePrinter()">Сменить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно подтверждения выполнения -->
+<div class="modal-bg" id="confirm-complete-modal">
+  <div class="modal">
+    <h3>Подтверждение</h3>
+    <p id="confirm-complete-text">Вы уверены, что хотите отметить задачу как выполненную и запустить печать?</p>
+    <div class="modal-buttons">
+      <button class="cancel-btn" onclick="closeConfirmCompleteModal()">Отмена</button>
+      <button class="save-btn" onclick="executeCompleteTask()">Да, запустить печать</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== КОНСТАНТЫ =====
+const STORAGE_KEY = '3d_printer_farm_data';
+const LOGS_STORAGE_KEY = 'printer_farm_logs';
+const TASKS_STORAGE_KEY = 'printer_tasks_data';
+const SETTINGS_STORAGE_KEY = 'printer_farm_settings';
+const SHEET_SETTINGS_KEY = 'sheet_settings';
+
+// Telegram Bot (убрал уведомления по твоей просьбе)
+const TELEGRAM_BOT_TOKEN = '';
+const TELEGRAM_CHAT_ID = '';
+
+// База изделий по умолчанию (загружается из products.json)
+let productsDatabase = {};
+
+// Глобальные переменные
+let currentPage = 'printers';
+let selectedPrinter = null;
+let currentStep = 'model';
+let isRendering = false;
+let currentTaskForChange = null;
+let currentTaskForComplete = null;
+
+// Настройки по умолчанию
+const DEFAULT_SETTINGS = {
+  operatorStart: { hour: 9, minute: 0 },
+  operatorEnd: { hour: 16, minute: 0 },
+  deadline: { hour: 8, minute: 0 },
+  minimizePrinters: true,
+  useNight: true
+};
+
+// Настройки таблицы по умолчанию
+const DEFAULT_SHEET_SETTINGS = {
+  sheetId: '12cvna-mOg3z9PofZ2tEPSwQjz7WOhkGnjQpYBnwTKoc',
+  sheetName: 'Sheet1',
+  nameColumn: 'B',
+  quantityColumn: 'C'
+};
+
+// ===== НАСТРОЙКИ ТАБЛИЦЫ =====
+function loadSheetSettings() {
+  try {
+    const saved = localStorage.getItem(SHEET_SETTINGS_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch {
+    // Ignore error
+  }
+  
+  return DEFAULT_SHEET_SETTINGS;
+}
+
+function saveSheetSettings() {
+  const settings = {
+    sheetId: document.getElementById('sheet-id').value.trim(),
+    sheetName: document.getElementById('sheet-name').value.trim() || 'Sheet1',
+    nameColumn: document.getElementById('name-column').value,
+    quantityColumn: document.getElementById('quantity-column').value
+  };
+  
+  if (!settings.sheetId) {
+    showNotification('Введите ID таблицы!');
+    return;
+  }
+  
+  localStorage.setItem(SHEET_SETTINGS_KEY, JSON.stringify(settings));
+  showNotification('Настройки таблицы сохранены!');
+}
+
+function updateSheetSettingsUI() {
+  const settings = loadSheetSettings();
+  
+  document.getElementById('sheet-id').value = settings.sheetId;
+  document.getElementById('sheet-name').value = settings.sheetName;
+  document.getElementById('name-column').value = settings.nameColumn;
+  document.getElementById('quantity-column').value = settings.quantityColumn;
+}
+
+function getSheetUrl() {
+  const settings = loadSheetSettings();
+  return `https://docs.google.com/spreadsheets/d/${settings.sheetId}/gviz/tq?tqx=out:json&sheet=${settings.sheetName}`;
+}
+
+// ===== НАСТРОЙКИ =====
+function loadSettings() {
+  try {
+    const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
+function saveSettings(settings) {
+  try {
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function updateSettingsUI() {
+  const settings = loadSettings();
+  
+  document.getElementById('start-hour').value = settings.operatorStart.hour;
+  document.getElementById('start-minute').value = settings.operatorStart.minute;
+  document.getElementById('end-hour').value = settings.operatorEnd.hour;
+  document.getElementById('end-minute').value = settings.operatorEnd.minute;
+  document.getElementById('deadline-hour').value = settings.deadline.hour;
+  document.getElementById('deadline-minute').value = settings.deadline.minute;
+  document.getElementById('minimize-printers').checked = settings.minimizePrinters;
+  document.getElementById('use-night').checked = settings.useNight;
+  
+  // Обновляем настройки таблицы
+  updateSheetSettingsUI();
+}
+
+function saveSettingsFromUI() {
+  const settings = {
+    operatorStart: {
+      hour: parseInt(document.getElementById('start-hour').value) || 9,
+      minute: parseInt(document.getElementById('start-minute').value) || 0
+    },
+    operatorEnd: {
+      hour: parseInt(document.getElementById('end-hour').value) || 16,
+      minute: parseInt(document.getElementById('end-minute').value) || 0
+    },
+    deadline: {
+      hour: parseInt(document.getElementById('deadline-hour').value) || 8,
+      minute: parseInt(document.getElementById('deadline-minute').value) || 0
+    },
+    minimizePrinters: document.getElementById('minimize-printers').checked,
+    useNight: document.getElementById('use-night').checked
+  };
+  
+  saveSettings(settings);
+  showNotification('Настройки сохранены!');
+}
+
+// ===== ИНИЦИАЛИЗАЦИЯ =====
+document.addEventListener('DOMContentLoaded', function() {
+  renderPrinters();
+  loadProductsDatabase();
+  updateSettingsUI();
+  
+  // Навигация
+  document.querySelectorAll('.nav-item').forEach((item, index) => {
+    item.addEventListener('click', function() {
+      if (index === 0) showPage('printers');
+      else if (index === 1) showPage('tasks');
+      else if (index === 2) showPage('settings');
+      else if (index === 4) showPage('orders');
+      else if (index === 5) showPage('logs');
+    });
+  });
+  
+  // Модальные окна
+  document.getElementById('choose-model-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeChooseModelModal();
+  });
+  
+  document.getElementById('choose-name-modal').addEventListener('click', function(e) {
+    if (e.target === this && currentStep === 'name') {
+      document.getElementById('choose-name-modal').style.display = 'none';
+      selectedPrinter = null;
+    }
+  });
+  
+  document.getElementById('change-printer-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeChangePrinterModal();
+  });
+  
+  document.getElementById('confirm-complete-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeConfirmCompleteModal();
+  });
+  
+  // Автосохранение настроек при изменении
+  document.querySelectorAll('#settings-page input').forEach(input => {
+    input.addEventListener('change', saveSettingsFromUI);
+  });
+  
+  // Обновление каждую секунду
+  setInterval(() => {
+    if (isRendering) return;
+    
+    if (currentPage === 'printers') {
+      updatePrintersStatus();
+      renderPrinters();
+    } else if (currentPage === 'tasks') {
+      updateTasksStatus();
+      if (document.getElementById('tasks-page') && !document.getElementById('tasks-page').classList.contains('hidden')) {
+        renderTasks();
+      }
+    }
+  }, 2000);
+  
+  // Инициализируем текущую страницу
+  showPage('printers');
+});
+
+// ===== БАЗА ПРИНТЕРОВ =====
+const POPULAR_PRINTERS = [
+  { brand: "Anycubic", model: "Cobra 2", image: "foto/anycubic_cobra2.jpg" },
+  { brand: "Creality", model: "Ender 3", image: "foto/creality_ender3.jpg" },
+  { brand: "Creality", model: "Ender 5", image: "foto/creality_ender5.jpg" },
+  { brand: "Creality", model: "K1", image: "foto/creality_k1.jpg" },
+  { brand: "Bambu Lab", model: "A1 Mini", image: "foto/bambulab_a1mini.jpg" },
+  { brand: "Bambu Lab", model: "A1", image: "foto/bambulab_a1.jpg" },
+  { brand: "Bambu Lab", model: "X1 Carbon", image: "foto/bambulab_x1carbon.jpg" },
+  { brand: "Elegoo", model: "Neptune 3", image: "foto/elegoo_neptune3.jpg" },
+  { brand: "Elegoo", model: "Neptune 4", image: "foto/elegoo_neptune4.jpg" },
+  { brand: "Flashforge", model: "AD5X", image: "foto/flashforge_ad5x.jpg" },
+  { brand: "Flashforge", model: "Adventurer 5M", image: "foto/flashforge_adventurer5m.jpg" },
+  { brand: "Flashforge", model: "Adventurer 3", image: "foto/flashforge_adventurer3.jpg" },
+  { brand: "Artillery", model: "Sidewinder X2", image: "foto/artillery_sidewinderx2.jpg" },
+  { brand: "Sovol", model: "SV06", image: "foto/sovol_sv06.jpg" }
+];
+
+const DEFAULT_PRINTERS = [
+  {
+    id: "printer1",
+    name: "Принтер 1",
+    model: "Bambu Lab A1",
+    status: "idle",
+    color: "red",
+    progress: 0,
+    printName: "",
+    image: "foto/bambulab_a1.jpg",
+    startTime: null,
+    printDuration: null,
+    finishedNotified: false,
+    problem: "",
+    currentTaskId: null
+  },
+  {
+    id: "printer2", 
+    name: "Принтер 2",
+    model: "Creality Ender 3",
+    status: "idle",
+    color: "blue",
+    progress: 0,
+    printName: "",
+    image: "foto/creality_ender3.jpg",
+    startTime: null,
+    printDuration: null,
+    finishedNotified: false,
+    problem: "",
+    currentTaskId: null
+  }
+];
+
+// ===== ФУНКЦИИ ПРИНТЕРОВ =====
+function getPrinters() {
+  try {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    if (!savedData) {
+      savePrinters(DEFAULT_PRINTERS);
+      DEFAULT_PRINTERS.forEach(printer => {
+        addLog(`Создан принтер: ${printer.name} (${printer.model})`, 'info');
+      });
+      return DEFAULT_PRINTERS;
+    }
+    return JSON.parse(savedData);
+  } catch (error) {
+    return DEFAULT_PRINTERS;
+  }
+}
+
+function savePrinters(printers) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(printers));
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function getAvailablePrinters() {
+  const printers = getPrinters();
+  return printers.filter(p => p.status !== 'repair');
+}
+
+function updatePrintersStatus() {
+  const printers = getPrinters();
+  const now = Date.now();
+  let updated = false;
+  
+  printers.forEach((printer, index) => {
+    if (printer.status === 'printing' && printer.startTime && printer.printDuration) {
+      const elapsed = now - printer.startTime;
+      const progress = Math.min(100, Math.floor((elapsed / printer.printDuration) * 100));
+      
+      if (progress !== printer.progress) {
+        printer.progress = progress;
+        updated = true;
+      }
+      
+      if (progress >= 100 && printer.status !== 'finished') {
+        printer.status = 'finished';
+        printer.finishedNotified = false;
+        updated = true;
+        addLog(`Принтер "${printer.name}" завершил печать: ${printer.printName}`, 'info');
         
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        // Освобождаем задачу принтера
+        printer.currentTaskId = null;
+      }
+    }
+  });
+  
+  if (updated) savePrinters(printers);
+  return updated;
+}
+
+function renderPrinters() {
+  if (isRendering) return;
+  isRendering = true;
+  
+  updatePrintersStatus();
+  const printers = getPrinters();
+  const container = document.getElementById('printers-container');
+  
+  if (printers.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:40px; color:#888; width:100%;">
+        <i class="fas fa-print" style="font-size:48px; margin-bottom:15px; opacity:0.5;"></i>
+        <h3>Нет принтеров</h3>
+        <p>Добавьте первый принтер</p>
+      </div>
+    `;
+    isRendering = false;
+    return;
+  }
+  
+  let html = '';
+  printers.forEach(printer => {
+    const statusText = getStatusText(printer.status);
+    const statusColor = getStatusColor(printer.status);
+    const progressColor = getProgressColor(printer.status);
+    
+    const pulseClass = (printer.status === 'finished' && printer.finishedNotified === false) ? 'pulse-animation' : '';
+    const showProblemBadge = printer.status === 'repair';
+    const showFinishedBadge = printer.status === 'finished' && printer.finishedNotified === false;
+    
+    html += `
+      <div class="card" onclick="openPrinter('${printer.id}')">
+        ${showProblemBadge ? '<div class="problem-badge"><i class="fas fa-wrench"></i></div>' : ''}
+        ${showFinishedBadge ? '<div class="finished-badge"><i class="fas fa-check"></i></div>' : ''}
         
-        // ===== ФУНКЦИИ =====
-        function showError(text) {
-            document.getElementById('error').innerText = text;
-            document.getElementById('error').style.display = 'block';
-        }
-        
-        function hideError() {
-            document.getElementById('error').style.display = 'none';
-        }
-        
-        function showRegister() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('register-form').style.display = 'block';
-            hideError();
-        }
-        
-        function showLogin() {
-            document.getElementById('register-form').style.display = 'none';
-            document.getElementById('login-form').style.display = 'block';
-            hideError();
-        }
-        
-        // ===== ВХОД =====
-        async function login() {
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value.trim();
-            
-            if (!email || !password) {
-                showError('Заполните все поля');
-                return;
-            }
-            
-            try {
-                const user = await auth.signInWithEmailAndPassword(email, password);
-                window.location.href = 'main.html';
-            } catch (error) {
-                if (error.code === 'auth/user-not-found') {
-                    showError('Аккаунт не найден');
-                } else if (error.code === 'auth/wrong-password') {
-                    showError('Неверный пароль');
-                } else {
-                    showError('Ошибка входа: ' + error.message);
-                }
-            }
-        }
-        
-        // ===== РЕГИСТРАЦИЯ =====
-        async function register() {
-            const email = document.getElementById('register-email').value.trim();
-            const password = document.getElementById('register-password').value.trim();
-            const password2 = document.getElementById('register-password2').value.trim();
-            const agreed = document.getElementById('agree-checkbox').checked;
-            
-            // Проверки
-            if (!email || !password || !password2) {
-                showError('Заполните все поля');
-                return;
-            }
-            
-            if (password !== password2) {
-                showError('Пароли не совпадают');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showError('Пароль должен быть минимум 6 символов');
-                return;
-            }
-            
-            if (!agreed) {
-                showError('Примите условия использования');
-                return;
-            }
-            
-            try {
-                // 1. Создаём пользователя
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const userId = userCredential.user.uid;
-                
-                // 2. Сохраняем данные пользователя
-                await db.collection('users').doc(userId).set({
-                    email: email,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    subscription: 'free'
-                });
-                
-                // 3. Создаём первую ферму
-                await createFirstFarm(userId, email);
-                
-                // 4. Переходим в приложение
-                window.location.href = 'main.html';
-                
-            } catch (error) {
-                if (error.code === 'auth/email-already-in-use') {
-                    showError('Email уже используется');
-                } else {
-                    showError('Ошибка: ' + error.message);
-                }
-            }
-        }
-        
-        // ===== СОЗДАНИЕ ФЕРМЫ =====
-        async function createFirstFarm(userId, email) {
-            try {
-                const farmId = 'farm_' + Date.now();
-                
-                // Создаём ферму
-                await db.collection('users').doc(userId).collection('farms').doc(farmId).set({
-                    id: farmId,
-                    name: 'Моя ферма',
-                    ownerId: userId,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    subscription: 'free'
-                });
-                
-                // Создаём демо-принтер
-                await db.collection('users').doc(userId).collection('farms').doc(farmId)
-                    .collection('printers').doc('printer1').set({
-                        id: 'printer1',
-                        name: 'Мой первый принтер',
-                        model: 'Creality Ender 3',
-                        status: 'idle',
-                        color: 'red',
-                        progress: 0,
-                        printName: '',
-                        image: 'foto/creality_ender3.jpg',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                
-                // Сохраняем ID фермы у пользователя
-                await db.collection('users').doc(userId).update({
-                    currentFarmId: farmId
-                });
-                
-            } catch (error) {
-                console.error('Ошибка создания фермы:', error);
-            }
-        }
-        
-        // ===== ПРОВЕРКА АВТОРИЗАЦИИ =====
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                // Уже авторизован - сразу в приложение
-                window.location.href = 'main.html';
-            }
+        <div class="card-image-container">
+          <img class="card-image" src="${printer.image}" alt="${printer.model}" 
+               onerror="this.src='foto/default.png'">
+        </div>
+        <div class="card-title">
+          <span>${printer.name}</span>
+          <div class="color-indicator" style="background:${printer.color}"></div>
+        </div>
+        <div class="model-text">${printer.model}</div>
+        <div class="status-row">
+          <div>Статус:</div>
+          <div class="status-text" style="color:${statusColor};">${statusText}</div>
+        </div>
+        <div class="status-row">
+          <div>Печатает:</div>
+          <div style="max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            ${printer.printName || '—'}
+          </div>
+        </div>
+        <div class="progress">
+          <div class="progress-bar ${pulseClass}" style="width:${printer.progress}%; background:${progressColor}"></div>
+          <div class="progress-text">${printer.progress}%</div>
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+  updateNotificationBadge();
+  isRendering = false;
+}
+
+// ===== БАЗА ИЗДЕЛИЙ =====
+async function loadProductsDatabase() {
+  try {
+    const response = await fetch('products.json');
+    if (!response.ok) throw new Error('Файл products.json не найден');
+    
+    const data = await response.json();
+    productsDatabase = {};
+    
+    try {
+      const parsedData = JSON.parse(data);
+      if (typeof parsedData === 'object') {
+        productsDatabase = parsedData;
+      }
+    } catch (e) {
+      const fixedJson = data.replace(/(\w+):/g, '"$1":').replace(/'/g, '"');
+      productsDatabase = JSON.parse(fixedJson);
+    }
+    
+    console.log('База изделий загружена:', Object.keys(productsDatabase));
+    showNotification('База изделий обновлена!');
+    return productsDatabase;
+  } catch (error) {
+    console.error('Ошибка загрузки базы изделий:', error);
+    
+    productsDatabase = {
+      "Хорек серый": {
+        name: "Хорек серый",
+        description: "Серый хорек, печатается группами",
+        variants: [
+          { quantity: 1, time: 3, file: "horek-seryj-1.gcode" },
+          { quantity: 2, time: 5, file: "horek-seryj-2.gcode" }
+        ]
+      },
+      "Хорек белый": {
+        name: "Хорек белый", 
+        description: "Белый хорек, печатается группами",
+        variants: [
+          { quantity: 1, time: 3, file: "horek-belyj-1.gcode" },
+          { quantity: 2, time: 5, file: "horek-belyj-2.gcode" }
+        ]
+      }
+    };
+    return productsDatabase;
+  }
+}
+
+// ===== УМНЫЕ ЗАДАЧИ (НОВЫЙ АЛГОРИТМ) =====
+async function generateSmartTasks() {
+  const container = document.getElementById('tasks-container');
+  container.innerHTML = `
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Создаём умные задачи по новому алгоритму...</p>
+    </div>
+  `;
+  
+  try {
+    // Загружаем заказы
+    const orders = await fetchOrdersFromSheet();
+    const availablePrinters = getAvailablePrinters();
+    const settings = loadSettings();
+    
+    if (orders.length === 0) {
+      container.innerHTML = `
+        <div class="empty-tasks">
+          <i class="fas fa-check-circle"></i>
+          <h3>Нет заказов</h3>
+          <p>В таблице нет заказов на печать</p>
+        </div>
+      `;
+      return;
+    }
+    
+    if (availablePrinters.length === 0) {
+      container.innerHTML = `
+        <div class="empty-tasks">
+          <i class="fas fa-print"></i>
+          <h3>Нет доступных принтеров</h3>
+          <p>Все принтеры в ремонте</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // Создаем умные задачи по новому алгоритму
+    const tasks = createSmartTasksNewAlgorithm(orders, availablePrinters, settings);
+    saveTasks(tasks);
+    
+    // Показываем задачи
+    renderTasks();
+    
+    showNotification(`Создано ${tasks.length} умных задач!`);
+    
+  } catch (error) {
+    console.error('Ошибка:', error);
+    container.innerHTML = `
+      <div class="empty-tasks">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3>Ошибка</h3>
+        <p>${error.message}</p>
+      </div>
+    `;
+  }
+}
+
+// Новый алгоритм создания задач
+function createSmartTasksNewAlgorithm(orders, printers, settings) {
+  const tasks = [];
+  const printerQueues = {};
+  const printerAssignments = {};
+  
+  // Инициализируем очереди для каждого принтера
+  printers.forEach(printer => {
+    if (printer.status !== 'repair') {
+      printerQueues[printer.id] = [];
+      printerAssignments[printer.id] = [];
+    }
+  });
+  
+  // Рассчитываем время работы
+  const workDayHours = calculateWorkDayHours(settings);
+  const nightHours = calculateNightHours(settings);
+  
+  // Для каждого заказа
+  orders.forEach(order => {
+    const product = productsDatabase[order.name];
+    if (!product || !product.variants || product.variants.length === 0) {
+      console.warn(`Нет информации о продукте: ${order.name}`);
+      return;
+    }
+    
+    let remaining = order.need;
+    let printerIndex = 0;
+    const printerIds = Object.keys(printerQueues);
+    
+    while (remaining > 0 && printerIndex < printerIds.length) {
+      const printerId = printerIds[printerIndex];
+      const printerTasks = printerQueues[printerId];
+      
+      // Что уже запланировано на этот принтер
+      const existingDayTime = calculateTotalTime(printerTasks.filter(t => t.timeOfDay === 'day'));
+      const existingNightTime = calculateTotalTime(printerTasks.filter(t => t.timeOfDay === 'night'));
+      
+      // Сколько места осталось
+      const remainingDayTime = Math.max(0, workDayHours - existingDayTime);
+      const remainingNightTime = Math.max(0, nightHours - existingNightTime);
+      
+      // Пытаемся разместить остаток
+      const placement = placeOrderOnPrinter(
+        product, 
+        remaining, 
+        remainingDayTime, 
+        remainingNightTime,
+        settings
+      );
+      
+      if (placement.tasks.length > 0) {
+        // Добавляем задачи на принтер
+        placement.tasks.forEach(task => {
+          const taskId = `task-${Date.now()}-${tasks.length}`;
+          const fullTask = {
+            id: taskId,
+            product: order.name,
+            productDisplayName: product.name || order.name,
+            quantity: task.quantity,
+            printerId: printerId,
+            printerName: printers.find(p => p.id === printerId)?.name || printerId,
+            file: task.file,
+            time: task.time,
+            timeOfDay: task.timeOfDay,
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+            completedAt: null,
+            orderId: order.id,
+            dependsOn: null,
+            unlockTime: null,
+            startTime: null,
+            sequenceNumber: printerTasks.length + 1
+          };
+          
+          printerQueues[printerId].push(fullTask);
+          tasks.push(fullTask);
+          remaining -= task.quantity;
         });
-    </script>
+      }
+      
+      // Если осталось еще, переходим к следующему принтеру
+      if (remaining > 0) {
+        printerIndex++;
+      }
+    }
+    
+    // Если после всех принтеров остался остаток - загружаем последний принтер полностью
+    if (remaining > 0 && printerIds.length > 0) {
+      const lastPrinterId = printerIds[printerIds.length - 1];
+      const lastPrinterTasks = printerQueues[lastPrinterId];
+      
+      // Считаем что можно добавить на ночь
+      const existingNightTime = calculateTotalTime(lastPrinterTasks.filter(t => t.timeOfDay === 'night'));
+      const remainingNightTime = Math.max(0, nightHours - existingNightTime);
+      
+      if (remainingNightTime > 0) {
+        // Берем максимальный вариант для ночи
+        const nightVariant = getBestVariantForTime(product, remainingNightTime);
+        if (nightVariant && nightVariant.quantity > 0) {
+          const taskId = `task-${Date.now()}-${tasks.length}`;
+          const fullTask = {
+            id: taskId,
+            product: order.name,
+            productDisplayName: product.name || order.name,
+            quantity: nightVariant.quantity,
+            printerId: lastPrinterId,
+            printerName: printers.find(p => p.id === lastPrinterId)?.name || lastPrinterId,
+            file: nightVariant.file,
+            time: nightVariant.time,
+            timeOfDay: 'night',
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+            completedAt: null,
+            orderId: order.id,
+            dependsOn: null,
+            unlockTime: null,
+            startTime: null,
+            sequenceNumber: lastPrinterTasks.length + 1
+          };
+          
+          printerQueues[lastPrinterId].push(fullTask);
+          tasks.push(fullTask);
+        }
+      }
+    }
+  });
+  
+  // Устанавливаем зависимости и статусы
+  Object.keys(printerQueues).forEach(printerId => {
+    const queue = printerQueues[printerId].sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+    
+    for (let i = 0; i < queue.length; i++) {
+      if (i === 0) {
+        queue[i].status = 'current';
+      } else {
+        queue[i].dependsOn = queue[i-1].id;
+        queue[i].status = 'locked';
+      }
+    }
+  });
+  
+  return tasks;
+}
+
+function calculateWorkDayHours(settings) {
+  const start = settings.operatorStart.hour + settings.operatorStart.minute / 60;
+  const end = settings.operatorEnd.hour + settings.operatorEnd.minute / 60;
+  return Math.max(0, end - start);
+}
+
+function calculateNightHours(settings) {
+  const end = settings.operatorEnd.hour + settings.operatorEnd.minute / 60;
+  const deadline = settings.deadline.hour + settings.deadline.minute / 60;
+  
+  if (end <= deadline) {
+    return deadline - end;
+  } else {
+    return (24 - end) + deadline;
+  }
+}
+
+function calculateTotalTime(tasks) {
+  return tasks.reduce((sum, task) => sum + task.time, 0);
+}
+
+function placeOrderOnPrinter(product, remaining, dayTimeAvailable, nightTimeAvailable, settings) {
+  const tasks = [];
+  let remainingAfterPlacement = remaining;
+  
+  // Сначала пытаемся разместить днем
+  if (dayTimeAvailable > 0 && remainingAfterPlacement > 0) {
+    const dayVariant = getBestVariantForTime(product, dayTimeAvailable);
+    if (dayVariant && dayVariant.quantity > 0 && dayVariant.quantity <= remainingAfterPlacement) {
+      tasks.push({
+        ...dayVariant,
+        timeOfDay: 'day'
+      });
+      remainingAfterPlacement -= dayVariant.quantity;
+    }
+  }
+  
+  // Потом ночью
+  if (nightTimeAvailable > 0 && remainingAfterPlacement > 0 && settings.useNight) {
+    const nightVariant = getBestVariantForTime(product, nightTimeAvailable);
+    if (nightVariant && nightVariant.quantity > 0 && nightVariant.quantity <= remainingAfterPlacement) {
+      tasks.push({
+        ...nightVariant,
+        timeOfDay: 'night'
+      });
+      remainingAfterPlacement -= nightVariant.quantity;
+    }
+  }
+  
+  return { tasks, remaining: remainingAfterPlacement };
+}
+
+function getBestVariantForTime(product, availableTime) {
+  if (!product.variants || product.variants.length === 0) return null;
+  
+  // Сортируем по эффективности (количество/время)
+  const sortedVariants = [...product.variants]
+    .filter(v => v.time <= availableTime)
+    .sort((a, b) => (b.quantity / b.time) - (a.quantity / a.time));
+  
+  return sortedVariants[0] || null;
+}
+
+// ===== ОТОБРАЖЕНИЕ ЗАДАЧ =====
+function updateTasksStatus() {
+  const tasks = getTasks();
+  const printers = getPrinters();
+  let updated = false;
+  const now = new Date();
+  
+  tasks.forEach(task => {
+    // Проверяем, нужно ли разблокировать задачу
+    if (task.status === 'locked' && task.dependsOn) {
+      const dependentTask = tasks.find(t => t.id === task.dependsOn);
+      
+      if (dependentTask) {
+        if (dependentTask.status === 'completed') {
+          // Задача разблокируется через время печати предыдущей задачи
+          if (dependentTask.startTime) {
+            const unlockDateTime = new Date(dependentTask.startTime);
+            unlockDateTime.setHours(unlockDateTime.getHours() + dependentTask.time);
+            
+            if (now >= unlockDateTime) {
+              task.status = 'current';
+              updated = true;
+            }
+          } else {
+            // Если предыдущая задача была отмечена как выполненная без запуска печати
+            task.status = 'current';
+            updated = true;
+          }
+        }
+      }
+    }
+    
+    // Проверяем текущие задачи - доступен ли принтер
+    if (task.status === 'current') {
+      const printer = printers.find(p => p.id === task.printerId);
+      if (!printer || printer.status === 'repair') {
+        // Принтер в ремонте - пропускаем задачу
+        task.status = 'skipped';
+        updated = true;
+      }
+    }
+  });
+  
+  if (updated) {
+    saveTasks(tasks);
+  }
+}
+
+function renderTasks() {
+  if (isRendering) return;
+  isRendering = true;
+  
+  if (currentPage !== 'tasks') {
+    isRendering = false;
+    return;
+  }
+  
+  const tasks = getTasks();
+  const container = document.getElementById('tasks-container');
+  const statsContainer = document.getElementById('tasks-stats');
+  
+  if (statsContainer) {
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(t => t.status === 'completed').length;
+    const availableTasks = tasks.filter(t => t.status === 'current').length;
+    statsContainer.textContent = `Задач: ${totalTasks} | Выполнено: ${completedTasks} | Доступно: ${availableTasks}`;
+  }
+  
+  if (tasks.length === 0) {
+    container.innerHTML = `
+      <div class="empty-tasks">
+        <i class="fas fa-tasks"></i>
+        <h3>Нет задач на сегодня</h3>
+        <p>Нажмите "Создать умные задачи" чтобы начать</p>
+      </div>
+    `;
+    isRendering = false;
+    return;
+  }
+  
+  // Группируем задачи по принтерам
+  const tasksByPrinter = {};
+  tasks.forEach(task => {
+    if (!tasksByPrinter[task.printerId]) {
+      tasksByPrinter[task.printerId] = [];
+    }
+    tasksByPrinter[task.printerId].push(task);
+  });
+  
+  // Сортируем задачи по последовательности
+  Object.keys(tasksByPrinter).forEach(printerId => {
+    tasksByPrinter[printerId].sort((a, b) => {
+      if (a.sequenceNumber && b.sequenceNumber) {
+        return a.sequenceNumber - b.sequenceNumber;
+      }
+      return 0;
+    });
+  });
+  
+  let html = '';
+  Object.keys(tasksByPrinter).forEach(printerId => {
+    const printerTasks = tasksByPrinter[printerId];
+    const printer = getPrinters().find(p => p.id === printerId);
+    
+    html += `<div style="margin-bottom: 20px; padding: 10px; background: #333; border-radius: 8px;">
+      <div style="font-weight: bold; margin-bottom: 10px; color: #4caf50;">
+        <i class="fas fa-print"></i> ${printer ? printer.name : printerId}
+        ${printer && printer.status === 'repair' ? ' <span style="color: red;">(в ремонте)</span>' : ''}
+      </div>`;
+    
+    printerTasks.forEach((task, index) => {
+      const productInfo = productsDatabase[task.product] || {};
+      const isPrinterAvailable = printer && printer.status !== 'repair';
+      const isPrinterBusy = printer && printer.status === 'printing';
+      
+      let statusClass = task.status;
+      if (task.status === 'pending' && task.dependsOn) {
+        statusClass = 'locked';
+      }
+      
+      // Для заблокированных задач показываем время разблокировки
+      let unlockInfo = '';
+      if (task.status === 'locked' && task.dependsOn) {
+        const dependentTask = tasks.find(t => t.id === task.dependsOn);
+        if (dependentTask) {
+          unlockInfo = `⏰ Доступна через ${dependentTask.time}ч после запуска задачи ${dependentTask.sequenceNumber || ''}`;
+        }
+      }
+      
+      html += `
+      <div class="task-item ${statusClass}" style="margin-bottom: 10px;">
+        <div class="task-header">
+          <div class="task-name">${task.sequenceNumber ? `Задача ${task.sequenceNumber}: ` : ''}${task.productDisplayName || task.product} ×${task.quantity}</div>
+          <div class="task-status">
+            ${task.status === 'pending' && task.dependsOn ? '🔒 Заблокирована' : 
+              task.status === 'pending' ? '⏳ Ожидает' : 
+              task.status === 'current' ? '🚀 ТЕКУЩАЯ' : 
+              task.status === 'locked' ? '🔒 Недоступна' :
+              task.status === 'skipped' ? '⏭️ Пропущена' :
+              '✅ Выполнена'}
+          </div>
+        </div>
+        
+        <div class="task-details">
+          <div class="task-detail">
+            <div class="task-label">Принтер:</div>
+            <div class="task-value" style="color: ${isPrinterAvailable ? '#4caf50' : '#f44336'}">
+              ${task.printerName} ${!isPrinterAvailable ? '(в ремонте)' : isPrinterBusy ? '(занят)' : ''}
+            </div>
+          </div>
+          <div class="task-detail">
+            <div class="task-label">Время:</div>
+            <div class="task-value">${task.time} часа (${task.timeOfDay === 'night' ? 'ночь' : 'день'})</div>
+          </div>
+          <div class="task-detail">
+            <div class="task-label">Файл:</div>
+            <div class="task-value">${task.file}</div>
+          </div>
+          <div class="task-detail">
+            <div class="task-label">Статус:</div>
+            <div class="task-value">${task.status === 'current' ? 'Готова к запуску' : 
+              task.status === 'locked' ? 'Ожидает предыдущую' : 
+              task.status === 'completed' ? 'Выполнена' : 'Ожидание'}</div>
+          </div>
+        </div>
+        
+        ${unlockInfo ? `
+        <div style="font-size: 12px; color: #ff9800; margin: 8px 0;">
+          ${unlockInfo}
+        </div>
+        ` : ''}
+        
+        <div class="task-actions">
+      `;
+      
+      if (task.status === 'current' && isPrinterAvailable && !isPrinterBusy) {
+        html += `
+          <button class="task-btn complete-btn" onclick="confirmCompleteTask('${task.id}')">
+            <i class="fas fa-check"></i> Выполнить
+          </button>
+          <button class="task-btn change-printer-btn" onclick="showChangePrinterModal('${task.id}')">
+            <i class="fas fa-exchange-alt"></i> Сменить принтер
+          </button>
+        `;
+      } else if (task.status === 'locked') {
+        html += `
+          <button class="task-btn" style="flex: 1; background: #666;" disabled>
+            <i class="fas fa-lock"></i> Заблокирована
+          </button>
+        `;
+      } else if (task.status === 'completed') {
+        html += `
+          <button class="task-btn" style="flex: 1; background: #4caf50;" disabled>
+            <i class="fas fa-check-circle"></i> Выполнено
+          </button>
+        `;
+      } else if (!isPrinterAvailable) {
+        html += `
+          <button class="task-btn change-printer-btn" style="flex: 1;" onclick="showChangePrinterModal('${task.id}')">
+            <i class="fas fa-exchange-alt"></i> Сменить принтер (ремонт)
+          </button>
+        `;
+      } else if (isPrinterBusy) {
+        html += `
+          <button class="task-btn change-printer-btn" style="flex: 1;" onclick="showChangePrinterModal('${task.id}')">
+            <i class="fas fa-exchange-alt"></i> Сменить принтер (занят)
+          </button>
+        `;
+      }
+      
+      html += `</div></div>`;
+    });
+    
+    html += `</div>`;
+  });
+  
+  container.innerHTML = html;
+  isRendering = false;
+}
+
+function confirmCompleteTask(taskId) {
+  const task = getTasks().find(t => t.id === taskId);
+  if (!task) return;
+  
+  currentTaskForComplete = taskId;
+  document.getElementById('confirm-complete-text').textContent = 
+    `Вы уверены, что хотите отметить задачу как выполненную и запустить печать "${task.productDisplayName || task.product} ×${task.quantity}" на принтере "${task.printerName}"?`;
+  document.getElementById('confirm-complete-modal').style.display = 'flex';
+}
+
+function closeConfirmCompleteModal() {
+  document.getElementById('confirm-complete-modal').style.display = 'none';
+  currentTaskForComplete = null;
+}
+
+function executeCompleteTask() {
+  if (!currentTaskForComplete) return;
+  
+  const taskId = currentTaskForComplete;
+  const tasks = getTasks();
+  const printers = getPrinters();
+  const taskIndex = tasks.findIndex(t => t.id === taskId);
+  
+  if (taskIndex === -1) {
+    closeConfirmCompleteModal();
+    return;
+  }
+  
+  const task = tasks[taskIndex];
+  const printerIndex = printers.findIndex(p => p.id === task.printerId);
+  
+  if (printerIndex === -1) {
+    showNotification('Принтер не найден!');
+    closeConfirmCompleteModal();
+    return;
+  }
+  
+  // Запускаем печать на принтере
+  printers[printerIndex].status = 'printing';
+  printers[printerIndex].printName = `${task.productDisplayName || task.product} ×${task.quantity}`;
+  printers[printerIndex].startTime = Date.now();
+  printers[printerIndex].printDuration = task.time * 3600000;
+  printers[printerIndex].progress = 0;
+  printers[printerIndex].currentTaskId = taskId;
+  
+  // Отмечаем задачу как выполненную
+  task.status = 'completed';
+  task.completedAt = new Date().toISOString();
+  task.startTime = new Date().toISOString();
+  
+  // Сохраняем изменения
+  savePrinters(printers);
+  saveTasks(tasks);
+  
+  // Обновляем интерфейс
+  closeConfirmCompleteModal();
+  renderTasks();
+  
+  showNotification(`Печать запущена на ${task.printerName}!`);
+}
+
+function showChangePrinterModal(taskId) {
+  const task = getTasks().find(t => t.id === taskId);
+  if (!task) return;
+  
+  currentTaskForChange = taskId;
+  const allPrinters = getPrinters();
+  const availablePrinters = allPrinters.filter(p => p.id !== task.printerId);
+  const tasks = getTasks();
+  
+  const list = document.getElementById('change-printer-list');
+  list.innerHTML = '';
+  
+  if (availablePrinters.length === 0) {
+    list.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Нет доступных принтеров</div>';
+  } else {
+    availablePrinters.forEach(printer => {
+      // Считаем задачи на этом принтере
+      const tasksOnPrinter = tasks.filter(t => t.printerId === printer.id);
+      const hasTasks = tasksOnPrinter.length > 0;
+      
+      const option = document.createElement('div');
+      option.className = 'printer-option';
+      option.dataset.printerId = printer.id;
+      option.dataset.printerName = printer.name;
+      
+      let taskInfo = '';
+      if (hasTasks) {
+        taskInfo = `<div style="font-size: 11px; color: #ff9800; margin-top: 4px;">
+          <i class="fas fa-exclamation-circle"></i> На этом принтере ${tasksOnPrinter.length} задач(а)
+        </div>`;
+      }
+      
+      option.innerHTML = `
+        <div class="printer-option-image">
+          <img src="${printer.image}" alt="${printer.name}" onerror="this.parentElement.innerHTML='<i class=\"fas fa-print printer-icon\"></i>'">
+        </div>
+        <div class="printer-option-info">
+          <div class="printer-option-brand">${printer.model}</div>
+          <div class="printer-option-model">${printer.name}</div>
+          <div style="font-size: 12px; color: ${printer.status === 'idle' ? '#4caf50' : printer.status === 'printing' ? '#ff9800' : '#f44336'}">
+            ${getStatusText(printer.status)}
+          </div>
+          ${taskInfo}
+        </div>
+      `;
+      
+      option.onclick = function() {
+        document.querySelectorAll('#change-printer-list .printer-option').forEach(el => {
+          el.classList.remove('selected');
+        });
+        this.classList.add('selected');
+      };
+      
+      list.appendChild(option);
+    });
+  }
+  
+  document.getElementById('change-printer-modal').style.display = 'flex';
+}
+
+function closeChangePrinterModal() {
+  document.getElementById('change-printer-modal').style.display = 'none';
+  currentTaskForChange = null;
+}
+
+function confirmChangePrinter() {
+  if (!currentTaskForChange) return;
+  
+  const selectedOption = document.querySelector('#change-printer-list .printer-option.selected');
+  if (!selectedOption) {
+    showNotification('Выберите принтер!');
+    return;
+  }
+  
+  const newPrinterId = selectedOption.dataset.printerId;
+  const newPrinterName = selectedOption.dataset.printerName;
+  
+  const tasks = getTasks();
+  const taskIndex = tasks.findIndex(t => t.id === currentTaskForChange);
+  
+  if (taskIndex === -1) {
+    closeChangePrinterModal();
+    return;
+  }
+  
+  const oldTask = tasks[taskIndex];
+  const oldPrinterId = oldTask.printerId;
+  
+  // Если меняем на принтер, у которого уже есть задачи
+  if (newPrinterId !== oldPrinterId) {
+    // Находим все задачи на новом принтере
+    const tasksOnNewPrinter = tasks.filter(t => t.printerId === newPrinterId && t.id !== currentTaskForChange);
+    
+    if (tasksOnNewPrinter.length > 0) {
+      // Сортируем задачи на новом принтере по последовательности
+      tasksOnNewPrinter.sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0));
+      
+      // Освобождаем первую задачу на новом принтере
+      const firstTaskOnNewPrinter = tasksOnNewPrinter[0];
+      const firstTaskIndex = tasks.findIndex(t => t.id === firstTaskOnNewPrinter.id);
+      
+      if (firstTaskIndex !== -1) {
+        tasks[firstTaskIndex].printerId = oldPrinterId;
+        tasks[firstTaskIndex].printerName = getPrinters().find(p => p.id === oldPrinterId)?.name || oldPrinterId;
+        
+        // Обновляем все зависимые задачи у освобожденной задачи
+        const dependentTasks = tasks.filter(t => t.dependsOn === firstTaskOnNewPrinter.id);
+        dependentTasks.forEach(dependentTask => {
+          const depIndex = tasks.findIndex(t => t.id === dependentTask.id);
+          if (depIndex !== -1) {
+            tasks[depIndex].printerId = oldPrinterId;
+            tasks[depIndex].printerName = getPrinters().find(p => p.id === oldPrinterId)?.name || oldPrinterId;
+          }
+        });
+      }
+    }
+  }
+  
+  // Меняем принтер у текущей задачи
+  tasks[taskIndex].printerId = newPrinterId;
+  tasks[taskIndex].printerName = newPrinterName;
+  
+  // Если есть зависимые задачи, меняем и у них
+  const dependentTasks = tasks.filter(t => t.dependsOn === currentTaskForChange);
+  dependentTasks.forEach(dependentTask => {
+    const depIndex = tasks.findIndex(t => t.id === dependentTask.id);
+    if (depIndex !== -1) {
+      tasks[depIndex].printerId = newPrinterId;
+      tasks[depIndex].printerName = newPrinterName;
+    }
+  });
+  
+  saveTasks(tasks);
+  closeChangePrinterModal();
+  renderTasks();
+  
+  showNotification('Принтер изменен!');
+}
+
+function deleteAllTasks() {
+  if (confirm('ВНИМАНИЕ: Это удалит ВСЕ задачи! Действие нельзя отменить. Продолжить?')) {
+    localStorage.removeItem(TASKS_STORAGE_KEY);
+    renderTasks();
+    showNotification('Все задачи удалены!');
+  }
+}
+
+function getTasks() {
+  try {
+    const tasksJSON = localStorage.getItem(TASKS_STORAGE_KEY);
+    return tasksJSON ? JSON.parse(tasksJSON) : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveTasks(tasks) {
+  try {
+    localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks));
+    return true;
+  } catch (error) {
+    console.error('Ошибка сохранения задач:', error);
+    return false;
+  }
+}
+
+// ===== СТРАНИЦА ЗАКАЗОВ =====
+async function loadOrders() {
+  if (isRendering) return;
+  isRendering = true;
+  
+  const container = document.getElementById('orders-container');
+  container.innerHTML = `
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Загружаем заказы...</p>
+    </div>
+  `;
+  
+  try {
+    const orders = await fetchOrdersFromSheet();
+    const printers = getPrinters();
+    
+    // Считаем сколько в печати
+    const inPrintCounts = {};
+    printers.forEach(printer => {
+      if (printer.status === 'printing' && printer.printName) {
+        const match = printer.printName.match(/(.+?)\s*×\s*(\d+)/);
+        if (match) {
+          const productName = match[1].trim();
+          const quantity = parseInt(match[2]);
+          inPrintCounts[productName] = (inPrintCounts[productName] || 0) + quantity;
+        }
+      }
+    });
+    
+    // Обновляем статистику
+    const totalOrders = orders.length;
+    let totalInPrint = 0;
+    let totalRemaining = 0;
+    
+    let html = '';
+    orders.forEach(order => {
+      const inPrint = inPrintCounts[order.name] || 0;
+      const remaining = Math.max(0, order.need - inPrint);
+      const progress = order.need > 0 ? Math.floor((inPrint / order.need) * 100) : 0;
+      
+      totalInPrint += inPrint;
+      totalRemaining += remaining;
+      
+      html += `
+        <div class="order-card ${remaining >= 10 ? 'urgent' : ''}">
+          <div class="order-header">
+            <div class="order-name">${order.name}</div>
+            <div class="order-id">${order.id}</div>
+          </div>
+          <div class="order-stats">
+            <div class="stat-item">
+              <div class="stat-label">Всего</div>
+              <div class="stat-value reserve">${order.need}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">В печати</div>
+              <div class="stat-value in-print">${inPrint}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Осталось</div>
+              <div class="stat-value need">${remaining}</div>
+            </div>
+          </div>
+          <div class="order-progress">
+            <div class="order-progress-bar" style="width: ${progress}%"></div>
+          </div>
+          <div style="text-align: center; font-size: 12px; color: #888; margin-top: 5px;">
+            Готово: ${progress}%
+          </div>
+        </div>
+      `;
+    });
+    
+    if (orders.length === 0) {
+      html = `
+        <div class="empty-orders">
+          <i class="fas fa-check-circle"></i>
+          <h3>Нет заказов</h3>
+          <p>В таблице нет заказов на печать</p>
+        </div>
+      `;
+    }
+    
+    container.innerHTML = html;
+    
+    // Обновляем статистику в футере
+    document.getElementById('orders-stats').textContent = 
+      `Заказов: ${totalOrders} | В печати: ${totalInPrint} | Осталось: ${totalRemaining}`;
+    
+  } catch (error) {
+    console.error('Ошибка загрузки заказов:', error);
+    container.innerHTML = `
+      <div class="empty-orders">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3>Ошибка загрузки</h3>
+        <p>${error.message}</p>
+      </div>
+    `;
+  }
+  
+  isRendering = false;
+}
+
+async function fetchOrdersFromSheet() {
+  try {
+    const settings = loadSheetSettings();
+    const SHEET_URL = getSheetUrl();
+    
+    const response = await fetch(SHEET_URL);
+    const text = await response.text();
+    const jsonText = text.substring(47).slice(0, -2);
+    const data = JSON.parse(jsonText);
+    
+    const orders = [];
+    const rows = data.table.rows;
+    
+    // Функция для преобразования буквы столбца в индекс (A=0, B=1, C=2, ...)
+    function columnLetterToIndex(letter) {
+      return letter.toUpperCase().charCodeAt(0) - 65;
+    }
+    
+    const nameColumnIndex = columnLetterToIndex(settings.nameColumn);
+    const quantityColumnIndex = columnLetterToIndex(settings.quantityColumn);
+    
+    // Читаем со второй строки (первая - заголовки)
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      const cells = row.c;
+      
+      if (cells && cells[nameColumnIndex] && cells[quantityColumnIndex]) {
+        const name = cells[nameColumnIndex].v;
+        const quantity = parseFloat(cells[quantityColumnIndex].v);
+        
+        if (name && !isNaN(quantity) && quantity > 0) {
+          orders.push({
+            id: `order-${i}`,
+            name: name.trim(),
+            need: Math.floor(quantity)
+          });
+        }
+      }
+    }
+    
+    return orders;
+  } catch (error) {
+    console.error('Ошибка загрузки:', error);
+    return [];
+  }
+}
+
+// ===== ОСТАЛЬНЫЕ ФУНКЦИИ =====
+function addLog(message, type = 'info') {
+  const logs = getLogs();
+  const logEntry = {
+    id: Date.now(),
+    timestamp: new Date().toLocaleTimeString(),
+    date: new Date().toLocaleDateString(),
+    message: message,
+    type: type
+  };
+  
+  logs.unshift(logEntry);
+  if (logs.length > 50) logs.pop();
+  localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(logs));
+  
+  if (currentPage === 'logs') loadLogs();
+  return logEntry;
+}
+
+function getLogs() {
+  try {
+    const logsJSON = localStorage.getItem(LOGS_STORAGE_KEY);
+    return logsJSON ? JSON.parse(logsJSON) : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function clearLogs() {
+  if (confirm('Очистить всю историю действий?')) {
+    localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify([]));
+    loadLogs();
+    showNotification('История очищена');
+  }
+}
+
+function loadLogs() {
+  if (isRendering) return;
+  isRendering = true;
+  
+  const logs = getLogs();
+  const container = document.getElementById('logs-container');
+  const statsContainer = document.getElementById('logs-stats');
+  
+  if (statsContainer) {
+    const totalLogs = logs.length;
+    const infoLogs = logs.filter(log => log.type === 'info').length;
+    const warningLogs = logs.filter(log => log.type === 'warning').length;
+    const problemLogs = logs.filter(log => log.type === 'problem').length;
+    const repairLogs = logs.filter(log => log.type === 'repair').length;
+    
+    statsContainer.innerHTML = `
+      Всего: ${totalLogs} | 
+      Инфо: ${infoLogs} | 
+      Внимание: ${warningLogs} | 
+      Проблемы: ${problemLogs} | 
+      Ремонт: ${repairLogs}
+    `;
+  }
+  
+  if (logs.length === 0) {
+    container.innerHTML = `
+      <div class="empty-logs">
+        <i class="fas fa-history"></i>
+        <h3>История действий пуста</h3>
+        <p>Здесь будут отображаться все действия с принтерами</p>
+      </div>
+    `;
+    isRendering = false;
+    return;
+  }
+  
+  let html = '';
+  logs.forEach(log => {
+    const typeClass = log.type || 'info';
+    const typeIcon = getLogIcon(log.type);
+    const typeText = getLogTypeText(log.type);
+    
+    html += `<div class="log-item ${typeClass}">
+      <div class="log-header">
+        <span class="log-time">${log.date} ${log.timestamp}</span>
+        <span class="log-type">${typeIcon} ${typeText}</span>
+      </div>
+      <div class="log-message">${log.message}</div>
+    </div>`;
+  });
+  
+  container.innerHTML = html;
+  isRendering = false;
+}
+
+function getLogIcon(type) {
+  const iconMap = {
+    'info': 'ℹ️',
+    'warning': '⚠️',
+    'problem': '🔧',
+    'repair': '🔧',
+    'error': '❌'
+  };
+  return iconMap[type] || '📝';
+}
+
+function getLogTypeText(type) {
+  const textMap = {
+    'info': 'Инфо',
+    'warning': 'Внимание',
+    'problem': 'Проблема',
+    'repair': 'Ремонт',
+    'error': 'Ошибка'
+  };
+  return textMap[type] || 'Запись';
+}
+
+function getNotificationCount() {
+  const printers = getPrinters();
+  let count = 0;
+  printers.forEach(printer => {
+    if (printer.status === 'finished' && printer.finishedNotified === false) {
+      count++;
+    }
+  });
+  return count;
+}
+
+function updateNotificationBadge() {
+  const count = getNotificationCount();
+  const badge = document.getElementById('global-notification');
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'flex' : 'none';
+}
+
+function getStatusText(status) {
+  const statusMap = {
+    'idle': 'Простаивает',
+    'printing': 'Печать',
+    'stopped': 'Остановлено', 
+    'finished': 'Готово',
+    'repair': 'На ремонте'
+  };
+  return statusMap[status] || status;
+}
+
+function getStatusColor(status) {
+  const colorMap = {
+    'idle': '#fff',
+    'printing': '#fff',
+    'stopped': 'orange',
+    'finished': '#4caf50',
+    'repair': 'red'
+  };
+  return colorMap[status] || '#fff';
+}
+
+function getProgressColor(status) {
+  const colorMap = {
+    'idle': '#444',
+    'printing': '#4caf50',
+    'stopped': 'orange',
+    'finished': '#4caf50',
+    'repair': 'red'
+  };
+  return colorMap[status] || '#444';
+}
+
+function showPage(page) {
+  document.getElementById('printers-page').classList.add('hidden');
+  document.getElementById('tasks-page').classList.add('hidden');
+  document.getElementById('settings-page').classList.add('hidden');
+  document.getElementById('orders-page').classList.add('hidden');
+  document.getElementById('logs-page').classList.add('hidden');
+  
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  
+  document.getElementById(page + '-page').classList.remove('hidden');
+  
+  if (page === 'printers') {
+    document.querySelectorAll('.nav-item')[0].classList.add('active');
+    document.getElementById('page-title').textContent = 'Ферма принтеров';
+    renderPrinters();
+  } else if (page === 'tasks') {
+    document.querySelectorAll('.nav-item')[1].classList.add('active');
+    document.getElementById('page-title').textContent = 'Задачи на день';
+    renderTasks();
+  } else if (page === 'settings') {
+    document.querySelectorAll('.nav-item')[2].classList.add('active');
+    document.getElementById('page-title').textContent = 'Настройки';
+    updateSettingsUI();
+  } else if (page === 'orders') {
+    document.querySelectorAll('.nav-item')[4].classList.add('active');
+    document.getElementById('page-title').textContent = 'Заказы';
+    loadOrders();
+  } else if (page === 'logs') {
+    document.querySelectorAll('.nav-item')[5].classList.add('active');
+    document.getElementById('page-title').textContent = 'История действий';
+    loadLogs();
+  }
+  
+  currentPage = page;
+}
+
+function showAddModal() {
+  selectedPrinter = null;
+  currentStep = 'model';
+  createPrinterList();
+  document.getElementById('choose-model-modal').style.display = 'flex';
+  document.getElementById('choose-name-modal').style.display = 'none';
+}
+
+function closeChooseModelModal() {
+  document.getElementById('choose-model-modal').style.display = 'none';
+  selectedPrinter = null;
+}
+
+function createPrinterList() {
+  const list = document.getElementById('printer-list');
+  list.innerHTML = '';
+  
+  POPULAR_PRINTERS.forEach(printer => {
+    const option = document.createElement('div');
+    option.className = 'printer-option';
+    option.dataset.brand = printer.brand;
+    option.dataset.model = printer.model;
+    option.dataset.image = printer.image;
+    
+    option.innerHTML = `
+      <div class="printer-option-image">
+        <img src="${printer.image}" alt="${printer.brand}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-print printer-icon\\'></i>'">
+      </div>
+      <div class="printer-option-info">
+        <div class="printer-option-brand">${printer.brand}</div>
+        <div class="printer-option-model">${printer.model}</div>
+      </div>
+    `;
+    
+    option.onclick = function() {
+      document.querySelectorAll('.printer-option').forEach(el => {
+        el.classList.remove('selected');
+      });
+      this.classList.add('selected');
+      selectedPrinter = {
+        brand: this.dataset.brand,
+        model: this.dataset.model,
+        image: this.dataset.image
+      };
+    };
+    
+    list.appendChild(option);
+  });
+}
+
+function goToNameStep() {
+  if (!selectedPrinter) {
+    alert('Выберите модель принтера');
+    return;
+  }
+  
+  document.getElementById('selected-printer-brand').textContent = selectedPrinter.brand;
+  document.getElementById('selected-printer-model').textContent = selectedPrinter.model;
+  
+  const imageContainer = document.getElementById('selected-printer-image');
+  imageContainer.innerHTML = `<img src="${selectedPrinter.image}" alt="${selectedPrinter.brand}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-print printer-icon\\'></i>'">`;
+  
+  const printerCount = getPrinters().length;
+  document.getElementById('new-printer-name').value = `${selectedPrinter.brand} ${printerCount + 1}`;
+  document.getElementById('new-printer-name').focus();
+  document.getElementById('new-printer-name').select();
+  
+  document.getElementById('choose-model-modal').style.display = 'none';
+  document.getElementById('choose-name-modal').style.display = 'flex';
+  currentStep = 'name';
+}
+
+function goBackToModelStep() {
+  document.getElementById('choose-name-modal').style.display = 'none';
+  document.getElementById('choose-model-modal').style.display = 'flex';
+  currentStep = 'model';
+}
+
+function addNewPrinter() {
+  const name = document.getElementById('new-printer-name').value.trim();
+  
+  if (!name) {
+    alert('Введите название принтера');
+    return;
+  }
+  
+  if (!selectedPrinter) {
+    alert('Ошибка: модель принтера не выбрана');
+    return;
+  }
+  
+  const printers = getPrinters();
+  let maxId = 0;
+  printers.forEach(printer => {
+    const idNum = parseInt(printer.id.replace('printer', ''));
+    if (idNum > maxId) maxId = idNum;
+  });
+  
+  const newId = 'printer' + (maxId + 1);
+  const imageUrl = selectedPrinter.image.trim() || 'foto/default.png';
+  
+  const newPrinter = {
+    id: newId,
+    name: name,
+    model: `${selectedPrinter.brand} ${selectedPrinter.model}`,
+    status: "idle",
+    color: "gray",
+    progress: 0,
+    printName: "",
+    image: imageUrl,
+    startTime: null,
+    printDuration: null,
+    finishedNotified: false,
+    problem: "",
+    currentTaskId: null
+  };
+  
+  printers.push(newPrinter);
+  
+  if (savePrinters(printers)) {
+    addLog(`Добавлен новый принтер: ${name} (${newPrinter.model})`, 'info');
+    document.getElementById('choose-name-modal').style.display = 'none';
+    selectedPrinter = null;
+    renderPrinters();
+    showNotification(`Принтер "${name}" добавлен!`);
+  } else {
+    alert('Ошибка при добавлении принтера');
+  }
+}
+
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.textContent = message;
+  notification.style.animation = 'slideIn 0.3s ease-out';
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease-out';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        document.body.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
+}
+
+function openPrinter(printerId) {
+  const printers = getPrinters();
+  const printer = printers.find(p => p.id === printerId);
+  
+  if (printer && printer.status === 'finished' && printer.finishedNotified === false) {
+    printer.finishedNotified = true;
+    const updatedPrinters = printers.map(p => p.id === printerId ? printer : p);
+    savePrinters(updatedPrinters);
+    renderPrinters();
+  }
+  
+  window.location.href = `printer.html?id=${printerId}`;
+}
+
+// Экспорт функций
+window.showPage = showPage;
+window.showAddModal = showAddModal;
+window.closeAddModal = closeChooseModelModal;
+window.addNewPrinter = addNewPrinter;
+window.openPrinter = openPrinter;
+window.clearLogs = clearLogs;
+window.generateSmartTasks = generateSmartTasks;
+window.loadOrders = loadOrders;
+window.deleteAllTasks = deleteAllTasks;
+window.loadProductsDatabase = loadProductsDatabase;
+window.saveSheetSettings = saveSheetSettings;
+</script>
 </body>
 </html>
